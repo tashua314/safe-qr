@@ -98,11 +98,7 @@ class ScannerViewModel: ObservableObject {
      * URLを安全に開く処理
      */
     func proceedWithURL(_ url: String, safetyLevel: SafetyLevel) {
-        // 履歴に保存
-        saveToHistory(url: url, safetyLevel: safetyLevel)
-        
-        // タイトル取得（後追い）
-        fetchTitleAsync(for: url)
+        // 履歴への保存は評価時に既に実行済み
         
         // URLを開く通知
         NotificationCenter.default.post(
@@ -172,6 +168,9 @@ class ScannerViewModel: ObservableObject {
         
         print("📋 評価完了: \(url) → \(immediateSafety.displayName)")
         
+        // 評価完了時点で履歴に保存（ユーザーのアクション関係なく）
+        saveToHistory(url: url, safetyLevel: immediateSafety)
+        
         // 安全でない場合は確認画面を表示（即座評価の詳細情報も取得）
         if immediateSafety != .safe {
             let localEvaluator = UrlRiskEvaluator()
@@ -239,7 +238,8 @@ class ScannerViewModel: ObservableObject {
                 safetyLevel: safetyLevel, 
                 title: nil // 後追いで更新
             )
-            // 履歴保存完了
+            // 履歴保存完了後、タイトル取得を開始
+            fetchTitleAsync(for: url)
         } catch {
             print("⚠️ 履歴保存エラー: \(error.localizedDescription)")
         }
@@ -249,13 +249,14 @@ class ScannerViewModel: ObservableObject {
      * タイトル取得（非同期）
      */
     private func fetchTitleAsync(for url: String) {
+        print("🔍 タイトル取得開始: \(url)")
         titleFetcher.fetchTitle(from: url) { [weak self] result in
             switch result {
             case .success(let title):
+                print("✅ タイトル取得成功: \(title)")
                 self?.updateHistoryTitle(url: url, title: title)
-            case .failure:
-                // タイトル取得失敗（ログ非表示）
-                break
+            case .failure(let error):
+                print("❌ タイトル取得失敗: \(error.localizedDescription)")
             }
         }
     }

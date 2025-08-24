@@ -281,4 +281,31 @@ class HistoryRepository {
             return nil
         }
     }
+    
+    /**
+     * 指定URLのタイトルを更新
+     * @param url: 更新対象のURL
+     * @param title: 新しいタイトル
+     */
+    func updateTitle(url: String, title: String) throws {
+        let context = coreDataStack.viewContext
+        
+        // URLに一致するレコードを検索
+        let request: NSFetchRequest<ScanRecordEntity> = ScanRecordEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "url == %@", url)
+        request.fetchLimit = 1
+        
+        do {
+            if let entity = try context.fetch(request).first {
+                entity.title = title
+                coreDataStack.saveContext()
+                print("✅ タイトル更新成功: \(url) -> \(title)")
+            } else {
+                print("⚠️ タイトル更新: レコードが見つからない: \(url)")
+            }
+        } catch {
+            print("❌ タイトル更新エラー: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }

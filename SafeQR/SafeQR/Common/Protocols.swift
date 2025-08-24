@@ -76,11 +76,8 @@ protocol HistoryRepositoryProtocol {
 // MARK: - HTML Title Fetcher Protocol
 
 protocol HtmlTitleFetcherProtocol {
-    /// HTMLタイトルの取得
-    func fetchTitle(from url: String, completion: @escaping (Result<String, HtmlTitleFetcher.TitleFetchError>) -> Void)
-    
-    /// タイトル取得のキャンセル
-    func cancelFetch(for url: String)
+    /// HTMLタイトルの取得 - 簡潔な形式で文字列を返す
+    func fetchTitle(from url: String, completion: @escaping (Result<String, Error>) -> Void)
 }
 
 

@@ -5,7 +5,7 @@ import Foundation
  * タイムアウトを短く設定し、レスポンスが遅いサイトでもアプリがブロックされないように配慮
  * 履歴表示用のタイトル取得に使用
  */
-class HtmlTitleFetcher {
+class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
     
     // MARK: - 型定義
     
@@ -110,6 +110,26 @@ class HtmlTitleFetcher {
                 self?.handleResponse(data: data, response: response, error: error, fetchTime: fetchTime, completion: completion)
             }
         }.resume()
+    }
+    
+    // MARK: - Protocol Conformance
+    
+    /**
+     * プロトコル適合のため、簡潔な形式でタイトルを取得
+     */
+    func fetchTitle(from url: String, completion: @escaping (Result<String, Error>) -> Void) {
+        fetchTitle(from: url) { result in
+            switch result {
+            case .success(let titleResult):
+                if let title = titleResult.title {
+                    completion(.success(title))
+                } else {
+                    completion(.failure(TitleFetchError.titleNotFound))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     /**

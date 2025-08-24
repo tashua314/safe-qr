@@ -1,5 +1,6 @@
 import AVFoundation
 import UIKit
+import Combine
 
 protocol QRScannerServiceDelegate: AnyObject {
     func qrScannerService(_ service: QRScannerService, didDetectQRCode code: String)
@@ -30,11 +31,19 @@ class QRScannerService: NSObject {
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     private var isScanning = false
     
+    // MARK: - Published Properties for Protocol Conformance
+    
+    private let scanResultSubject = PassthroughSubject<String, Never>()
+    
+    var scanResult: AnyPublisher<String, Never> {
+        return scanResultSubject.eraseToAnyPublisher()
+    }
+    
     override init() {
         super.init()
     }
     
-    func setupCamera(in view: UIView) {
+    func setupCaptureSession(in view: UIView) {
         #if targetEnvironment(simulator)
         // シミュレータではモックカメラを設定
         setupMockCamera(in: view)
@@ -223,6 +232,10 @@ class QRScannerService: NSObject {
     #endif
     #endif
     
+    func requestCameraPermission(completion: @escaping (Bool) -> Void) {
+        _requestCameraPermission(completion: completion)
+    }
+    
     private func _requestCameraPermission(completion: @escaping (Bool) -> Void) {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -239,10 +252,14 @@ class QRScannerService: NSObject {
     }
     
     private func configureCameraSession(in view: UIView) {
+        print("📷 カメラセッション設定開始")
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            print("❌ カメラデバイス取得失敗")
             delegate?.qrScannerService(self, didFailWithError: .cameraNotAvailable)
             return
         }
+        
+        print("✅ カメラデバイス取得成功: \(videoCaptureDevice.localizedName)")
         
         do {
             let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
@@ -272,8 +289,15 @@ class QRScannerService: NSObject {
             previewLayer.videoGravity = .resizeAspectFill
             view.layer.addSublayer(previewLayer)
             
+            print("📺 プレビューレイヤー設定完了: frame=\(previewLayer.frame)")
+            
             self.captureSession = captureSession
             self.videoPreviewLayer = previewLayer
+            
+            // カメラ設定完了後、自動的にスキャンを開始
+            DispatchQueue.main.async { [weak self] in
+                self?.startScanning()
+            }
             
         } catch {
             delegate?.qrScannerService(self, didFailWithError: .sessionSetupFailed)
@@ -281,11 +305,20 @@ class QRScannerService: NSObject {
     }
     
     func startScanning() {
-        guard let captureSession = captureSession else { return }
+        guard let captureSession = captureSession else { 
+            print("⚠️ startScanning: captureSession is nil")
+            return 
+        }
         
         if !captureSession.isRunning {
-            captureSession.startRunning()
-            isScanning = true
+            // バックグラウンドスレッドでセッション開始（重い処理のため）
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                captureSession.startRunning()
+                DispatchQueue.main.async {
+                    self?.isScanning = true
+                    print("📷 カメラスキャン開始")
+                }
+            }
         }
     }
     
@@ -300,6 +333,48 @@ class QRScannerService: NSObject {
     
     func updatePreviewLayer(frame: CGRect) {
         videoPreviewLayer?.frame = frame
+    }
+    
+    func setTorchEnabled(_ enabled: Bool) {
+        #if targetEnvironment(simulator)
+        // シミュレータでは何もしない
+        print("🔦 シミュレータ: トーチ設定 \(enabled ? "ON" : "OFF")")
+        return
+        #else
+        guard let device = AVCaptureDevice.default(for: .video) else {
+            print("⚠️ トーチ設定: デバイス取得失敗")
+            return
+        }
+        
+        guard device.hasTorch else {
+            print("⚠️ トーチ設定: フラッシュ未対応デバイス")
+            return
+        }
+        
+        do {
+            try device.lockForConfiguration()
+            
+            if enabled {
+                if device.torchMode == .off {
+                    try device.setTorchModeOn(level: 1.0)
+                    print("🔦 フラッシュライト ON")
+                }
+            } else {
+                if device.torchMode == .on {
+                    device.torchMode = .off
+                    print("🔦 フラッシュライト OFF")
+                }
+            }
+            
+            device.unlockForConfiguration()
+        } catch {
+            print("❌ フラッシュライト制御エラー: \(error.localizedDescription)")
+        }
+        #endif
+    }
+    
+    func getPreviewLayer() -> CALayer? {
+        return videoPreviewLayer
     }
 }
 
@@ -318,13 +393,14 @@ extension QRScannerService: AVCaptureMetadataOutputObjectsDelegate {
             // 一度検出したら一時的に停止
             isScanning = false
             
+            // プロトコル対応：Publisherにも通知
+            scanResultSubject.send(stringValue)
+            
             // MVVM構造のため、NotificationCenterを使用
             NotificationCenter.default.post(
                 name: .qrCodeDetected,
                 object: stringValue
             )
-            
-            // MVVM構造のためNotificationCenterのみ使用
             
             // 1秒後に再度スキャンを有効化
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in

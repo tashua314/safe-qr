@@ -154,34 +154,7 @@ class DIContainer: DIContainerProtocol {
 // MARK: - Extensions for Easy Protocol Conformance
 
 extension QRScannerService: QRScannerServiceProtocol {
-    var scanResult: AnyPublisher<String, Never> {
-        return NotificationCenter.default
-            .publisher(for: .qrCodeDetected)
-            .compactMap { $0.object as? String }
-            .eraseToAnyPublisher()
-    }
-    
-    func setTorchEnabled(_ enabled: Bool) {
-        // 既存のライト機能があれば使用、なければ仮実装
-        print("🔦 ライト設定: \(enabled ? "ON" : "OFF")")
-    }
-    
-    func getPreviewLayer() -> CALayer? {
-        // videoPreviewLayerが存在すれば返す（privateなので仮実装）
-        return nil
-    }
-    
-    func requestCameraPermission(completion: @escaping (Bool) -> Void) {
-        // 仮実装：実際のプロジェクトでは適切な実装に置き換え
-        DispatchQueue.main.async {
-            completion(true)
-        }
-    }
-    
-    func setupCaptureSession(in view: UIView) {
-        // 既存のsetupCameraメソッドを使用
-        setupCamera(in: view)
-    }
+    // QRScannerServiceのベースクラスで実装されているメソッドは、extensionでは重複宣言不要
 }
 
 extension EnhancedUrlRiskEvaluator: URLEvaluationServiceProtocol {
@@ -208,34 +181,14 @@ extension HistoryRepository: HistoryRepositoryProtocol {
         deleteAllScanRecords()
     }
     
-    func updateTitle(url: String, title: String) throws {
-        // 既存の実装があればそれを使用、なければ仮実装
-        print("📝 タイトル更新: \(url) -> \(title)")
-    }
+    // updateTitleはベースクラスで実装されているので、extensionでは重複宣言不要
     
     func getRecordCount() throws -> Int {
         return fetchAllScanRecords().count
     }
 }
 
-extension HtmlTitleFetcher: HtmlTitleFetcherProtocol {
-    func fetchTitle(from url: String, completion: @escaping (Result<String, HtmlTitleFetcher.TitleFetchError>) -> Void) {
-        // 既存のfetchTitleメソッドを呼び出し、結果を変換
-        fetchTitle(from: url) { result in
-            switch result {
-            case .success(let titleResult):
-                completion(.success(titleResult.title ?? "無題"))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    func cancelFetch(for url: String) {
-        // 既存の実装があればそれを使用、なければ仮実装
-        print("🚫 タイトル取得キャンセル: \(url)")
-    }
-}
+// HtmlTitleFetcherは既にプロトコルに適合しているため、extensionは不要
 
 extension SafeBrowsingAPIClient: SafeBrowsingAPIClientProtocol {
     // 既存のメソッドがプロトコルに適合しているので追加実装不要
