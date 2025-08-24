@@ -175,12 +175,49 @@ class ScannerUIManager: ScannerUIManagerProtocol {
             button.tintColor = .white
             button.backgroundColor = AppConstants.Colors.overlayBackground
             button.layer.cornerRadius = AppConstants.UI.overlayCornerRadius
-            button.contentEdgeInsets = AppConstants.UI.buttonPadding
+            setButtonContentInsets(button, insets: AppConstants.UI.buttonPadding)
             button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 4)
         }
         
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }
+    
+    /**
+     * ボタンのコンテンツインセット設定（iOS 15以降対応）
+     */
+    private func setButtonContentInsets(_ button: UIButton, insets: UIEdgeInsets) {
+        if #available(iOS 15.0, *) {
+            // iOS 15以降はUIButton.Configurationを使用
+            var config: UIButton.Configuration
+            
+            // オーバーレイボタンは統一スタイル
+            config = UIButton.Configuration.filled()
+            config.baseBackgroundColor = AppConstants.Colors.overlayBackground
+            config.baseForegroundColor = .white
+            config.cornerStyle = .medium
+            
+            config.contentInsets = NSDirectionalEdgeInsets(
+                top: insets.top,
+                leading: insets.left,
+                bottom: insets.bottom,
+                trailing: insets.right
+            )
+            
+            // タイトルとイメージを保持してからConfigurationを設定
+            let title = button.title(for: .normal)
+            let image = button.image(for: .normal)
+            button.configuration = config
+            if let title = title {
+                button.setTitle(title, for: .normal)
+            }
+            if let image = image {
+                button.setImage(image, for: .normal)
+            }
+        } else {
+            // iOS 13-14は従来のcontentEdgeInsetsを使用
+            button.contentEdgeInsets = insets
+        }
     }
     
     // MARK: - Auto Layout Setup
@@ -250,7 +287,7 @@ class ScannerUIManager: ScannerUIManagerProtocol {
     // MARK: - Button Actions Configuration
     
     private func configureButtonActions() {
-        guard let actions = buttonActions else { return }
+        guard buttonActions != nil else { return }
         
         historyButton.addTarget(self, action: #selector(historyButtonTapped), for: .touchUpInside)
         settingsButton.addTarget(self, action: #selector(settingsButtonTapped), for: .touchUpInside)

@@ -68,7 +68,7 @@ class QRScannerService: NSObject {
         ])
         
         let label = UILabel()
-        label.text = "シミュレータではカメラは利用できません\n\nテスト用QRをタップしてください"
+        label.text = "シミュレータではカメラは利用できません\n\n下のボタンでテストしてください"
         label.textColor = .white
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -78,7 +78,7 @@ class QRScannerService: NSObject {
         
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: mockView.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: mockView.centerYAnchor, constant: -50),
+            label.topAnchor.constraint(equalTo: mockView.safeAreaLayoutGuide.topAnchor, constant: 100),
             label.leadingAnchor.constraint(equalTo: mockView.leadingAnchor, constant: 20),
             label.trailingAnchor.constraint(equalTo: mockView.trailingAnchor, constant: -20)
         ])
@@ -109,30 +109,18 @@ class QRScannerService: NSObject {
         mockView.addSubview(stackView)
         
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 30),
+            stackView.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 40),
             stackView.centerXAnchor.constraint(equalTo: mockView.centerXAnchor),
             stackView.widthAnchor.constraint(equalToConstant: 200),
-            stackView.heightAnchor.constraint(equalToConstant: 180), // 3つのボタン × 50pt + spacing
-            // Safe Area を考慮して、少なくとも下から100pt以上の余白を確保
-            stackView.bottomAnchor.constraint(lessThanOrEqualTo: mockView.bottomAnchor, constant: -100)
+            stackView.heightAnchor.constraint(equalToConstant: 156), // 3つのボタン × 44pt + spacing × 2
+            // Safe Area を考慮して、下からも十分な余白を確保
+            stackView.bottomAnchor.constraint(lessThanOrEqualTo: mockView.safeAreaLayoutGuide.bottomAnchor, constant: -50)
         ])
         
-        // レイアウト後にボタンの情報を出力と最前面への移動
+        // レイアウト後にボタンの情報を出力（最前面移動は削除）
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // スタックビューを最前面に
+            // mockView内でスタックビューだけを最前面に（他のビューは影響しない）
             mockView.bringSubviewToFront(stackView)
-            
-            // さらに親ビューがある場合は、mockView自体も最前面に
-            if let parentView = mockView.superview {
-                parentView.bringSubviewToFront(mockView)
-                
-                // 全ての親ビューを遡って最前面に移動
-                var currentView = parentView
-                while let superView = currentView.superview {
-                    superView.bringSubviewToFront(currentView)
-                    currentView = superView
-                }
-            }
             
             print("📱 テストボタン設定完了:")
             print("  - StackView Frame: \(stackView.frame)")
@@ -227,8 +215,8 @@ class QRScannerService: NSObject {
         button.addTarget(self, action: #selector(simulateQRDetection(_:)), for: .touchUpInside)
         button.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
         
-        // 固定高さを設定
-        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        // 固定高さを設定（少し小さく）
+        button.heightAnchor.constraint(equalToConstant: 44).isActive = true
         
         return button
     }

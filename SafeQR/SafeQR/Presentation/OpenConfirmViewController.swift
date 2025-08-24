@@ -245,7 +245,7 @@ class OpenConfirmViewController: UIViewController {
         detailToggleButton.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
         detailToggleButton.layer.cornerRadius = 8
         detailToggleButton.translatesAutoresizingMaskIntoConstraints = false
-        detailToggleButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        setButtonContentInsets(detailToggleButton, insets: UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12))
         
         detailToggleButton.addTarget(self, action: #selector(toggleDetailTapped), for: .touchUpInside)
         dialogContainer.addSubview(detailToggleButton)
@@ -315,7 +315,7 @@ class OpenConfirmViewController: UIViewController {
         recommendedButton.translatesAutoresizingMaskIntoConstraints = false
         
         // タップ領域を十分に確保
-        recommendedButton.contentEdgeInsets = UIEdgeInsets(top: 16, left: 24, bottom: 16, right: 24)
+        setButtonContentInsets(recommendedButton, insets: UIEdgeInsets(top: 16, left: 24, bottom: 16, right: 24))
         
         recommendedButton.addTarget(self, action: #selector(recommendedButtonTapped), for: .touchUpInside)
         buttonStackView.addArrangedSubview(recommendedButton)
@@ -333,10 +333,56 @@ class OpenConfirmViewController: UIViewController {
         alternativeButton.layer.cornerRadius = 12
         alternativeButton.translatesAutoresizingMaskIntoConstraints = false
         
-        alternativeButton.contentEdgeInsets = UIEdgeInsets(top: 16, left: 24, bottom: 16, right: 24)
+        setButtonContentInsets(alternativeButton, insets: UIEdgeInsets(top: 16, left: 24, bottom: 16, right: 24))
         
         alternativeButton.addTarget(self, action: #selector(alternativeButtonTapped), for: .touchUpInside)
         buttonStackView.addArrangedSubview(alternativeButton)
+    }
+    
+    /**
+     * ボタンのコンテンツインセット設定（iOS 15以降対応）
+     */
+    private func setButtonContentInsets(_ button: UIButton, insets: UIEdgeInsets) {
+        if #available(iOS 15.0, *) {
+            // iOS 15以降はUIButton.Configurationを使用
+            var config: UIButton.Configuration
+            
+            if button == recommendedButton {
+                config = UIButton.Configuration.filled()
+                config.baseBackgroundColor = .systemBlue
+                config.baseForegroundColor = .white
+                config.cornerStyle = .medium
+            } else if button == alternativeButton {
+                config = UIButton.Configuration.plain()
+                config.background.strokeColor = .systemRed
+                config.background.strokeWidth = 1
+                config.baseForegroundColor = .systemRed
+                config.cornerStyle = .medium
+            } else {
+                // 詳細ボタンの場合
+                config = UIButton.Configuration.tinted()
+                config.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                config.baseForegroundColor = .systemBlue
+                config.cornerStyle = .small
+            }
+            
+            config.contentInsets = NSDirectionalEdgeInsets(
+                top: insets.top,
+                leading: insets.left,
+                bottom: insets.bottom,
+                trailing: insets.right
+            )
+            
+            // タイトルを保持してからConfigurationを設定
+            let title = button.title(for: .normal)
+            button.configuration = config
+            if let title = title {
+                button.setTitle(title, for: .normal)
+            }
+        } else {
+            // iOS 13-14は従来のcontentEdgeInsetsを使用
+            button.contentEdgeInsets = insets
+        }
     }
     
     /**
@@ -626,17 +672,15 @@ class OpenConfirmViewController: UIViewController {
  * URLラベルのボックス表示に使用
  */
 extension UILabel {
-    private struct AssociatedKeys {
-        static var textInsets = "textInsets"
-    }
+    private static var textInsetsKey: UInt8 = 0
     
     /// テキストインセット
     var textInsets: UIEdgeInsets {
         get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.textInsets) as? UIEdgeInsets ?? .zero
+            return objc_getAssociatedObject(self, &UILabel.textInsetsKey) as? UIEdgeInsets ?? .zero
         }
         set {
-            objc_setAssociatedObject(self, &AssociatedKeys.textInsets, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &UILabel.textInsetsKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             setNeedsDisplay()
         }
     }
