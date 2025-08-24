@@ -264,7 +264,7 @@ extension SettingsViewController: UITableViewDataSource {
         
         cell.configure(
             title: "外部安全性チェック",
-            subtitle: "個人情報は送信しません",
+            subtitle: "Google脅威データベースでより正確に判定",
             isOn: settingsStore.isExternalReputationEnabled
         ) { [weak self] isOn in
             // スイッチ変更時の処理
