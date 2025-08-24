@@ -588,7 +588,7 @@ class HistoryTableViewCell: UITableViewCell {
         
         // 訪問回数設定
         if scanRecord.visitCount > 1 {
-            visitCountLabel.text = "\\(scanRecord.visitCount)回"
+            visitCountLabel.text = "\(scanRecord.visitCount)回"
             visitCountLabel.isHidden = false
         } else {
             visitCountLabel.isHidden = true
