@@ -15,6 +15,9 @@ class OpenConfirmViewController: UIViewController {
     /// 安全性レベル
     private let safetyLevel: SafetyLevel
     
+    /// 検出された問題の詳細
+    private let detectedIssues: [String]
+    
     /// ユーザーの判断結果を通知するコールバック
     var onUserDecision: ((Bool) -> Void)?
     
@@ -50,16 +53,30 @@ class OpenConfirmViewController: UIViewController {
     /// 代替アクション（続行する/自己責任で開くボタン）
     private let alternativeButton = UIButton(type: .system)
     
+    /// 詳細表示の展開/折りたたみボタン
+    private let detailToggleButton = UIButton(type: .system)
+    
+    /// 詳細情報を表示するコンテナ
+    private let detailContainer = UIView()
+    
+    /// 詳細情報のラベル
+    private let detailLabel = UILabel()
+    
+    /// 詳細表示の展開状態
+    private var isDetailExpanded = false
+    
     // MARK: - Initializer
     
     /**
      * イニシャライザ
      * @param url: 確認対象のURL
      * @param safetyLevel: 安全性レベル（caution または danger）
+     * @param detectedIssues: 検出された問題の詳細リスト
      */
-    init(url: String, safetyLevel: SafetyLevel) {
+    init(url: String, safetyLevel: SafetyLevel, detectedIssues: [String] = []) {
         self.url = url
         self.safetyLevel = safetyLevel
+        self.detectedIssues = detectedIssues
         super.init(nibName: nil, bundle: nil)
         
         // モーダル表示の設定
@@ -99,6 +116,8 @@ class OpenConfirmViewController: UIViewController {
         setupUrlLabel()
         setupDescriptionLabel()
         setupAdviceLabel()
+        setupDetailToggleButton()
+        setupDetailContainer()
         setupButtons()
         setupConstraints()
     }
@@ -206,6 +225,66 @@ class OpenConfirmViewController: UIViewController {
     }
     
     /**
+     * 詳細展開ボタンの設定
+     */
+    private func setupDetailToggleButton() {
+        // デバッグログ
+        print("🔍 詳細ボタン設定: detectedIssues.count = \(detectedIssues.count)")
+        print("🔍 詳細情報: \(detectedIssues)")
+        
+        // 詳細情報がない場合は表示しない
+        guard !detectedIssues.isEmpty else {
+            print("🔍 詳細情報が空のため、ボタンを非表示にします")
+            detailToggleButton.isHidden = true
+            return
+        }
+        
+        detailToggleButton.setTitle("詳細を確認 ▼", for: .normal)
+        detailToggleButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        detailToggleButton.setTitleColor(.systemBlue, for: .normal)
+        detailToggleButton.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+        detailToggleButton.layer.cornerRadius = 8
+        detailToggleButton.translatesAutoresizingMaskIntoConstraints = false
+        detailToggleButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        
+        detailToggleButton.addTarget(self, action: #selector(toggleDetailTapped), for: .touchUpInside)
+        dialogContainer.addSubview(detailToggleButton)
+    }
+    
+    /**
+     * 詳細情報コンテナの設定
+     */
+    private func setupDetailContainer() {
+        detailContainer.backgroundColor = UIColor.systemGray6
+        detailContainer.layer.cornerRadius = 8
+        detailContainer.translatesAutoresizingMaskIntoConstraints = false
+        detailContainer.isHidden = true
+        detailContainer.alpha = 0
+        
+        // 詳細情報ラベルの設定
+        detailLabel.textAlignment = .left
+        detailLabel.font = UIFont.systemFont(ofSize: 14)
+        detailLabel.textColor = .label
+        detailLabel.numberOfLines = 0
+        detailLabel.translatesAutoresizingMaskIntoConstraints = false
+        detailLabel.adjustsFontForContentSizeCategory = true
+        
+        // 詳細情報のテキストを設定
+        detailLabel.text = detectedIssues.joined(separator: "\n\n")
+        
+        detailContainer.addSubview(detailLabel)
+        dialogContainer.addSubview(detailContainer)
+        
+        // 詳細ラベルの制約
+        NSLayoutConstraint.activate([
+            detailLabel.topAnchor.constraint(equalTo: detailContainer.topAnchor, constant: 12),
+            detailLabel.leadingAnchor.constraint(equalTo: detailContainer.leadingAnchor, constant: 12),
+            detailLabel.trailingAnchor.constraint(equalTo: detailContainer.trailingAnchor, constant: -12),
+            detailLabel.bottomAnchor.constraint(equalTo: detailContainer.bottomAnchor, constant: -12)
+        ])
+    }
+    
+    /**
      * ボタンの設定
      */
     private func setupButtons() {
@@ -264,7 +343,8 @@ class OpenConfirmViewController: UIViewController {
      * Auto Layout制約の設定
      */
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
+        // 基本的な制約
+        var constraints = [
             // 背景ビュー（全画面）
             backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
             backgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -302,16 +382,40 @@ class OpenConfirmViewController: UIViewController {
             adviceLabel.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
             adviceLabel.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
             
-            // ボタンスタックビュー
-            buttonStackView.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 24),
-            buttonStackView.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
-            buttonStackView.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
-            buttonStackView.bottomAnchor.constraint(equalTo: dialogContainer.bottomAnchor, constant: -24),
-            
             // ボタンの高さ制約
             recommendedButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
             alternativeButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
-        ])
+        ]
+        
+        // 詳細情報がある場合の追加制約
+        if !detectedIssues.isEmpty {
+            constraints.append(contentsOf: [
+                // 詳細展開ボタン
+                detailToggleButton.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 12),
+                detailToggleButton.centerXAnchor.constraint(equalTo: dialogContainer.centerXAnchor),
+                
+                // 詳細情報コンテナ
+                detailContainer.topAnchor.constraint(equalTo: detailToggleButton.bottomAnchor, constant: 8),
+                detailContainer.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
+                detailContainer.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
+                
+                // ボタンスタックビュー（詳細コンテナから）
+                buttonStackView.topAnchor.constraint(equalTo: detailContainer.bottomAnchor, constant: 24),
+                buttonStackView.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
+                buttonStackView.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
+                buttonStackView.bottomAnchor.constraint(equalTo: dialogContainer.bottomAnchor, constant: -24)
+            ])
+        } else {
+            constraints.append(contentsOf: [
+                // ボタンスタックビュー（アドバイスラベルから直接）
+                buttonStackView.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 24),
+                buttonStackView.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
+                buttonStackView.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
+                buttonStackView.bottomAnchor.constraint(equalTo: dialogContainer.bottomAnchor, constant: -24)
+            ])
+        }
+        
+        NSLayoutConstraint.activate(constraints)
     }
     
     /**
@@ -476,6 +580,29 @@ class OpenConfirmViewController: UIViewController {
     @objc private func backgroundTapped() {
         // 背景タップは安全な選択（URLを開かない）として扱う
         dismissWithDecision(shouldOpen: false)
+    }
+    
+    /**
+     * 詳細展開ボタンタップ処理
+     */
+    @objc private func toggleDetailTapped() {
+        isDetailExpanded.toggle()
+        
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0, options: .curveEaseInOut, animations: {
+            if self.isDetailExpanded {
+                self.detailContainer.isHidden = false
+                self.detailContainer.alpha = 1
+                self.detailToggleButton.setTitle("詳細を閉じる ▲", for: .normal)
+            } else {
+                self.detailContainer.alpha = 0
+                self.detailToggleButton.setTitle("詳細を確認 ▼", for: .normal)
+            }
+            self.view.layoutIfNeeded()
+        }) { _ in
+            if !self.isDetailExpanded {
+                self.detailContainer.isHidden = true
+            }
+        }
     }
     
     /**

@@ -297,11 +297,4 @@ class ReputationClient {
 }
 
 // MARK: - String拡張（ハッシュ生成用）
-
-extension String {
-    /// SHA256ハッシュ値を取得
-    var sha256: String {
-        // 簡易実装：実際はCryptoKitまたはCommonCryptoを使用
-        return String(self.hashValue)
-    }
-}
+// SHA256拡張はSafeBrowsingAPIClientで定義済みのため削除

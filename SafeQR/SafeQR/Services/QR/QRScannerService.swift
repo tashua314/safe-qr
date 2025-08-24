@@ -39,7 +39,7 @@ class QRScannerService: NSObject {
         // シミュレータではモックカメラを設定
         setupMockCamera(in: view)
         #else
-        requestCameraPermission { [weak self] granted in
+        _requestCameraPermission { [weak self] granted in
             DispatchQueue.main.async {
                 if granted {
                     self?.configureCameraSession(in: view)
@@ -83,49 +83,159 @@ class QRScannerService: NSObject {
             label.trailingAnchor.constraint(equalTo: mockView.trailingAnchor, constant: -20)
         ])
         
-        // テスト用ボタンを追加
-        let testButton = UIButton(type: .system)
-        testButton.setTitle("テスト QR スキャン", for: .normal)
-        testButton.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        testButton.setTitleColor(.white, for: .normal)
-        testButton.backgroundColor = UIColor.systemBlue
-        testButton.layer.cornerRadius = 8
-        testButton.translatesAutoresizingMaskIntoConstraints = false
+        // テストボタンのスタックビューを作成
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.distribution = .fillEqually
+        stackView.spacing = 12
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 安全なURLテストボタン
+        let safeButton = createTestButton(title: "安全URL テスト", color: .systemGreen, tag: 0)
+        
+        // 注意URLテストボタン
+        let cautionButton = createTestButton(title: "注意URL テスト", color: .systemOrange, tag: 1)
+        
+        // 危険URLテストボタン
+        let dangerButton = createTestButton(title: "危険URL テスト", color: .systemRed, tag: 2)
+        
+        stackView.addArrangedSubview(safeButton)
+        stackView.addArrangedSubview(cautionButton)
+        stackView.addArrangedSubview(dangerButton)
         
         // タッチイベントを確実に受け取るための設定
-        testButton.isUserInteractionEnabled = true
         mockView.isUserInteractionEnabled = true
         
-        testButton.addTarget(self, action: #selector(simulateQRDetection), for: .touchUpInside)
-        
-        // デバッグ用：タッチダウンイベントも追加
-        testButton.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
-        
-        mockView.addSubview(testButton)
+        mockView.addSubview(stackView)
         
         NSLayoutConstraint.activate([
-            testButton.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 30),
-            testButton.centerXAnchor.constraint(equalTo: mockView.centerXAnchor),
-            testButton.widthAnchor.constraint(equalToConstant: 200),
-            testButton.heightAnchor.constraint(equalToConstant: 50),
+            stackView.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 30),
+            stackView.centerXAnchor.constraint(equalTo: mockView.centerXAnchor),
+            stackView.widthAnchor.constraint(equalToConstant: 200),
+            stackView.heightAnchor.constraint(equalToConstant: 180), // 3つのボタン × 50pt + spacing
             // Safe Area を考慮して、少なくとも下から100pt以上の余白を確保
-            testButton.bottomAnchor.constraint(lessThanOrEqualTo: mockView.bottomAnchor, constant: -100)
+            stackView.bottomAnchor.constraint(lessThanOrEqualTo: mockView.bottomAnchor, constant: -100)
         ])
+        
+        // レイアウト後にボタンの情報を出力と最前面への移動
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // スタックビューを最前面に
+            mockView.bringSubviewToFront(stackView)
+            
+            // さらに親ビューがある場合は、mockView自体も最前面に
+            if let parentView = mockView.superview {
+                parentView.bringSubviewToFront(mockView)
+                
+                // 全ての親ビューを遡って最前面に移動
+                var currentView = parentView
+                while let superView = currentView.superview {
+                    superView.bringSubviewToFront(currentView)
+                    currentView = superView
+                }
+            }
+            
+            print("📱 テストボタン設定完了:")
+            print("  - StackView Frame: \(stackView.frame)")
+            print("  - StackView Bounds: \(stackView.bounds)")
+            print("  - StackView isUserInteractionEnabled: \(stackView.isUserInteractionEnabled)")
+            print("  - StackView arrangedSubviews count: \(stackView.arrangedSubviews.count)")
+            print("  - mockView.frame: \(mockView.frame)")
+            print("  - mockView.isUserInteractionEnabled: \(mockView.isUserInteractionEnabled)")
+            
+            // 各ボタンの情報も出力
+            for (index, button) in stackView.arrangedSubviews.enumerated() {
+                if let btn = button as? UIButton {
+                    print("  - Button[\(index)] tag: \(btn.tag), title: \(btn.title(for: .normal) ?? "no title")")
+                }
+            }
+            
+            // 親ビューのsubviews確認
+            if let parentView = mockView.superview {
+                print("  - 親ビューのsubviews数: \(parentView.subviews.count)")
+                for (index, subview) in parentView.subviews.enumerated() {
+                    print("    \(index): \(type(of: subview)) - isUserInteractionEnabled: \(subview.isUserInteractionEnabled)")
+                }
+            }
+            
+            // タッチ可能かテスト（最初のボタンでテスト）
+            if let firstButton = stackView.arrangedSubviews.first {
+                let testPoint = CGPoint(x: firstButton.frame.midX, y: firstButton.frame.midY)
+                if let hitView = mockView.hitTest(testPoint, with: nil) {
+                    print("  - hitTest結果: \(type(of: hitView))")
+                } else {
+                    print("  - hitTest結果: nil（タッチ不可）")
+                }
+            }
+        }
     }
     
     @objc private func buttonTouchDown() {
-        print("🔘 ボタンがタッチされました")
+        // ボタンの視覚的フィードバック (sender経由でボタンにアクセス)
     }
     
-    @objc private func simulateQRDetection() {
-        print("🎯 simulateQRDetection が呼ばれました")
-        // テスト用のURL
-        let testURL = "https://www.google.com"
-        delegate?.qrScannerService(self, didDetectQRCode: testURL)
+    @objc private func simulateQRDetection(_ sender: UIButton? = nil) {
+        // ボタンのアニメーション（senderがある場合）
+        if let button = sender {
+            UIView.animate(withDuration: 0.1, animations: {
+                button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    button.transform = CGAffineTransform.identity
+                }
+            }
+        }
+        
+        // ボタンのtagに応じてテストURLを選択
+        let testURL: String
+        let buttonTag = sender?.tag ?? 0
+        
+        switch buttonTag {
+        case 0: // 安全URL
+            testURL = "https://www.google.com"
+            print("🟢 テスト: 安全URL")
+        case 1: // 注意URL（長いパスを持つURL）
+            testURL = "https://example-very-long-subdomain.suspicious-brand-name.com/very/long/path/that/exceeds/normal/length/limits/and/triggers/caution/level/detection/with/additional/parameters?param1=value1&param2=value2&param3=value3&param4=value4"
+            print("🟡 テスト: 注意URL")
+        case 2: // 危険URL（Punycodeドメインを模擬）
+            testURL = "https://xn--80akhbyknj4f.fake-site.com/login"
+            print("🔴 テスト: 危険URL")
+        default:
+            testURL = "https://www.google.com"
+            print("🟢 テスト: デフォルト安全URL")
+        }
+        
+        // MVVM構造のため、NotificationCenterを使用
+        NotificationCenter.default.post(
+            name: .qrCodeDetected,
+            object: testURL
+        )
+    }
+    
+    #if targetEnvironment(simulator)
+    // テストボタン作成ヘルパーメソッド
+    private func createTestButton(title: String, color: UIColor, tag: Int) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle(title, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = color
+        button.layer.cornerRadius = 8
+        button.tag = tag
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.isUserInteractionEnabled = true
+        
+        button.addTarget(self, action: #selector(simulateQRDetection(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
+        
+        // 固定高さを設定
+        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        
+        return button
     }
     #endif
+    #endif
     
-    private func requestCameraPermission(completion: @escaping (Bool) -> Void) {
+    private func _requestCameraPermission(completion: @escaping (Bool) -> Void) {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             completion(true)
@@ -220,7 +330,13 @@ extension QRScannerService: AVCaptureMetadataOutputObjectsDelegate {
             // 一度検出したら一時的に停止
             isScanning = false
             
-            delegate?.qrScannerService(self, didDetectQRCode: stringValue)
+            // MVVM構造のため、NotificationCenterを使用
+            NotificationCenter.default.post(
+                name: .qrCodeDetected,
+                object: stringValue
+            )
+            
+            // MVVM構造のためNotificationCenterのみ使用
             
             // 1秒後に再度スキャンを有効化
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
