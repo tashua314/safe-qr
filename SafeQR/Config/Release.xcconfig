@@ -1,0 +1,13 @@
+// Release環境設定
+// 本番リリース用の設定
+
+// Google Safe Browsing API Key (本番用)
+SAFE_BROWSING_API_KEY = YOUR_PROD_API_KEY_HERE
+
+// アプリケーション設定
+PRODUCT_BUNDLE_IDENTIFIER = jp.techguide.SafeQR
+PRODUCT_NAME = SafeQR
+
+// 本番用フラグ
+DEBUG_MODE = NO
+ENABLE_LOGGING = NO

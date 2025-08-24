@@ -135,7 +135,14 @@ Thumbs.db
 # Simulator app bundles
 *.app
 
-# Personal API keys and secrets
+# Configuration Files with Secrets
+# Ignore configuration files with actual API keys
+Config/Local-Keys.xcconfig
+Config/Production-Keys.xcconfig
+SafeQR/Config/Local-Keys.xcconfig
+SafeQR/Config/Production-Keys.xcconfig
+
+# Legacy API key files
 Config.plist
 secrets.plist
 APIKeys.plist
@@ -148,3 +155,16 @@ APIKeys.plist
 *.zip
 *.tar.gz
 *.rar
+
+# Environment specific files
+.env.local
+.env.production
+.env.development
+.env.staging
+
+# IDE-specific config files (if any)
+*.xcconfig.local
+
+# Backup config files
+*.xcconfig.backup
+Config/*.backup

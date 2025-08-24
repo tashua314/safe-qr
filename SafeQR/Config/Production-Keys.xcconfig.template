@@ -1,0 +1,24 @@
+// Production-Keys.xcconfig.template
+// 本番環境用APIキー設定テンプレート
+//
+// セットアップ手順:
+// 1. このファイルを "Production-Keys.xcconfig" にコピー
+// 2. YOUR_PROD_API_KEY_HERE を実際のGoogle Safe Browsing APIキー（本番用）に置き換え
+// 3. Xcodeプロジェクトに Production-Keys.xcconfig を追加
+// 4. プロジェクト設定のReleaseビルド設定でこのファイルを選択
+//
+// 注意: Production-Keys.xcconfig は .gitignore に含まれているため、Gitにコミットされません
+
+// Google Safe Browsing API Key (本番用)
+SAFE_BROWSING_API_KEY = YOUR_PROD_API_KEY_HERE
+
+// アプリケーション設定
+PRODUCT_BUNDLE_IDENTIFIER = jp.techguide.SafeQR
+PRODUCT_NAME = SafeQR
+
+// 本番用フラグ
+DEBUG_MODE = NO
+ENABLE_LOGGING = NO
+
+// 本番環境用のカスタム設定
+APP_ENVIRONMENT = production

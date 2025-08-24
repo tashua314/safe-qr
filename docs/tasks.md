@@ -1,47 +1,200 @@
-# タスクリスト（iOS10 / UIKit）
+# SafeQR リリースタスク管理
 
-> 目的：iOS10対応のシンプル＆安全なQRリーダーの叩き台を最短で生成
+**最終更新**: 2025-08-24  
+**対象OS**: iOS 13.0以上（iOS 10サポート廃止済み）  
+**アーキテクチャ**: MVVM + DIContainer  
 
-## 0) プロジェクト雛形
-- 新規 iOS アプリ（Objective-Cは不要、**Swift**）
-- 最低OS **iOS 10.0**
-- ライフサイクル: AppDelegate + Storyboard無し（コードでUI構築）
-- 依存: 純正フレームワークのみ（AVFoundation, SafariServices, CoreData）
+## 🎯 リリース目標
+- ✅ QRコード読み取り + URL安全性判定 + 履歴管理 + 設定画面
+- ✅ 実機での動作確認済み（カメラ・フラッシュライト）
+- 🔄 App Storeリリース準備中
 
-## 1) ファイル作成（この順で最低限可動まで）
-- App/AppDelegate.swift（rootをScannerViewControllerに）
-- Services/QR/QRScannerService.swift（AVCaptureSession/AVCaptureVideoPreviewLayer/AVMetadataOutputでQRCode検出）
-- Domain/Safety/SafetyLevel.swift（safe/caution/danger）
-- Domain/Safety/UrlRiskEvaluator.swift（docs/safety-design.md のスコアリング実装）
-- Presentation/ScannerViewController.swift
-  - カメラプレビュー全画面＋シンプルなガイド
-  - URL検出→UrlRiskEvaluator→必要時OpenConfirmViewController表示
-  - 開く時は SFSafariViewController 経由
-  - 取得URLを HistoryRepository 経由で保存（後追いタイトル取得はキックのみ）
-- Data/CoreData/CoreDataStack.swift（軽量でOK）
-- Data/CoreData/ScanRecordEntity（xcdatamodeld）: docs/db-design.md 準拠
-- Domain/Repositories/HistoryRepository.swift（最大50件ルール＋重複扱い）
-- Presentation/HistoryViewController.swift（UITableView）
-- Data/Metadata/HtmlTitleFetcher.swift（timeout短め、<title>抽出）
-- Presentation/SettingsViewController.swift（厳しさ: low/standard/high、外部照会ON/OFF）
-- Presentation/OpenConfirmViewController.swift（優しい文章と2ボタン）
+---
 
-## 2) 受入れ観点（Doneの定義）
-- 起動直後にスキャン開始（許可未取得なら許可導線）
-- URL検出→危険/注意は確認画面、safeはそのまま開ける
-- 履歴に最大50件保存（51件目で一番古いもの削除）
-- タイトル後追い取得が成功すればリスト反映
-- Dynamic Type拡大で主要画面が破綻しない
-- オフラインでもスキャン/保存は動作（タイトル取得/外部照会は待機）
+## ✅ 完了済み機能（実装率: 95%）
 
-## 3) 実装メモ
-- AVFoundation: iOS10で動く `AVCaptureMetadataOutputObjectsDelegate` を使用
-- UI: AutoLayoutはコード。配色/文言は docs/ui-design.md を参照
-- 外部レピュテーション: `ReputationClient` はダミーのモック実装→後で実エンドポイント差し替え
-- 機微情報送信なし。URLの**生文字列は外部送信しない**（ハッシュ化/ドメインのみ）
+### Core機能
+- [x] **QRコードスキャン機能**（AVFoundation）
+- [x] **URL安全性評価**（ローカル + Google Safe Browsing API）
+- [x] **履歴管理**（Core Data、50件制限、重複URLのvisitCount加算）
+- [x] **設定画面**（安全性レベル調整、外部API ON/OFF）
+- [x] **危険URL警告画面**（詳細表示、折りたたみ対応）
+- [x] **HTMLタイトル後追い取得機能**
 
-## 4) テスト
-- UrlRiskEvaluatorTests: 代表URLで safe/caution/danger が期待通り
-- HistoryRepositoryTests: 50件上限ローテーション、重複URLのvisitCount加算
+### Architecture & Code Quality
+- [x] **MVVM アーキテクチャ**実装完了
+- [x] **DIContainer**による依存性注入
+- [x] **NotificationCenter**による画面間通信
+- [x] **プロトコル指向設計**
+- [x] iOS 15対応（UIButton.Configuration）
+- [x] EXC_BAD_ACCESS crash修正済み
 
-> 以上を順に生成→ビルド通過→シミュレータでカメラは不可（実機で確認）。UIはモック画像でもOK。
+### UI/UX 
+- [x] カメラプレビュー画面（全画面＋ガイド）
+- [x] 履歴一覧画面（UITableView）
+- [x] 設定画面（分かりやすい説明文）
+- [x] 警告確認画面（優しい文言＋2ボタン）
+- [x] シミュレータ用テストボタン
+- [x] 実機カメラ・フラッシュライト動作確認済み
+
+### Security & Environment
+- [x] **URL生値の外部送信禁止**（プライバシー保護）
+- [x] **環境変数管理**（.xcconfig による開発/本番分離）
+- [x] **APIキー管理体制**構築
+- [x] **.gitignore** セキュリティ設定
+
+---
+
+## 📋 リリース前必須タスク
+
+### 🔴 HIGH PRIORITY
+
+#### 1. 品質保証（予想工数: 9時間）
+- [ ] **ユニットテスト実行・合格確認**（2時間）
+  - `UrlRiskEvaluatorTests` - 危険度判定ロジック
+  - `HistoryRepositoryTests` - 履歴管理（50件制限、重複処理）
+
+- [ ] **実機テスト（複数デバイス）**（4時間）
+  - iPhone（iOS 13, 14, 15+）での動作確認
+  - iPad対応確認
+  - カメラ機能、フラッシュライト機能
+
+- [ ] **UIテスト自動化実行**（1時間）
+  - `SafeQRUITests` の実行・合格確認
+
+- [ ] **メモリリーク検証**（2時間）
+  - Instruments でメモリリーク確認
+  - QRスキャン中の長時間動作テスト
+
+#### 2. App Store準備（予想工数: 9時間）
+- [ ] **アプリアイコン最終確認**（2時間）
+  - 全サイズ対応（1024x1024含む）
+  - デザインの最終調整
+
+- [ ] **スクリーンショット準備**（4時間）
+  - iPhone/iPad用スクリーンショット（各5枚）
+  - 機能説明テキスト追加
+
+- [ ] **App Store説明文作成**（3時間）
+  - 日本語・英語版
+  - キーワード最適化
+
+#### 3. 法的要件（予想工数: 6時間）
+- [ ] **プライバシーポリシー作成**（4時間）
+  - Google Safe Browsing API利用に関する記載
+  - カメラ利用に関する記載
+
+- [ ] **利用規約作成**（2時間）
+  - アプリ利用に関する規約
+
+---
+
+### 🟡 MEDIUM PRIORITY
+
+#### 4. コード品質向上（予想工数: 7時間）
+- [ ] **本番用ログレベル調整**（3時間）
+  - 現在12ファイルに `print()` 文が残存
+  - DEBUG条件分岐によるログ制御実装
+  - 対象ファイル: `HistoryRepository`, `ScannerViewModel`, `HtmlTitleFetcher`, など
+
+- [ ] **エラーハンドリング見直し**（2時間）
+  - 適切なエラーメッセージ表示
+  - ユーザビリティ向上
+
+- [ ] **パフォーマンステスト**（2時間）
+  - QRコード読み取り速度測定
+  - API応答時間測定
+
+#### 5. 技術的準備（予想工数: 4時間）
+- [ ] **リリースビルド最適化**（1時間）
+  - Swift Compiler Optimization (Release: -O)
+  - Strip Debug Symbols: YES
+
+- [ ] **コード署名設定**（2時間）
+  - Distribution Certificate準備
+  - Provisioning Profile設定
+
+- [ ] **本番APIキー設定**（1時間）
+  - Google Safe Browsing API本番キー取得・設定
+
+---
+
+### 🟢 LOW PRIORITY
+
+#### 6. ドキュメント整備（予想工数: 6時間）
+- [ ] **README.md更新**（2時間）
+  - プロジェクト概要
+  - セットアップ手順
+
+- [ ] **CHANGELOG.md作成**（1時間）
+  - バージョン履歴
+
+- [ ] **アーキテクチャ図作成**（3時間）
+  - MVVM構成図
+  - データフロー図
+
+---
+
+## 🚨 重要チェックポイント
+
+### セキュリティ
+1. ✅ APIキー漏洩防止（.gitignoreでKeys.xcconfigが除外済み）
+2. ✅ プライバシー保護（URL生値は外部送信なし）
+3. ✅ 適切な権限設定（NSCameraUsageDescription設定済み）
+
+### パフォーマンス
+1. 🔄 メモリ使用量（QRスキャン中のメモリリーク要確認）
+2. 🔄 バッテリー消費（カメラの適切な停止処理要確認）
+
+---
+
+## 📊 進捗サマリー
+
+| カテゴリ | 完了 | 進行中 | 未着手 | 合計 |
+|---------|------|--------|--------|------|
+| 実装 | 22 | 0 | 0 | 22 |
+| テスト | 0 | 0 | 4 | 4 |
+| リリース準備 | 0 | 0 | 8 | 8 |
+| ドキュメント | 2 | 0 | 3 | 5 |
+
+**全体進捗**: 62% (24/39 完了)
+
+### 予想総工数
+- **必須タスク（HIGH）**: 24時間
+- **推奨タスク（MEDIUM）**: 11時間  
+- **任意タスク（LOW）**: 6時間
+- **総計**: 41時間
+
+### 推奨スケジュール
+- **Week 1**: 品質保証 + 必須準備（24h）
+- **Week 2**: コード品質向上 + 技術準備（11h）
+- **Week 3**: App Store申請 + 最終調整
+
+---
+
+## 📈 過去の主要マイルストーン
+
+### Phase 1: 基盤構築 ✅
+- [x] プロジェクト雛形作成（iOS13+対応）
+- [x] 基本的なQRスキャン機能実装
+- [x] URL危険度判定エンジン実装
+
+### Phase 2: アーキテクチャ改善 ✅  
+- [x] MVVM アーキテクチャ移行
+- [x] DIContainer導入
+- [x] EXC_BAD_ACCESS crash修正
+
+### Phase 3: 機能完成・品質向上 ✅
+- [x] 詳細警告表示機能
+- [x] 実機動作確認・修正
+- [x] 環境変数管理体制構築
+
+### Phase 4: リリース準備 🔄（現在）
+- 品質保証
+- App Store準備  
+- 法的要件対応
+
+---
+
+**Next Review**: 毎週月曜日  
+**Target Release**: TBD（品質確認完了後）
