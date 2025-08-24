@@ -296,13 +296,13 @@ class HistoryRepositoryTests: XCTestCase {
      */
     func testErrorHandling() {
         // 無効なデータでもクラッシュしないことを確認
-        XCTAssertNoThrow({
+        XCTAssertNoThrow({ [self] in
             let record = createTestScanRecord(url: "", safety: .safe) // 空URL
             repository.upsertScanRecord(record)
         }, "Should handle empty URL gracefully")
         
         // 存在しないIDの削除でもクラッシュしないことを確認
-        XCTAssertNoThrow({
+        XCTAssertNoThrow({ [self] in
             repository.deleteScanRecord(by: UUID())
         }, "Should handle deletion of nonexistent record gracefully")
     }

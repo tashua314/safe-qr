@@ -11,8 +11,8 @@ class CoreDataStack {
     // MARK: - シングルトンインスタンス
     static let shared = CoreDataStack()
     
-    // MARK: - プライベートイニシャライザ
-    private init() {}
+    // MARK: - プライベートイニシャライザ（テスト用にinternal）
+    internal init() {}
     
     // MARK: - Core Data Stack
     

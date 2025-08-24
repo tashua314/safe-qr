@@ -1,5 +1,5 @@
 import XCTest
-@testable import SafeQRCore
+@testable import SafeQR
 
 /**
  * UrlRiskEvaluator のユニットテスト
@@ -13,27 +13,25 @@ class UrlRiskEvaluatorTests: XCTestCase {
     /// テスト対象のUrlRiskEvaluator
     private var evaluator: UrlRiskEvaluator!
     
-    /// SettingsStore のモック（テスト用）
-    private var mockSettingsStore: MockSettingsStore!
+    /// SettingsStore（実際のインスタンスを使用）
+    private let settingsStore = SettingsStore.shared
     
     // MARK: - Setup & Teardown
     
     override func setUp() {
         super.setUp()
         
-        // モックの設定ストアを作成
-        mockSettingsStore = MockSettingsStore()
-        
         // テスト対象を初期化
         evaluator = UrlRiskEvaluator()
         
         // デフォルトは「標準」の厳しさに設定
-        mockSettingsStore.safetyStrictness = .standard
+        settingsStore.safetyStrictness = .standard
     }
     
     override func tearDown() {
         evaluator = nil
-        mockSettingsStore = nil
+        // デフォルトに戻す
+        settingsStore.safetyStrictness = .standard
         super.tearDown()
     }
     
@@ -201,11 +199,11 @@ class UrlRiskEvaluatorTests: XCTestCase {
         let borderlineURL = "https://sub1.sub2.example.com/path"
         
         // 標準設定での評価
-        mockSettingsStore.safetyStrictness = .standard
+        settingsStore.safetyStrictness = .standard
         let standardResult = evaluator.evaluate(url: borderlineURL)
         
         // 厳しい設定での評価  
-        mockSettingsStore.safetyStrictness = .high
+        settingsStore.safetyStrictness = .high
         let highResult = evaluator.evaluate(url: borderlineURL)
         
         // 厳しい設定の方が危険度が高いか同等であることを確認
@@ -221,11 +219,11 @@ class UrlRiskEvaluatorTests: XCTestCase {
         let borderlineURL = "https://sub1.sub2.sub3.example.com"
         
         // 標準設定での評価
-        mockSettingsStore.safetyStrictness = .standard  
+        settingsStore.safetyStrictness = .standard  
         let standardResult = evaluator.evaluate(url: borderlineURL)
         
         // 弱い設定での評価
-        mockSettingsStore.safetyStrictness = .low
+        settingsStore.safetyStrictness = .low
         let lowResult = evaluator.evaluate(url: borderlineURL)
         
         // 弱い設定の方が危険度が低いか同等であることを確認
@@ -277,8 +275,8 @@ class UrlRiskEvaluatorTests: XCTestCase {
         
         for url in specialCharURLs {
             // クラッシュせずに評価が完了することを確認
-            XCTAssertNoThrow({
-                _ = self.evaluator.evaluate(url: url)
+            XCTAssertNoThrow({ [self] in
+                _ = evaluator.evaluate(url: url)
             }, "URL with special characters should not crash: '\(url)'")
         }
     }
@@ -290,24 +288,14 @@ class UrlRiskEvaluatorTests: XCTestCase {
         // 2000文字のURL
         let longURL = "https://example.com/" + String(repeating: "verylongpath/", count: 150)
         
-        XCTAssertNoThrow({
-            let result = self.evaluator.evaluate(url: longURL)
+        XCTAssertNoThrow({ [self] in
+            let result = evaluator.evaluate(url: longURL)
             // 長いパスなので少なくとも注意レベル以上になることを期待
             XCTAssertGreaterThanOrEqual(result.rawValue, SafetyLevel.caution.rawValue)
         }, "Very long URL should not crash")
     }
 }
 
-// MARK: - MockSettingsStore
-
-/**
- * テスト用のSettingsStoreモック
- * 実際のUserDefaultsに依存しない独立したテスト環境を提供
- */
-class MockSettingsStore {
-    var safetyStrictness: SafetyStrictness = .standard
-    var isExternalReputationEnabled: Bool = false
-}
 
 // MARK: - Test Extensions
 
