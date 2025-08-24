@@ -3,7 +3,7 @@ import CoreData
 
 /**
  * Core Dataスタック管理クラス
- * iOS 10対応のため、NSPersistentContainer使用可能
+ * iOS 18.5+対応、NSPersistentContainerを使用
  * シングルトンパターンでアプリ全体からアクセス
  */
 class CoreDataStack {
@@ -18,7 +18,7 @@ class CoreDataStack {
     
     /**
      * NSPersistentContainer
-     * iOS 10から利用可能なCore Dataの新しいスタック管理方式
+     * iOS 18.5+で利用可能なCore Dataスタック管理方式
      */
     lazy var persistentContainer: NSPersistentContainer = {
         /*

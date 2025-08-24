@@ -89,7 +89,7 @@ class ScannerViewController: UIViewController {
     
     /**
      * UI要素の初期設定
-     * iOS 10対応のためAutoLayoutをコードで構築
+     * iOS 18.5+対応のためAutoLayoutをコードで構築
      */
     private func setupUI() {
         view.backgroundColor = .black
