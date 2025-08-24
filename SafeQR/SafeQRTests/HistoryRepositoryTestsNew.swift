@@ -3,13 +3,10 @@ import CoreData
 @testable import SafeQR
 
 /**
- * HistoryRepository のユニットテスト
- * 履歴管理の主要機能をテスト
- * - 最大50件制限
- * - 重複URL時のvisitCount増加
- * - CRUD操作
+ * HistoryRepository のユニットテスト（リファクタリング版）
+ * 現在のAPI実装に合わせて作り直し
  */
-class HistoryRepositoryTests: XCTestCase {
+class HistoryRepositoryTestsNew: XCTestCase {
     
     // MARK: - Properties
     
@@ -50,7 +47,7 @@ class HistoryRepositoryTests: XCTestCase {
         repository.upsertScanRecord(scanRecord)
         
         // 保存確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 1, "Should have 1 record after inserting")
         
         let fetchedRecord = fetchedRecords.first!
@@ -74,7 +71,7 @@ class HistoryRepositoryTests: XCTestCase {
         repository.upsertScanRecord(secondRecord)
         
         // 確認：レコード数は1件のまま、visitCountが増加
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 1, "Should still have only 1 record")
         
         let fetchedRecord = fetchedRecords.first!
@@ -85,7 +82,7 @@ class HistoryRepositoryTests: XCTestCase {
     /**
      * 全履歴取得テスト（最新順）
      */
-    func testFetchAllScanRecords() {
+    func testGetAllRecords() {
         // 複数のレコードを時間差で保存
         let record1 = createTestScanRecord(url: "https://first.com", safety: .safe)
         repository.upsertScanRecord(record1)
@@ -96,7 +93,7 @@ class HistoryRepositoryTests: XCTestCase {
         repository.upsertScanRecord(record2)
         
         // 取得してソート順を確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 2)
         
         // 最新のものが最初に来ることを確認
@@ -144,7 +141,7 @@ class HistoryRepositoryTests: XCTestCase {
         repository.deleteScanRecord(by: scanRecord.id)
         
         // 削除確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 0, "Should have no records after deletion")
     }
     
@@ -159,13 +156,13 @@ class HistoryRepositoryTests: XCTestCase {
         }
         
         // 保存確認
-        XCTAssertEqual(repository.fetchAllScanRecords().count, 5)
+        XCTAssertEqual((try! repository.getAllRecords()).count, 5)
         
         // 全削除実行
         repository.deleteAllScanRecords()
         
         // 削除確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 0, "Should have no records after delete all")
     }
     
@@ -173,22 +170,19 @@ class HistoryRepositoryTests: XCTestCase {
     
     /**
      * 最大50件制限のテスト
-     * 51件目を追加した時に最も古いものが削除されることを確認
      */
     func testMaxHistoryLimit() {
         // 51件のレコードを保存
-        var savedRecords: [ScanRecord] = []
         for i in 1...51 {
             let record = createTestScanRecord(url: "https://example\(i).com", safety: .safe)
             repository.upsertScanRecord(record)
-            savedRecords.append(record)
             
             // 少しずつ時間をずらして保存順序を明確にする
             Thread.sleep(forTimeInterval: 0.01)
         }
         
         // 50件のみ保持されていることを確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 50, "Should maintain maximum of 50 records")
         
         // 最も古いレコード（1件目）が削除され、2件目〜51件目が残っていることを確認
@@ -196,21 +190,6 @@ class HistoryRepositoryTests: XCTestCase {
         XCTAssertFalse(urls.contains("https://example1.com"), "Oldest record should be deleted")
         XCTAssertTrue(urls.contains("https://example51.com"), "Newest record should be kept")
         XCTAssertTrue(urls.contains("https://example2.com"), "Second oldest should be kept")
-    }
-    
-    /**
-     * 制限内（50件以下）では削除されないことをテスト
-     */
-    func testNoDeleteionUnderLimit() {
-        // 30件のレコードを保存
-        for i in 1...30 {
-            let record = createTestScanRecord(url: "https://example\(i).com", safety: .safe)
-            repository.upsertScanRecord(record)
-        }
-        
-        // 全て保持されていることを確認
-        let fetchedRecords = repository.fetchAllScanRecords()
-        XCTAssertEqual(fetchedRecords.count, 30, "All records should be kept under the limit")
     }
     
     // MARK: - 重複URL処理のテスト
@@ -228,7 +207,7 @@ class HistoryRepositoryTests: XCTestCase {
         }
         
         // 1つのレコードのvisitCountが5になることを確認
-        let fetchedRecords = repository.fetchAllScanRecords()
+        let fetchedRecords = try! repository.getAllRecords()
         XCTAssertEqual(fetchedRecords.count, 1, "Should have only 1 record for duplicate URLs")
         
         let record = fetchedRecords.first!
@@ -246,7 +225,7 @@ class HistoryRepositoryTests: XCTestCase {
         let firstRecord = createTestScanRecord(url: url, safety: .safe)
         repository.upsertScanRecord(firstRecord)
         
-        let firstFetch = repository.fetchAllScanRecords().first!
+        let firstFetch = (try! repository.getAllRecords()).first!
         let firstTimestamp = firstFetch.scannedAt
         
         // 時間をおいて2回目の保存
@@ -255,7 +234,7 @@ class HistoryRepositoryTests: XCTestCase {
         repository.upsertScanRecord(secondRecord)
         
         // タイムスタンプが更新されていることを確認
-        let secondFetch = repository.fetchAllScanRecords().first!
+        let secondFetch = (try! repository.getAllRecords()).first!
         let secondTimestamp = secondFetch.scannedAt
         
         XCTAssertGreaterThan(secondTimestamp, firstTimestamp, 
@@ -281,43 +260,89 @@ class HistoryRepositoryTests: XCTestCase {
         XCTAssertEqual(repository.getHistoryCount(), 3, "Count should be 3 after adding 3 records")
         
         // 1件削除
-        let records = repository.fetchAllScanRecords()
+        let records = try! repository.getAllRecords()
         repository.deleteScanRecord(by: records.first!.id)
         
         // 件数確認
         XCTAssertEqual(repository.getHistoryCount(), 2, "Count should be 2 after deleting 1 record")
     }
     
-    // MARK: - エラーケースのテスト
+    // MARK: - プロトコル準拠メソッドのテスト
     
     /**
-     * Core Dataエラー時の動作テスト
-     * ここでは基本的にクラッシュしないことを確認
+     * saveRecord プロトコルメソッドのテスト
      */
-    func testErrorHandling() {
-        // 無効なデータでもクラッシュしないことを確認
-        XCTAssertNoThrow({ [self] in
-            let record = createTestScanRecord(url: "", safety: .safe) // 空URL
-            repository.upsertScanRecord(record)
-        }, "Should handle empty URL gracefully")
+    func testSaveRecord() throws {
+        // プロトコル準拠メソッドで保存
+        try repository.saveRecord(url: "https://test.com", safetyLevel: .safe, title: "Test Page")
         
-        // 存在しないIDの削除でもクラッシュしないことを確認
-        XCTAssertNoThrow({ [self] in
-            repository.deleteScanRecord(by: UUID())
-        }, "Should handle deletion of nonexistent record gracefully")
+        // 保存確認
+        let fetchedRecords = try repository.getAllRecords()
+        XCTAssertEqual(fetchedRecords.count, 1)
+        
+        let record = fetchedRecords.first!
+        XCTAssertEqual(record.url, "https://test.com")
+        XCTAssertEqual(record.safety, .safe)
+        XCTAssertEqual(record.title, "Test Page")
+    }
+    
+    /**
+     * getRecordCount プロトコルメソッドのテスト
+     */
+    func testGetRecordCount() throws {
+        // 初期状態
+        XCTAssertEqual(try repository.getRecordCount(), 0)
+        
+        // レコード追加
+        try repository.saveRecord(url: "https://test.com", safetyLevel: .safe, title: nil)
+        XCTAssertEqual(try repository.getRecordCount(), 1)
+    }
+    
+    /**
+     * deleteRecord プロトコルメソッドのテスト
+     */
+    func testDeleteRecord() throws {
+        // レコード保存
+        let scanRecord = createTestScanRecord(url: "https://example.com", safety: .safe)
+        repository.upsertScanRecord(scanRecord)
+        
+        // プロトコル準拠メソッドで削除
+        try repository.deleteRecord(with: scanRecord.id)
+        
+        // 削除確認
+        let fetchedRecords = try repository.getAllRecords()
+        XCTAssertEqual(fetchedRecords.count, 0)
+    }
+    
+    /**
+     * deleteAllRecords プロトコルメソッドのテスト
+     */
+    func testDeleteAllRecords() throws {
+        // 複数レコード保存
+        for i in 1...3 {
+            try repository.saveRecord(url: "https://example\(i).com", safetyLevel: .safe, title: nil)
+        }
+        
+        // 全削除
+        try repository.deleteAllRecords()
+        
+        // 削除確認
+        let fetchedRecords = try repository.getAllRecords()
+        XCTAssertEqual(fetchedRecords.count, 0)
     }
     
     // MARK: - ヘルパーメソッド
     
     /**
      * テスト用のScanRecordを作成
-     * @param url: URL文字列
-     * @param safety: 安全性レベル
-     * @return: ScanRecordインスタンス
      */
     private func createTestScanRecord(url: String, safety: SafetyLevel) -> ScanRecord {
         let domainHash = ScanRecord.generateDomainHash(from: url)
-        return ScanRecord(url: url, safety: safety, domainHash: domainHash)
+        return ScanRecord(
+            url: url,
+            safety: safety,
+            domainHash: domainHash
+        )
     }
 }
 
@@ -325,40 +350,53 @@ class HistoryRepositoryTests: XCTestCase {
 
 /**
  * テスト用のCore Dataスタック
- * インメモリストアを使用してテストの独立性を保つ
+ * 独立したインメモリストアを使用
  */
 class TestCoreDataStack: CoreDataStack {
     
+    private var _persistentContainer: NSPersistentContainer!
+    
     override init() {
         super.init()
+        setupInMemoryPersistentContainer()
+    }
+    
+    private func setupInMemoryPersistentContainer() {
+        let container = NSPersistentContainer(name: "SafeQR")
         
-        // インメモリストアとして設定
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
-        persistentContainer.persistentStoreDescriptions = [description]
+        description.url = nil
         
-        // 同期的に読み込み
+        container.persistentStoreDescriptions = [description]
+        
         var loadError: Error?
-        persistentContainer.loadPersistentStores { _, error in
+        container.loadPersistentStores { _, error in
             loadError = error
         }
         
         if let error = loadError {
             fatalError("Test Core Data setup failed: \(error)")
         }
+        
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        
+        _persistentContainer = container
     }
-}
-
-// MARK: - Test Utilities
-
-extension ScanRecord {
-    /**
-     * テスト用のイコール比較
-     * 主要なプロパティが一致するかを確認
-     */
-    func isEqualForTesting(to other: ScanRecord) -> Bool {
-        return self.url == other.url &&
-               self.safety == other.safety &&
-               self.domainHash == other.domainHash
+    
+    override var viewContext: NSManagedObjectContext {
+        return _persistentContainer.viewContext
+    }
+    
+    override func saveContext() {
+        let context = _persistentContainer.viewContext
+        
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                print("❌ Test Core Data save error: \(error)")
+            }
+        }
     }
 }

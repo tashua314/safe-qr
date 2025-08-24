@@ -8,7 +8,7 @@ import CoreData
  * - 同一URLの場合はvisitCountをインクリメント
  * - Core DataのScanRecordEntityとドメインのScanRecordの変換を担当
  */
-class HistoryRepository {
+class HistoryRepository: HistoryRepositoryProtocol {
     
     // MARK: - 定数
     
@@ -58,7 +58,7 @@ class HistoryRepository {
      * 全ての履歴を取得（最新順）
      * @return: ScanRecordの配列（最新のスキャン日時順）
      */
-    func fetchAllScanRecords() -> [ScanRecord] {
+    func getAllRecords() throws -> [ScanRecord] {
         let context = coreDataStack.viewContext
         let request: NSFetchRequest<ScanRecordEntity> = ScanRecordEntity.fetchRequest()
         
@@ -112,11 +112,13 @@ class HistoryRepository {
      */
     func deleteAllScanRecords() {
         let context = coreDataStack.viewContext
-        let request: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "ScanRecordEntity")
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: request)
+        let request: NSFetchRequest<ScanRecordEntity> = ScanRecordEntity.fetchRequest()
         
         do {
-            try context.execute(deleteRequest)
+            let entities = try context.fetch(request)
+            for entity in entities {
+                context.delete(entity)
+            }
             coreDataStack.saveContext()
         } catch {
             print("全履歴削除エラー: \(error)")
@@ -307,5 +309,46 @@ class HistoryRepository {
             print("❌ タイトル更新エラー: \(error.localizedDescription)")
             throw error
         }
+    }
+    
+    // MARK: - Protocol Compliance Methods
+    
+    /**
+     * 履歴記録の保存（プロトコル準拠）
+     */
+    func saveRecord(url: String, safetyLevel: SafetyLevel, title: String?) throws {
+        let domainHash = ScanRecord.generateDomainHash(from: url)
+        let scanRecord = ScanRecord(
+            id: UUID(),
+            url: url,
+            title: title,
+            domainHash: domainHash,
+            safety: safetyLevel,
+            scannedAt: Date(),
+            visitCount: 1,
+            favicon: nil
+        )
+        upsertScanRecord(scanRecord)
+    }
+    
+    /**
+     * 履歴の削除（プロトコル準拠）
+     */
+    func deleteRecord(with id: UUID) throws {
+        deleteScanRecord(by: id)
+    }
+    
+    /**
+     * 全履歴の削除（プロトコル準拠）
+     */
+    func deleteAllRecords() throws {
+        deleteAllScanRecords()
+    }
+    
+    /**
+     * 履歴件数の取得（プロトコル準拠）
+     */
+    func getRecordCount() throws -> Int {
+        return getHistoryCount()
     }
 }

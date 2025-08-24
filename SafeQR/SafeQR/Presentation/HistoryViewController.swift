@@ -200,7 +200,7 @@ class HistoryViewController: UIViewController {
      * 履歴データの読み込み
      */
     private func loadHistoryData() {
-        scanRecords = historyRepository.fetchAllScanRecords()
+        scanRecords = (try? historyRepository.getAllRecords()) ?? []
         
         DispatchQueue.main.async { [weak self] in
             self?.updateUI()

@@ -161,32 +161,7 @@ extension EnhancedUrlRiskEvaluator: URLEvaluationServiceProtocol {
     // 既存のメソッドがプロトコルに適合しているので追加実装不要
 }
 
-extension HistoryRepository: HistoryRepositoryProtocol {
-    func saveRecord(url: String, safetyLevel: SafetyLevel, title: String?) throws {
-        // ScanRecordを作成してupsert（domainHashは簡易計算）
-        let domainHash = url.components(separatedBy: "/")[2].hash
-        let record = ScanRecord(url: url, safety: safetyLevel, domainHash: String(domainHash))
-        upsertScanRecord(record)
-    }
-    
-    func getAllRecords() throws -> [ScanRecord] {
-        return fetchAllScanRecords()
-    }
-    
-    func deleteRecord(with id: UUID) throws {
-        deleteScanRecord(by: id)
-    }
-    
-    func deleteAllRecords() throws {
-        deleteAllScanRecords()
-    }
-    
-    // updateTitleはベースクラスで実装されているので、extensionでは重複宣言不要
-    
-    func getRecordCount() throws -> Int {
-        return fetchAllScanRecords().count
-    }
-}
+// HistoryRepositoryProtocol適合はHistoryRepositoryクラス内で実装
 
 // HtmlTitleFetcherは既にプロトコルに適合しているため、extensionは不要
 
