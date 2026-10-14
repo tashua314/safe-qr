@@ -12,10 +12,18 @@ class EnhancedUrlRiskEvaluator {
     private let localEvaluator = UrlRiskEvaluator()
 
     /// Safe Browsing API クライアント
-    private let safeBrowsingClient = SafeBrowsingAPIClient()
+    private let safeBrowsingClient: SafeBrowsingAPIClientProtocol
 
     /// 設定ストア
-    private let settingsStore = SettingsStore.shared
+    private let externalEnabled: () -> Bool
+
+    init(
+        safeBrowsingClient: SafeBrowsingAPIClientProtocol = SafeBrowsingAPIClient(),
+        externalEnabled: @escaping () -> Bool = { SettingsStore.shared.isExternalReputationEnabled }
+    ) {
+        self.safeBrowsingClient = safeBrowsingClient
+        self.externalEnabled = externalEnabled
+    }
 
     // MARK: - 型定義
 
@@ -65,7 +73,7 @@ class EnhancedUrlRiskEvaluator {
         }
 
         // 3. API評価を非同期で実行（バックグラウンド）
-        if settingsStore.isExternalReputationEnabled {
+        if externalEnabled() {
             safeBrowsingClient.checkURL(url) { [weak self] apiResultWrapper in
                 self?.handleAPIResult(apiResultWrapper, localResult: localResult, startTime: startTime, completion: completion)
             }
@@ -102,7 +110,7 @@ class EnhancedUrlRiskEvaluator {
         }
 
         // API評価実行
-        if settingsStore.isExternalReputationEnabled {
+        if externalEnabled() {
             safeBrowsingClient.checkURL(url) { [weak self] apiResultWrapper in
                 self?.handleAPIResult(apiResultWrapper, localResult: localResult, startTime: startTime, completion: completion)
             }
@@ -160,9 +168,10 @@ class EnhancedUrlRiskEvaluator {
         switch apiResultWrapper {
         case let .success(apiResult):
             // 最終的な安全性レベルを決定（より厳格な方を採用）
-            let finalSafetyLevel = selectStricterSafetyLevel(local: localResult, api: apiResult.safetyLevel)
+            let finalSafetyLevel = apiResult.safetyLevel.map { selectStricterSafetyLevel(local: localResult, api: $0) } ?? localResult
 
-            let evaluationMethod: EvaluationResult.EvaluationMethod = apiResult.cacheHit ? .hybridCached : .hybridImmediate
+            let evaluationMethod: EvaluationResult.EvaluationMethod = apiResult.verificationStatus == .unrecognizedThreats
+                ? .localFallback : (apiResult.cacheHit ? .hybridCached : .hybridImmediate)
 
             let result = EvaluationResult(
                 finalSafetyLevel: finalSafetyLevel,

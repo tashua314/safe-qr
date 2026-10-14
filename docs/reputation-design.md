@@ -14,3 +14,9 @@ URLProtocolテストでraw URLやmarkerがrequestにないこと、4byte prefix�
 - https://developers.google.com/safe-browsing/reference/URLs.and.Hashing
 - https://developers.google.com/safe-browsing/reference/rest/v5/hashes/search
 - https://publicsuffix.org/list/
+
+## Issue #6:照会状態
+
+単独・一括ともURLごとのResultを保持する。OFFはdisabled、キー未設定・HTTP/ネットワーク・不正応答はfailure。noMatchは有効な200応答に限る。未知type/attributeのdetailは適用せずunrecognizedThreatsとし、既知の脅威は保持する。未知情報しかない場合safetyLevelはnilで、無害性の確認ではない。Enhanced評価はlocalFallbackとして区別する。
+
+protobuf JSONで空fullHashesが省略された形は有効、null/誤った型/脅威詳細欠落はfailureとする。不正応答やfailureはcacheへ保存しない。未知の値を含む有効な応答はその情報のままTTL付きcacheへ保持し、cache hitでも未知状態を失わない。

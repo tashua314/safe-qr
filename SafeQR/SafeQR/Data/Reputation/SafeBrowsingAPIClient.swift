@@ -46,14 +46,25 @@ class SafeBrowsingAPIClient {
         }
     }
 
+    typealias CheckResult = Result<SafeBrowsingResult, SafeBrowsingError>
+
     struct SafeBrowsingResult {
-        let isURLSafe: Bool
+        enum VerificationStatus { case noMatch, threats, unrecognizedThreats }
+        let verificationStatus: VerificationStatus
         let detectedThreats: [ThreatType]
-        let safetyLevel: SafetyLevel
         let responseTime: Double
         let cacheHit: Bool
 
-        static let safe = SafeBrowsingResult(isURLSafe: true, detectedThreats: [], safetyLevel: .safe, responseTime: 0, cacheHit: false)
+        var isURLSafe: Bool {
+            verificationStatus == .noMatch
+        }
+
+        var safetyLevel: SafetyLevel? {
+            if verificationStatus == .unrecognizedThreats, detectedThreats.isEmpty { return nil }
+            return detectedThreats.map(\.safetyLevel).max { $0.rawValue < $1.rawValue } ?? .safe
+        }
+
+        static let safe = SafeBrowsingResult(verificationStatus: .noMatch, detectedThreats: [], responseTime: 0, cacheHit: false)
     }
 
     enum SafeBrowsingError: Error {
@@ -65,6 +76,7 @@ class SafeBrowsingAPIClient {
         case timeout
         case suffixListUnavailable
         case cacheExpired
+        case disabled
 
         var localizedDescription: String {
             switch self {
@@ -76,12 +88,13 @@ class SafeBrowsingAPIClient {
             case .timeout: return "タイムアウトしました"
             case .suffixListUnavailable: return "URL判定用リソースが読み込めません"
             case .cacheExpired: return "外部判定の有効期限が切れました"
+            case .disabled: return "外部チェックは無効です"
             }
         }
     }
 
     func checkURL(_ url: String, completion: @escaping (Result<SafeBrowsingResult, SafeBrowsingError>) -> Void) {
-        guard configuration.externalEnabled() else { completion(.success(.safe))
+        guard configuration.externalEnabled() else { completion(.failure(.disabled))
             return
         }
         guard let key = configuration.apiKey() else { completion(.failure(.apiKeyMissing))
@@ -119,18 +132,15 @@ class SafeBrowsingAPIClient {
         }.resume()
     }
 
-    func checkURLs(_ urls: [String], completion: @escaping ([String: SafeBrowsingResult]) -> Void) {
+    func checkURLs(_ urls: [String], completion: @escaping ([String: CheckResult]) -> Void) {
         let group = DispatchGroup()
         let lock = NSLock()
-        var results = [String: SafeBrowsingResult]()
+        var results = [String: CheckResult]()
         for url in urls {
             group.enter()
             checkURL(url) { result in
                 lock.lock()
-                switch result {
-                case let .success(value): results[url] = value
-                case .failure: results[url] = .safe
-                }
+                results[url] = result
                 lock.unlock()
                 group.leave()
             }
@@ -152,8 +162,18 @@ class SafeBrowsingAPIClient {
     }
 
     private struct HashResponse: Decodable {
-        let fullHashes: [SafeBrowsingHashCache.FullHash]?
+        let fullHashes: [SafeBrowsingHashCache.FullHash]
         let cacheDuration: String
+
+        private enum CodingKeys: String, CodingKey { case fullHashes, cacheDuration }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            // protobuf JSONは空repeated fieldを省略できるが、null/誤った型は成功にしない。
+            fullHashes = container.contains(.fullHashes) ? try container
+                .decode([SafeBrowsingHashCache.FullHash].self, forKey: .fullHashes) : []
+            cacheDuration = try container.decode(String.self, forKey: .cacheDuration)
+        }
     }
 
     private func handleResponse(
@@ -169,8 +189,11 @@ class SafeBrowsingAPIClient {
         guard let data = data, let parsed = try? JSONDecoder().decode(HashResponse.self, from: data),
               parsed.cacheDuration.range(of: "^[0-9]+(?:\\.[0-9]{1,9})?s$", options: .regularExpression) != nil,
               let duration = Double(parsed.cacheDuration.dropLast()), duration.isFinite else { return .failure(.parsingError) }
-        let hashes = parsed.fullHashes ?? []
-        guard hashes.allSatisfy({ $0.fullHash.count == 32 && prefixes.contains(Data($0.fullHash.prefix(4))) }) else {
+        let hashes = parsed.fullHashes
+        guard hashes.allSatisfy({ hash in
+            hash.fullHash.count == 32 && prefixes.contains(Data(hash.fullHash.prefix(4)))
+                && !hash.fullHashDetails.isEmpty && hash.fullHashDetails.allSatisfy { !$0.threatType.isEmpty }
+        }) else {
             return .failure(.parsingError)
         }
         cache.store(hashes, prefixes: prefixes, duration: duration, now: configuration.now())
@@ -184,18 +207,21 @@ class SafeBrowsingAPIClient {
         cacheHit: Bool
     ) -> SafeBrowsingResult {
         var threats = Set<ThreatType>()
+        var hasUnknown = false
         for hash in hashes where candidates.contains(hash.fullHash) {
-            for detail in hash.fullHashDetails ?? [] {
-                let attributes = detail.attributes ?? []
-                // v5:未知の値を含むdetail、CANARY、FRAME_ONLYはトップレベルで適用しない。
-                guard let threat = ThreatType(rawValue: detail.threatType), attributes.isEmpty else { continue }
-                threats.insert(threat)
+            for detail in hash.fullHashDetails {
+                let knownAttributes: Set = ["CANARY", "FRAME_ONLY"]
+                guard let threat = ThreatType(rawValue: detail.threatType),
+                      detail.attributes.allSatisfy({ knownAttributes.contains($0) }) else {
+                    hasUnknown = true // 未対応detail全体を適用しない。安全としても扱わない。
+                    continue
+                }
+                if detail.attributes.isEmpty { threats.insert(threat) }
             }
         }
-        let sorted = threats.sorted { $0.rawValue < $1.rawValue }
-        let level = sorted.map(\.safetyLevel).max { $0.rawValue < $1.rawValue } ?? .safe
+        let status: SafeBrowsingResult.VerificationStatus = hasUnknown ? .unrecognizedThreats : (threats.isEmpty ? .noMatch : .threats)
         return SafeBrowsingResult(
-            isURLSafe: sorted.isEmpty, detectedThreats: sorted, safetyLevel: level,
+            verificationStatus: status, detectedThreats: threats.sorted { $0.rawValue < $1.rawValue },
             responseTime: configuration.now().timeIntervalSince(start) * 1000, cacheHit: cacheHit
         )
     }

@@ -103,7 +103,7 @@ protocol SafeBrowsingAPIClientProtocol {
     )
 
     /// 複数URL一括チェック
-    func checkURLs(_ urls: [String], completion: @escaping ([String: SafeBrowsingAPIClient.SafeBrowsingResult]) -> Void)
+    func checkURLs(_ urls: [String], completion: @escaping ([String: SafeBrowsingAPIClient.CheckResult]) -> Void)
 }
 
 // MARK: - UI Manager Protocol
