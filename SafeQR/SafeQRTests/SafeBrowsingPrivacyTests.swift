@@ -66,6 +66,34 @@ final class SafeBrowsingPrivacyTests: XCTestCase {
         XCTAssertEqual(Set(sent), expected)
     }
 
+    func testBase64PlusSurvivesFormQueryDecoding() throws {
+        respond(["cacheDuration": "60s"])
+        let url = "https://example.com/11"
+        _ = try check(makeClient(), url: url)
+        let requestURL = try XCTUnwrap(requests.first?.url)
+        let query = try XCTUnwrap(URLComponents(url: requestURL, resolvingAgainstBaseURL: false)?.percentEncodedQuery)
+        XCTAssertFalse(query.contains("+"))
+        let sent = try query.split(separator: "&").filter { $0.hasPrefix("hashPrefixes=") }.map { item in
+            let encoded = String(item.dropFirst("hashPrefixes=".count)).replacingOccurrences(of: "+", with: " ")
+            let decoded = try XCTUnwrap(encoded.removingPercentEncoding)
+            return try XCTUnwrap(Data(base64Encoded: decoded))
+        }
+        let expected = try Set(SafeBrowsingURLHasher(suffixList: list).fullHashes(for: url).map { Data($0.prefix(4)) })
+        XCTAssertEqual(Set(sent), expected)
+        XCTAssertTrue(query.contains("%2B"), "plusを含む既知の候補で検証する")
+    }
+
+    func testPotentiallyHarmfulApplicationRemainsDangerInV5() throws {
+        let hash = try XCTUnwrap(SafeBrowsingURLHasher(suffixList: list).fullHashes(for: input).first)
+        respond(["cacheDuration": "60s", "fullHashes": [["fullHash": hash.base64EncodedString(), "fullHashDetails": [
+            ["threatType": "POTENTIALLY_HARMFUL_APPLICATION"]
+        ]]]])
+        let result = try check(makeClient(), url: input)
+        XCTAssertFalse(result.isURLSafe)
+        XCTAssertEqual(result.safetyLevel, .danger)
+        XCTAssertEqual(result.detectedThreats, [.potentiallyHarmfulApplication])
+    }
+
     func testExternalOffMakesNoRequest() throws {
         respond(["cacheDuration": "60s"])
         _ = try check(makeClient(enabled: false), url: input)

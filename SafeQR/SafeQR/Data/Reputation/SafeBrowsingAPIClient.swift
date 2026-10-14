@@ -39,6 +39,7 @@ class SafeBrowsingAPIClient {
         case malware = "MALWARE"
         case socialEngineering = "SOCIAL_ENGINEERING"
         case unwantedSoftware = "UNWANTED_SOFTWARE"
+        case potentiallyHarmfulApplication = "POTENTIALLY_HARMFUL_APPLICATION"
 
         var safetyLevel: SafetyLevel {
             self == .unwantedSoftware ? .caution : .danger
@@ -142,6 +143,8 @@ class SafeBrowsingAPIClient {
         components.queryItems = [URLQueryItem(name: "key", value: key)] + prefixes.sorted { $0.lexicographicallyPrecedes($1) }.map {
             URLQueryItem(name: "hashPrefixes", value: $0.base64EncodedString())
         }
+        // URLComponentsは「+」をそのまま残すが、gRPC queryはフォームとして復号する。
+        components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
         guard let url = components.url else { return nil }
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.httpMethod = "GET"
