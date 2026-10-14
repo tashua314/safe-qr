@@ -232,7 +232,7 @@ class HistoryRepositoryTestsNew: XCTestCase {
         let firstRecord = createTestScanRecord(url: url, safety: .safe)
         repository.upsertScanRecord(firstRecord)
 
-        let firstFetch = try try XCTUnwrap((repository.getAllRecords()).first)
+        let firstFetch = try XCTUnwrap(repository.getAllRecords().first)
         let firstTimestamp = firstFetch.scannedAt
 
         // 時間をおいて2回目の保存
@@ -241,7 +241,7 @@ class HistoryRepositoryTestsNew: XCTestCase {
         repository.upsertScanRecord(secondRecord)
 
         // タイムスタンプが更新されていることを確認
-        let secondFetch = try try XCTUnwrap((repository.getAllRecords()).first)
+        let secondFetch = try XCTUnwrap(repository.getAllRecords().first)
         let secondTimestamp = secondFetch.scannedAt
 
         XCTAssertGreaterThan(

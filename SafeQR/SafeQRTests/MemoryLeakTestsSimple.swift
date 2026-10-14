@@ -94,11 +94,11 @@ class MemoryLeakTestsSimple: XCTestCase {
         for index in 0 ..< 20 {
             autoreleasepool {
                 // QRScannerService
-                let qrService = DIContainer.shared.resolve(QRScannerServiceProtocol.self)
+                _ = DIContainer.shared.resolve(QRScannerServiceProtocol.self)
                 // サービスのインスタンス化のみテスト
 
                 // UrlRiskEvaluator
-                let riskEvaluator = DIContainer.shared.resolve(URLEvaluationServiceProtocol.self)
+                _ = DIContainer.shared.resolve(URLEvaluationServiceProtocol.self)
                 // 基本的なアクセスのみ（実際の評価は行わない）
 
                 if index % 10 == 9 {
@@ -130,7 +130,7 @@ class MemoryLeakTestsSimple: XCTestCase {
                         // 複数サービスの同時使用
                         let viewModel = DIContainer.shared.resolve(ScannerViewModel.self)
                         let historyRepo = DIContainer.shared.resolve(HistoryRepositoryProtocol.self)
-                        let qrService = DIContainer.shared.resolve(QRScannerServiceProtocol.self)
+                        _ = DIContainer.shared.resolve(QRScannerServiceProtocol.self)
 
                         // 基本操作
                         _ = viewModel.scanStatus
