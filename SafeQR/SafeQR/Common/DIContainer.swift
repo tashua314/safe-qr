@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 import QuartzCore
 import UIKit
 
@@ -10,107 +10,110 @@ import UIKit
  * - プロトコルベースの抽象化
  */
 class DIContainer: DIContainerProtocol {
-    
     // MARK: - Shared Instance
-    
+
     static let shared = DIContainer()
-    
+
     private init() {
         registerDefaultServices()
     }
-    
+
     // MARK: - Private Properties
-    
+
     private var services: [String: Any] = [:]
     private var factories: [String: () -> Any] = [:]
-    
+
     // MARK: - Public Methods
-    
+
     func register<T>(_ type: T.Type, factory: @escaping () -> T) {
         let key = String(describing: type)
         factories[key] = factory
     }
-    
+
     func registerSingleton<T>(_ type: T.Type, instance: T) {
         let key = String(describing: type)
         services[key] = instance
     }
-    
+
     func resolve<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
-        
+
         // シングルトンインスタンスがある場合
         if let instance = services[key] as? T {
             return instance
         }
-        
+
         // ファクトリがある場合
         if let factory = factories[key] {
-            let instance = factory() as! T
+            guard let instance = factory() as? T else {
+                preconditionFailure("登録されたサービスの型が一致しません: \(type)")
+            }
             return instance
         }
-        
+
         // 登録されていない場合はクラッシュ（開発時にミスを発見しやすくする）
         fatalError("Service of type \(type) is not registered")
     }
-    
+
     func resolveSingleton<T>(_ type: T.Type) -> T {
         let key = String(describing: type)
-        
+
         // 既にシングルトンが存在する場合
         if let instance = services[key] as? T {
             return instance
         }
-        
+
         // ファクトリからシングルトンを作成
         if let factory = factories[key] {
-            let instance = factory() as! T
+            guard let instance = factory() as? T else {
+                preconditionFailure("登録されたサービスの型が一致しません: \(type)")
+            }
             services[key] = instance
             return instance
         }
-        
+
         fatalError("Service of type \(type) is not registered")
     }
-    
+
     // MARK: - Default Services Registration
-    
+
     private func registerDefaultServices() {
         // Core Services (Concrete implementations)
-        register(QRScannerServiceProtocol.self) { 
-            QRScannerService() 
+        register(QRScannerServiceProtocol.self) {
+            QRScannerService()
         }
-        
-        register(URLEvaluationServiceProtocol.self) { 
-            EnhancedUrlRiskEvaluator() 
+
+        register(URLEvaluationServiceProtocol.self) {
+            EnhancedUrlRiskEvaluator()
         }
-        
-        register(HistoryRepositoryProtocol.self) { 
-            HistoryRepository() 
+
+        register(HistoryRepositoryProtocol.self) {
+            HistoryRepository()
         }
-        
-        register(HtmlTitleFetcherProtocol.self) { 
-            HtmlTitleFetcher() 
+
+        register(HtmlTitleFetcherProtocol.self) {
+            HtmlTitleFetcher()
         }
-        
-        register(SafeBrowsingAPIClientProtocol.self) { 
-            SafeBrowsingAPIClient() 
+
+        register(SafeBrowsingAPIClientProtocol.self) {
+            SafeBrowsingAPIClient()
         }
-        
-        register(SettingsStoreProtocol.self) { 
-            SettingsStore.shared 
+
+        register(SettingsStoreProtocol.self) {
+            SettingsStore.shared
         }
-        
+
         // Processing Services
         register(QRCodeProcessorProtocol.self) { [unowned self] in
             let qrService = self.resolve(QRScannerServiceProtocol.self)
             return QRCodeProcessor(qrScannerService: qrService) as QRCodeProcessorProtocol
         }
-        
+
         // UI Services
-        register(ScannerUIManagerProtocol.self) { 
-            ScannerUIManager() 
+        register(ScannerUIManagerProtocol.self) {
+            ScannerUIManager()
         }
-        
+
         // ViewModels
         register(ScannerViewModel.self) { [unowned self] in
             ScannerViewModel(
@@ -120,30 +123,30 @@ class DIContainer: DIContainerProtocol {
                 titleFetcher: self.resolve(HtmlTitleFetcherProtocol.self)
             )
         }
-        
+
         #if DEBUG
-        // registerMockServices() // コメントアウト - 必要時のみ有効化
+            // registerMockServices() // コメントアウト - 必要時のみ有効化
         #endif
     }
-    
+
     // MARK: - Mock Services (Debug only)
-    
+
     #if DEBUG
-    func useMockServices() {
-        // テスト時にモックサービスに切り替え
-        register(QRCodeProcessorProtocol.self) { 
-            MockQRCodeProcessor() 
+        func useMockServices() {
+            // テスト時にモックサービスに切り替え
+            register(QRCodeProcessorProtocol.self) {
+                MockQRCodeProcessor()
+            }
         }
-    }
     #endif
-    
+
     // MARK: - Utility Methods
-    
+
     func isRegistered<T>(_ type: T.Type) -> Bool {
         let key = String(describing: type)
         return services.keys.contains(key) || factories.keys.contains(key)
     }
-    
+
     func clear() {
         services.removeAll()
         factories.removeAll()

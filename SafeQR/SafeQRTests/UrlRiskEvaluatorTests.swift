@@ -20,7 +20,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
     func testSafeURLs() {
         for url in [
             "https://www.google.com", "https://apple.com", "https://github.com/user/repo",
-            "https://stackoverflow.com/questions/123", "https://www.wikipedia.org",
+            "https://stackoverflow.com/questions/123", "https://www.wikipedia.org"
         ] {
             XCTAssertEqual(evaluator.evaluate(url: url), .safe, url)
         }
@@ -50,7 +50,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
     func testIPAddressURLs() {
         for url in [
             "https://192.168.1.1/malware", "http://10.0.0.1/phishing",
-            "https://172.16.0.100:8080/suspicious", "https://[2001:db8::1]/",
+            "https://172.16.0.100:8080/suspicious", "https://[2001:db8::1]/"
         ] {
             let result = evaluator.evaluateWithDetails(url: url)
             XCTAssertEqual(result.totalScore, 2, url)
@@ -61,7 +61,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
     func testBrandSpoofingURLs() {
         for url in [
             "https://google-security.malicious.com/signin", "https://apple-support.phishing.net/account",
-            "https://paypal-verify.suspicious.org/login", "https://amazon-update.fake.com/payment",
+            "https://paypal-verify.suspicious.org/login", "https://amazon-update.fake.com/payment"
         ] {
             let result = evaluator.evaluateWithDetails(url: url)
             XCTAssertEqual(result.totalScore, 3, url)
@@ -90,7 +90,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
             settingsStore.safetyStrictness = strictness
             for url in [
                 "invalid-url", "", "/relative/path", "//example.com/path", "https://", "https:///path",
-                "ftp://not-http-url.com", "javascript:alert('xss')", "file:///tmp/test",
+                "ftp://not-http-url.com", "javascript:alert('xss')", "file:///tmp/test"
             ] {
                 XCTAssertEqual(evaluator.evaluate(url: url), .danger, "\(strictness): \(url)")
             }
@@ -117,7 +117,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
     func testLegitimateDomainsNotFlaggedAsSpoofing() {
         for url in [
             "https://accounts.google.com/signin", "https://appleid.apple.com/account",
-            "https://www.paypal.com/signin",
+            "https://www.paypal.com/signin"
         ] {
             XCTAssertFalse(evaluator.evaluateWithDetails(url: url).detectedIssues.contains { $0.category == .brandSpoofing }, url)
         }
@@ -126,7 +126,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
     func testSpecialCharactersInURL() {
         for url in [
             "https://example.com/path with spaces", "https://example.com/パス",
-            "https://example.com/search?q=特殊文字",
+            "https://example.com/search?q=特殊文字"
         ] {
             XCTAssertEqual(evaluator.evaluateWithDetails(url: url).finalSafetyLevel, .safe, url)
         }
@@ -143,7 +143,7 @@ final class UrlRiskEvaluatorTests: XCTestCase {
         let fixtures: [(String, Int)] = [
             ("https://example.com", 0), ("https://example.zip", 1),
             ("https://192.168.1.1", 2), ("https://google-security.example.com", 3),
-            ("https://192.168.1.1/" + String(repeating: "a", count: 201), 4),
+            ("https://192.168.1.1/" + String(repeating: "a", count: 201), 4)
         ]
         for strictness in SafetyStrictness.allCases {
             settingsStore.safetyStrictness = strictness

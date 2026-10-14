@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SAFEQR_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$SAFEQR_ROOT"
+
+for tool in swiftlint swiftformat xcodebuild python3; do
+    command -v "$tool" >/dev/null || { echo "$tool が必要です。" >&2; exit 1; }
+done
+
+xcodebuild -version
+swiftlint version
+swiftformat --version
+swiftlint lint --strict --no-cache
+swiftformat SafeQR/SafeQR SafeQR/SafeQRTests SafeQR/SafeQRUITests --lint --cache ignore
+plutil -lint SafeQR/SafeQR.xcodeproj/project.pbxproj SafeQR/SafeQR/Info.plist
+
+SAFEQR_SIMULATOR_ID="${SAFEQR_SIMULATOR_ID:-$(python3 scripts/simulator_destination.py)}"
+SAFEQR_ARTIFACTS="${SAFEQR_ARTIFACTS:-$SAFEQR_ROOT/.artifacts}"
+mkdir -p "$SAFEQR_ARTIFACTS"
+SAFEQR_DERIVED_DATA="$SAFEQR_ARTIFACTS/DerivedData"
+COMMON=(-project SafeQR/SafeQR.xcodeproj -scheme SafeQR -derivedDataPath "$SAFEQR_DERIVED_DATA" CODE_SIGNING_ALLOWED=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES)
+
+run_build() {
+    local configuration="$1"
+    local logfile="$SAFEQR_ARTIFACTS/$configuration-build.log"
+    if ! xcodebuild "${COMMON[@]}" -configuration "$configuration" -destination 'generic/platform=iOS Simulator' build > "$logfile" 2>&1; then
+        cat "$logfile"
+        return 1
+    fi
+    echo "$configuration build: 成功"
+}
+run_build Debug
+run_build Release
+
+SAFEQR_RESULT="$SAFEQR_ARTIFACTS/Tests-$(date +%s)-$$.xcresult"
+if ! xcodebuild "${COMMON[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$SAFEQR_SIMULATOR_ID" -parallel-testing-enabled NO -resultBundlePath "$SAFEQR_RESULT" test > "$SAFEQR_ARTIFACTS/tests.log" 2>&1; then
+    cat "$SAFEQR_ARTIFACTS/tests.log"
+    exit 1
+fi
+echo "lint・整形・Debug/Releaseビルド・iOSテスト: 成功"

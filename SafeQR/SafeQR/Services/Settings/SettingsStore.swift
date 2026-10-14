@@ -1,10 +1,10 @@
 import Foundation
 
 enum SafetyStrictness: String, CaseIterable {
-    case low = "low"
-    case standard = "standard"
-    case high = "high"
-    
+    case low
+    case standard
+    case high
+
     var displayName: String {
         switch self {
         case .low:
@@ -15,7 +15,7 @@ enum SafetyStrictness: String, CaseIterable {
             return "強"
         }
     }
-    
+
     var description: String {
         switch self {
         case .low:
@@ -26,7 +26,7 @@ enum SafetyStrictness: String, CaseIterable {
             return "より厳格にチェック"
         }
     }
-    
+
     var scoreModifier: Int {
         switch self {
         case .low:
@@ -42,14 +42,14 @@ enum SafetyStrictness: String, CaseIterable {
 class SettingsStore {
     static let shared = SettingsStore()
     private let userDefaults = UserDefaults.standard
-    
+
     private enum Keys {
         static let safetyStrictness = "safetyStrictness"
         static let externalReputationEnabled = "externalReputationEnabled"
     }
-    
+
     private init() {}
-    
+
     var safetyStrictness: SafetyStrictness {
         get {
             let rawValue = userDefaults.string(forKey: Keys.safetyStrictness) ?? SafetyStrictness.standard.rawValue
@@ -59,7 +59,7 @@ class SettingsStore {
             userDefaults.set(newValue.rawValue, forKey: Keys.safetyStrictness)
         }
     }
-    
+
     var isExternalReputationEnabled: Bool {
         get {
             return userDefaults.bool(forKey: Keys.externalReputationEnabled)

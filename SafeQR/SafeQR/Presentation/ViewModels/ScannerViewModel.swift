@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 /**
  * ScannerViewControllerのビジネスロジック専用ViewModel
@@ -8,41 +8,40 @@ import Combine
  * - 状態管理（MVVM）
  */
 class ScannerViewModel: ObservableObject {
-    
     // MARK: - Published Properties (UI Binding)
-    
+
     /// スキャン状態
     @Published var scanStatus: ScanStatus = .ready
-    
+
     /// 検出されたQRコード
     @Published var detectedQRCode: String?
-    
+
     /// URL評価結果
     @Published var evaluationResult: URLEvaluationResult?
-    
+
     /// エラー情報
     @Published var errorMessage: String?
-    
+
     /// ライト（フラッシュ）の状態
     @Published var isLightEnabled: Bool = false
-    
+
     // MARK: - Dependencies (Protocol-based for DI)
-    
+
     private let qrProcessor: QRCodeProcessorProtocol
     private let urlEvaluator: URLEvaluationServiceProtocol
     private let historyRepository: HistoryRepositoryProtocol
     private let titleFetcher: HtmlTitleFetcherProtocol
-    
+
     // MARK: - Private Properties
-    
+
     private var cancellables = Set<AnyCancellable>()
     private var processedURLs: Set<String> = []
-    
+
     // MARK: - Initialization
-    
+
     init(
         qrProcessor: QRCodeProcessorProtocol,
-        urlEvaluator: URLEvaluationServiceProtocol, 
+        urlEvaluator: URLEvaluationServiceProtocol,
         historyRepository: HistoryRepositoryProtocol,
         titleFetcher: HtmlTitleFetcherProtocol
     ) {
@@ -50,31 +49,31 @@ class ScannerViewModel: ObservableObject {
         self.urlEvaluator = urlEvaluator
         self.historyRepository = historyRepository
         self.titleFetcher = titleFetcher
-        
+
         setupBindings()
     }
-    
+
     // MARK: - Public Methods
-    
+
     /**
      * QRコード検出処理のエントリーポイント
      * @param qrCode: 検出されたQRコード文字列
      */
     func processDetectedQRCode(_ qrCode: String) {
         // 重複検出防止
-        guard !processedURLs.contains(qrCode) else { 
+        guard !processedURLs.contains(qrCode) else {
             print("🔄 重複QRコード検出をスキップ: \(qrCode)")
-            return 
+            return
         }
-        
+
         // 状態更新
         scanStatus = .processing
         detectedQRCode = qrCode
-        
+
         // QRコード処理を開始
         processQRCode(qrCode)
     }
-    
+
     /**
      * ライトの切り替え
      */
@@ -82,7 +81,7 @@ class ScannerViewModel: ObservableObject {
         isLightEnabled.toggle()
         qrProcessor.setLightEnabled(isLightEnabled)
     }
-    
+
     /**
      * スキャンのリセット（新しいスキャンを開始）
      */
@@ -93,25 +92,25 @@ class ScannerViewModel: ObservableObject {
         errorMessage = nil
         processedURLs.removeAll()
     }
-    
+
     /**
      * URLを安全に開く処理
      */
-    func proceedWithURL(_ url: String, safetyLevel: SafetyLevel) {
+    func proceedWithURL(_ url: String, safetyLevel _: SafetyLevel) {
         // 履歴への保存は評価時に既に実行済み
-        
+
         // URLを開く通知
         NotificationCenter.default.post(
             name: .openURLRequested,
             object: url
         )
-        
+
         // スキャンをリセット
         resetScan()
     }
-    
+
     // MARK: - Private Methods
-    
+
     private func setupBindings() {
         // QRProcessor からの結果を監視
         qrProcessor.processingResult
@@ -121,20 +120,20 @@ class ScannerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
+
     /**
      * QRコード処理の実行
      */
     private func processQRCode(_ qrCode: String) {
         processedURLs.insert(qrCode)
-        
+
         // QRコードの基本検証
         let validationResult = qrProcessor.validateQRCode(qrCode)
-        
+
         switch validationResult {
-        case .valid(let url):
+        case let .valid(url):
             evaluateURL(url)
-        case .invalid(let error):
+        case let .invalid(error):
             handleProcessingError(error)
         case .duplicate:
             // 重複URLの処理：無視してスキャンを続行
@@ -142,7 +141,7 @@ class ScannerViewModel: ObservableObject {
             scanStatus = .ready
         }
     }
-    
+
     /**
      * URL安全性評価の実行
      */
@@ -153,7 +152,7 @@ class ScannerViewModel: ObservableObject {
                 self?.handleFinalEvaluationResult(url: url, result: finalResult)
             }
         }
-        
+
         // 即座結果で初期評価結果を設定
         let initialResult = URLEvaluationResult(
             url: url,
@@ -162,15 +161,15 @@ class ScannerViewModel: ObservableObject {
             responseTime: 0,
             detectedIssues: []
         )
-        
+
         evaluationResult = initialResult
         scanStatus = .evaluated
-        
+
         print("📋 評価完了: \(url) → \(immediateSafety.displayName)")
-        
+
         // 評価完了時点で履歴に保存（ユーザーのアクション関係なく）
         saveToHistory(url: url, safetyLevel: immediateSafety)
-        
+
         // 安全でない場合は確認画面を表示（即座評価の詳細情報も取得）
         if immediateSafety != .safe {
             let localEvaluator = UrlRiskEvaluator()
@@ -185,19 +184,19 @@ class ScannerViewModel: ObservableObject {
             showWarningDialog(for: url, safetyLevel: immediateSafety, issues: issues)
         }
     }
-    
+
     /**
      * QR処理結果のハンドリング
      */
     private func handleQRProcessingResult(_ result: QRProcessingResult) {
         switch result {
-        case .success(let url):
+        case let .success(url):
             evaluateURL(url)
-        case .failure(let error):
+        case let .failure(error):
             handleProcessingError(error)
         }
     }
-    
+
     /**
      * 最終評価結果のハンドリング（API結果含む）
      */
@@ -209,33 +208,33 @@ class ScannerViewModel: ObservableObject {
             responseTime: result.responseTime,
             detectedIssues: extractDetectedIssues(result)
         )
-        
+
         evaluationResult = finalResult
-        
+
         // 最終結果で確認画面を更新（詳細情報付き）
         if finalResult.safetyLevel != .safe {
             showWarningDialog(for: url, safetyLevel: finalResult.safetyLevel, issues: finalResult.detectedIssues)
         }
     }
-    
+
     /**
      * 処理エラーのハンドリング
      */
     private func handleProcessingError(_ error: QRProcessingError) {
         errorMessage = error.localizedDescription
         scanStatus = .error
-        
+
         print("❌ QR処理エラー: \(error.localizedDescription)")
     }
-    
+
     /**
      * 履歴への保存
      */
     private func saveToHistory(url: String, safetyLevel: SafetyLevel) {
         do {
             try historyRepository.saveRecord(
-                url: url, 
-                safetyLevel: safetyLevel, 
+                url: url,
+                safetyLevel: safetyLevel,
                 title: nil // 後追いで更新
             )
             // 履歴保存完了後、タイトル取得を開始
@@ -244,7 +243,7 @@ class ScannerViewModel: ObservableObject {
             print("⚠️ 履歴保存エラー: \(error.localizedDescription)")
         }
     }
-    
+
     /**
      * タイトル取得（非同期）
      */
@@ -252,15 +251,15 @@ class ScannerViewModel: ObservableObject {
         print("🔍 タイトル取得開始: \(url)")
         titleFetcher.fetchTitle(from: url) { [weak self] result in
             switch result {
-            case .success(let title):
+            case let .success(title):
                 print("✅ タイトル取得成功: \(title)")
                 self?.updateHistoryTitle(url: url, title: title)
-            case .failure(let error):
+            case let .failure(error):
                 print("❌ タイトル取得失敗: \(error.localizedDescription)")
             }
         }
     }
-    
+
     /**
      * 履歴のタイトル更新
      */
@@ -272,7 +271,7 @@ class ScannerViewModel: ObservableObject {
             print("⚠️ タイトル更新エラー: \(error.localizedDescription)")
         }
     }
-    
+
     /**
      * 警告ダイアログの表示
      */
@@ -282,15 +281,15 @@ class ScannerViewModel: ObservableObject {
             "safetyLevel": safetyLevel.rawValue,
             "detectedIssues": issues
         ]
-        
+
         NotificationCenter.default.post(
             name: .showWarningDialog,
             object: dialogInfo
         )
     }
-    
+
     // MARK: - Helper Methods
-    
+
     private func mapEvaluationMethod(_ method: EnhancedUrlRiskEvaluator.EvaluationResult.EvaluationMethod) -> EvaluationMethod {
         switch method {
         case .localOnly:
@@ -303,10 +302,10 @@ class ScannerViewModel: ObservableObject {
             return .fallback
         }
     }
-    
+
     private func extractDetectedIssues(_ result: EnhancedUrlRiskEvaluator.EvaluationResult) -> [String] {
         var issues: [String] = []
-        
+
         // ローカル評価の結果を含める
         if result.localResult != .safe {
             // ローカル評価の詳細を取得
@@ -323,7 +322,7 @@ class ScannerViewModel: ObservableObject {
                 }
             }
         }
-        
+
         // API結果から脅威情報を抽出
         if let apiResult = result.apiResult {
             for threat in apiResult.detectedThreats {
@@ -333,7 +332,7 @@ class ScannerViewModel: ObservableObject {
             // APIエラーの場合
             issues.append("外部API確認失敗（ローカル評価のみ）")
         }
-        
+
         return issues
     }
 }
@@ -342,10 +341,10 @@ class ScannerViewModel: ObservableObject {
 
 /// スキャン状態
 enum ScanStatus {
-    case ready          // スキャン待機中
-    case processing     // 処理中
-    case evaluated      // 評価完了
-    case error          // エラー発生
+    case ready // スキャン待機中
+    case processing // 処理中
+    case evaluated // 評価完了
+    case error // エラー発生
 }
 
 /// URL評価結果（UIバインディング用）
@@ -359,16 +358,16 @@ struct URLEvaluationResult {
 
 /// 評価方法
 enum EvaluationMethod {
-    case local      // ローカル評価のみ
-    case hybrid     // ハイブリッド（ローカル＋API）
-    case cached     // キャッシュヒット
-    case fallback   // フォールバック
+    case local // ローカル評価のみ
+    case hybrid // ハイブリッド（ローカル＋API）
+    case cached // キャッシュヒット
+    case fallback // フォールバック
 }
 
 /// QR処理結果
 enum QRProcessingResult {
-    case success(String)  // 有効なURL
-    case failure(QRProcessingError)  // 処理エラー
+    case success(String) // 有効なURL
+    case failure(QRProcessingError) // 処理エラー
 }
 
 /// QR処理エラー
@@ -376,7 +375,7 @@ enum QRProcessingError: LocalizedError {
     case invalidFormat
     case unsupportedScheme
     case malformed
-    
+
     var errorDescription: String? {
         switch self {
         case .invalidFormat:
