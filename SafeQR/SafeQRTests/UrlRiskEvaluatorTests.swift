@@ -1,322 +1,182 @@
-import XCTest
 @testable import SafeQR
+import XCTest
 
-/**
- * UrlRiskEvaluator のユニットテスト
- * 危険度評価ロジックの各パターンをテスト
- * 設定による厳しさ調整もテスト対象
- */
-class UrlRiskEvaluatorTests: XCTestCase {
-    
-    // MARK: - Properties
-    
-    /// テスト対象のUrlRiskEvaluator
-    private var evaluator: UrlRiskEvaluator!
-    
-    /// SettingsStore（実際のインスタンスを使用）
+final class UrlRiskEvaluatorTests: XCTestCase {
+    private let evaluator = UrlRiskEvaluator()
     private let settingsStore = SettingsStore.shared
-    
-    // MARK: - Setup & Teardown
-    
+    private var originalStrictness = SafetyStrictness.standard
+
     override func setUp() {
         super.setUp()
-        
-        // テスト対象を初期化
-        evaluator = UrlRiskEvaluator()
-        
-        // デフォルトは「標準」の厳しさに設定
+        originalStrictness = settingsStore.safetyStrictness
         settingsStore.safetyStrictness = .standard
     }
-    
+
     override func tearDown() {
-        evaluator = nil
-        // デフォルトに戻す
-        settingsStore.safetyStrictness = .standard
+        settingsStore.safetyStrictness = originalStrictness
         super.tearDown()
     }
-    
-    // MARK: - 安全なURL のテスト
-    
-    /**
-     * 有名サイトの正規ドメインは安全と判定されることをテスト
-     */
+
     func testSafeURLs() {
-        let safeURLs = [
-            "https://www.google.com",
-            "https://apple.com",
-            "https://github.com/user/repo",
-            "https://stackoverflow.com/questions/123",
-            "https://www.wikipedia.org"
-        ]
-        
-        for url in safeURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .safe, "URL '\(url)' should be evaluated as safe")
+        for url in [
+            "https://www.google.com", "https://apple.com", "https://github.com/user/repo",
+            "https://stackoverflow.com/questions/123", "https://www.wikipedia.org",
+        ] {
+            XCTAssertEqual(evaluator.evaluate(url: url), .safe, url)
         }
     }
-    
-    /**
-     * シンプルで短いURLは安全と判定されることをテスト
-     */
+
     func testSimpleURLs() {
-        let simpleURLs = [
-            "https://example.com",
-            "https://test.jp",
-            "http://localhost:3000"
-        ]
-        
-        for url in simpleURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .safe, "Simple URL '\(url)' should be evaluated as safe")
+        for url in ["https://example.com", "https://test.jp", "http://localhost:3000"] {
+            XCTAssertEqual(evaluator.evaluate(url: url), .safe, url)
         }
     }
-    
-    // MARK: - 注意レベルURL のテスト
-    
-    /**
-     * サブドメインが深いURLは注意レベルと判定されることをテスト
-     */
+
     func testCautionLevelURLs() {
-        let cautionURLs = [
-            "https://sub1.sub2.sub3.sub4.example.com", // サブドメインが深い
-            "https://ads.tracking.example.com/campaign", // 広告・トラッキング系
-            "https://redirect.service.com/go?url=target"  // リダイレクト系
-        ]
-        
-        for url in cautionURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertTrue(result == .caution || result == .danger, 
-                         "URL '\(url)' should be evaluated as caution or danger")
-        }
+        // 深いサブドメイン1点と100文字超のパス1点を組み合わせる。
+        let url = "https://sub1.sub2.sub3.sub4.example.com/" + String(repeating: "a", count: 101)
+        let result = evaluator.evaluateWithDetails(url: url)
+        XCTAssertEqual(result.totalScore, 2)
+        XCTAssertEqual(result.finalSafetyLevel, .caution)
     }
-    
-    /**
-     * 長いパス・クエリを持つURLは注意レベルと判定されることをテスト
-     */
+
     func testLongPathQueryURLs() {
-        // 長いクエリパラメータを含むURL（100文字超）
-        let longQueryURL = "https://example.com/search?" + String(repeating: "param=value&", count: 20)
-        let result = evaluator.evaluate(url: longQueryURL)
-        
-        XCTAssertTrue(result == .caution || result == .danger,
-                     "URL with long query should be evaluated as caution or danger")
+        let url = "https://example.com/search?" + String(repeating: "param=value&", count: 20)
+        let result = evaluator.evaluateWithDetails(url: url)
+        XCTAssertEqual(result.totalScore, 2)
+        XCTAssertEqual(result.finalSafetyLevel, .caution)
     }
-    
-    // MARK: - 危険レベルURL のテスト
-    
-    /**
-     * IP直打ちURLは危険と判定されることをテスト
-     */
+
     func testIPAddressURLs() {
-        let ipURLs = [
-            "https://192.168.1.1/malware",
-            "http://10.0.0.1/phishing",
-            "https://172.16.0.100:8080/suspicious"
-        ]
-        
-        for url in ipURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .danger, "IP address URL '\(url)' should be evaluated as danger")
+        for url in [
+            "https://192.168.1.1/malware", "http://10.0.0.1/phishing",
+            "https://172.16.0.100:8080/suspicious", "https://[2001:db8::1]/",
+        ] {
+            let result = evaluator.evaluateWithDetails(url: url)
+            XCTAssertEqual(result.totalScore, 2, url)
+            XCTAssertEqual(result.finalSafetyLevel, .caution, url)
         }
     }
-    
-    /**
-     * ブランド偽装URLは危険と判定されることをテスト
-     */
+
     func testBrandSpoofingURLs() {
-        let spoofingURLs = [
-            "https://google-security.malicious.com/signin",
-            "https://apple-support.phishing.net/account",
-            "https://paypal-verify.suspicious.org/login",
-            "https://amazon-update.fake.com/payment"
-        ]
-        
-        for url in spoofingURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .danger, "Brand spoofing URL '\(url)' should be evaluated as danger")
+        for url in [
+            "https://google-security.malicious.com/signin", "https://apple-support.phishing.net/account",
+            "https://paypal-verify.suspicious.org/login", "https://amazon-update.fake.com/payment",
+        ] {
+            let result = evaluator.evaluateWithDetails(url: url)
+            XCTAssertEqual(result.totalScore, 3, url)
+            XCTAssertEqual(result.finalSafetyLevel, .caution, url)
+            XCTAssertTrue(result.detectedIssues.contains { $0.category == .brandSpoofing }, url)
         }
     }
-    
-    /**
-     * 疑義TLDは危険度が上がることをテスト
-     */
+
     func testSuspiciousTLDs() {
-        let suspiciousTLDURLs = [
-            "https://malware.zip",
-            "https://phishing.mov", 
-            "https://suspicious.tk"
-        ]
-        
-        for url in suspiciousTLDURLs {
-            let result = evaluator.evaluate(url: url)
-            // 疑義TLD単体では1点なので、他の要素と合わせて注意以上になることを期待
-            XCTAssertTrue(result == .caution || result == .danger,
-                         "Suspicious TLD URL '\(url)' should be evaluated as caution or danger")
+        for url in ["https://malware.zip", "https://phishing.mov", "https://suspicious.tk"] {
+            let result = evaluator.evaluateWithDetails(url: url)
+            XCTAssertEqual(result.totalScore, 1, url)
+            XCTAssertEqual(result.finalSafetyLevel, .safe, url)
+            XCTAssertTrue(result.detectedIssues.contains { $0.category == .suspiciousTLD }, url)
         }
     }
-    
-    /**
-     * Punycode（国際化ドメイン名）は危険と判定されることをテスト
-     */
+
     func testPunycodeURLs() {
-        let punycodeURLs = [
-            "https://xn--google-123.com", // Punycode偽装
-            "https://xn--apple-456.net"   // Punycode偽装
-        ]
-        
-        for url in punycodeURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .danger, "Punycode URL '\(url)' should be evaluated as danger")
+        for url in ["https://xn--google-123.com", "https://xn--apple-456.net"] {
+            XCTAssertEqual(evaluator.evaluate(url: url), .danger, url)
         }
     }
-    
-    // MARK: - 無効URL のテスト
-    
-    /**
-     * 無効なURLは危険と判定されることをテスト
-     */
+
     func testInvalidURLs() {
-        let invalidURLs = [
-            "invalid-url",
-            "",
-            "ftp://not-http-url.com",
-            "javascript:alert('xss')"
-        ]
-        
-        for url in invalidURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertEqual(result, .danger, "Invalid URL '\(url)' should be evaluated as danger")
+        for strictness in SafetyStrictness.allCases {
+            settingsStore.safetyStrictness = strictness
+            for url in [
+                "invalid-url", "", "/relative/path", "//example.com/path", "https://", "https:///path",
+                "ftp://not-http-url.com", "javascript:alert('xss')", "file:///tmp/test",
+            ] {
+                XCTAssertEqual(evaluator.evaluate(url: url), .danger, "\(strictness): \(url)")
+            }
         }
     }
-    
-    // MARK: - 厳しさ設定による調整のテスト
-    
-    /**
-     * 厳しさ「強」設定時により多くのURLが危険判定されることをテスト
-     */
+
     func testHighStrictnessIncreasesDangerLevel() {
-        // 境界値のURL（標準では安全だが、厳しさ「強」では注意になるもの）
-        let borderlineURL = "https://sub1.sub2.example.com/path"
-        
-        // 標準設定での評価
-        settingsStore.safetyStrictness = .standard
-        let standardResult = evaluator.evaluate(url: borderlineURL)
-        
-        // 厳しい設定での評価  
         settingsStore.safetyStrictness = .high
-        let highResult = evaluator.evaluate(url: borderlineURL)
-        
-        // 厳しい設定の方が危険度が高いか同等であることを確認
-        XCTAssertGreaterThanOrEqual(highResult.rawValue, standardResult.rawValue,
-                                   "High strictness should result in equal or higher danger level")
+        XCTAssertEqual(evaluator.evaluate(url: "https://google-security.example.com"), .danger)
     }
-    
-    /**
-     * 厳しさ「弱」設定時により多くのURLが安全判定されることをテスト
-     */
+
     func testLowStrictnessDecreasesDangerLevel() {
-        // 境界値のURL（標準では注意だが、厳しさ「弱」では安全になるもの）
-        let borderlineURL = "https://sub1.sub2.sub3.example.com"
-        
-        // 標準設定での評価
-        settingsStore.safetyStrictness = .standard  
-        let standardResult = evaluator.evaluate(url: borderlineURL)
-        
-        // 弱い設定での評価
         settingsStore.safetyStrictness = .low
-        let lowResult = evaluator.evaluate(url: borderlineURL)
-        
-        // 弱い設定の方が危険度が低いか同等であることを確認
-        XCTAssertLessThanOrEqual(lowResult.rawValue, standardResult.rawValue,
-                                "Low strictness should result in equal or lower danger level")
+        XCTAssertEqual(evaluator.evaluate(url: "https://192.168.1.1"), .safe)
     }
-    
-    // MARK: - 複合条件のテスト
-    
-    /**
-     * 複数の危険要素を持つURLは確実に危険と判定されることをテスト
-     */
+
     func testMultipleDangerFactors() {
-        // IP + 長いクエリ + ブランド偽装の複合
-        let multiDangerURL = "https://192.168.1.1/google-signin/verify?" + String(repeating: "param=value&", count: 30)
-        
-        let result = evaluator.evaluate(url: multiDangerURL)
-        XCTAssertEqual(result, .danger, "URL with multiple danger factors should be evaluated as danger")
+        let url = "https://192.168.1.1/path?" + String(repeating: "param=value&", count: 30)
+        let result = evaluator.evaluateWithDetails(url: url)
+        XCTAssertEqual(result.totalScore, 4)
+        XCTAssertEqual(result.finalSafetyLevel, .danger)
     }
-    
-    /**
-     * 正規ブランドドメインは偽装チェックで安全と判定されることをテスト
-     */
+
     func testLegitimateDomainsNotFlaggedAsSpoofing() {
-        let legitimateURLs = [
-            "https://accounts.google.com/signin",
-            "https://appleid.apple.com/account", 
-            "https://www.paypal.com/signin"
-        ]
-        
-        for url in legitimateURLs {
-            let result = evaluator.evaluate(url: url)
-            XCTAssertNotEqual(result, .danger, 
-                             "Legitimate domain '\(url)' should not be flagged as spoofing")
+        for url in [
+            "https://accounts.google.com/signin", "https://appleid.apple.com/account",
+            "https://www.paypal.com/signin",
+        ] {
+            XCTAssertFalse(evaluator.evaluateWithDetails(url: url).detectedIssues.contains { $0.category == .brandSpoofing }, url)
         }
     }
-    
-    // MARK: - エッジケースのテスト
-    
-    /**
-     * 特殊文字を含むURLの処理をテスト
-     */
+
     func testSpecialCharactersInURL() {
-        let specialCharURLs = [
-            "https://example.com/path with spaces",
-            "https://example.com/パス",
-            "https://example.com/search?q=特殊文字"
-        ]
-        
-        for url in specialCharURLs {
-            // クラッシュせずに評価が完了することを確認
-            XCTAssertNoThrow({ [self] in
-                _ = evaluator.evaluate(url: url)
-            }, "URL with special characters should not crash: '\(url)'")
+        for url in [
+            "https://example.com/path with spaces", "https://example.com/パス",
+            "https://example.com/search?q=特殊文字",
+        ] {
+            XCTAssertEqual(evaluator.evaluateWithDetails(url: url).finalSafetyLevel, .safe, url)
         }
     }
-    
-    /**
-     * 非常に長いURLの処理をテスト
-     */
+
     func testVeryLongURL() {
-        // 2000文字のURL
-        let longURL = "https://example.com/" + String(repeating: "verylongpath/", count: 150)
-        
-        XCTAssertNoThrow({ [self] in
-            let result = evaluator.evaluate(url: longURL)
-            // 長いパスなので少なくとも注意レベル以上になることを期待
-            XCTAssertGreaterThanOrEqual(result.rawValue, SafetyLevel.caution.rawValue)
-        }, "Very long URL should not crash")
+        let url = "https://example.com/" + String(repeating: "verylongpath/", count: 150)
+        let result = evaluator.evaluateWithDetails(url: url)
+        XCTAssertEqual(result.totalScore, 2)
+        XCTAssertEqual(result.finalSafetyLevel, .caution)
     }
-}
 
+    func testScoreBoundariesAtEveryStrictness() {
+        let fixtures: [(String, Int)] = [
+            ("https://example.com", 0), ("https://example.zip", 1),
+            ("https://192.168.1.1", 2), ("https://google-security.example.com", 3),
+            ("https://192.168.1.1/" + String(repeating: "a", count: 201), 4),
+        ]
+        for strictness in SafetyStrictness.allCases {
+            settingsStore.safetyStrictness = strictness
+            for (url, baseScore) in fixtures {
+                let score = max(0, baseScore + strictness.scoreModifier)
+                let level: SafetyLevel = score <= 1 ? .safe : score <= 3 ? .caution : .danger
+                let result = evaluator.evaluateWithDetails(url: url)
+                XCTAssertEqual(result.totalScore, score, "\(strictness): \(url)")
+                XCTAssertEqual(result.finalSafetyLevel, level, "\(strictness): \(url)")
+            }
+        }
+    }
 
-// MARK: - Test Extensions
+    func testSubdomainDepthBoundary() {
+        XCTAssertEqual(evaluator.evaluateWithDetails(url: "https://a.b.c.example.com").totalScore, 0)
+        XCTAssertEqual(evaluator.evaluateWithDetails(url: "https://a.b.c.d.example.com").totalScore, 1)
+    }
 
-extension SafetyLevel {
-    /**
-     * テスト用の比較演算子
-     * 危険度の数値比較を可能にする
-     */
-    static func < (lhs: SafetyLevel, rhs: SafetyLevel) -> Bool {
-        return lhs.rawValue < rhs.rawValue
+    func testPathLengthBoundaries() {
+        for (length, score) in [(100, 0), (101, 1), (200, 1), (201, 2)] {
+            // URL.pathには先頭のスラッシュも含まれる。
+            let url = "https://example.com/" + String(repeating: "a", count: length - 1)
+            XCTAssertEqual(evaluator.evaluateWithDetails(url: url).totalScore, score)
+        }
     }
-    
-    static func <= (lhs: SafetyLevel, rhs: SafetyLevel) -> Bool {
-        return lhs.rawValue <= rhs.rawValue
+
+    func testUppercaseHTTPSScheme() {
+        XCTAssertEqual(evaluator.evaluate(url: "HTTPS://example.com/path"), .safe)
     }
-    
-    static func > (lhs: SafetyLevel, rhs: SafetyLevel) -> Bool {
-        return lhs.rawValue > rhs.rawValue
-    }
-    
-    static func >= (lhs: SafetyLevel, rhs: SafetyLevel) -> Bool {
-        return lhs.rawValue >= rhs.rawValue
+
+    func testOfficialDomainSuffixBoundary() {
+        for url in ["https://google.com.evil.test", "https://evilgoogle.com", "https://apple.com.evil.test"] {
+            XCTAssertTrue(evaluator.evaluateWithDetails(url: url).detectedIssues.contains { $0.category == .brandSpoofing }, url)
+        }
     }
 }
