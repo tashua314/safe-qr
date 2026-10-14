@@ -32,6 +32,11 @@ run_build() {
 run_build Debug
 run_build Release
 
+# カメラ権限は検証専用Simulator内に限る。実機カメラの許可を確認した扱いにはしない。
+xcrun simctl bootstatus "$SAFEQR_SIMULATOR_ID" -b
+xcrun simctl install "$SAFEQR_SIMULATOR_ID" "$SAFEQR_DERIVED_DATA/Build/Products/Debug-iphonesimulator/SafeQR.app"
+xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" grant camera jp.techguide.SafeQR
+
 SAFEQR_RESULT="$SAFEQR_ARTIFACTS/Tests-$(date +%s)-$$.xcresult"
 if ! xcodebuild "${COMMON[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$SAFEQR_SIMULATOR_ID" -parallel-testing-enabled NO -resultBundlePath "$SAFEQR_RESULT" test > "$SAFEQR_ARTIFACTS/tests.log" 2>&1; then
     cat "$SAFEQR_ARTIFACTS/tests.log"

@@ -30,12 +30,12 @@ make check
 - SwiftFormatの整形差分チェック。書き換えは `make format` で行う。
 - project.pbxproj / Info.plistの構文検査。
 - Swift警告をエラーとするDebug / ReleaseのSimulatorビルド。
-- iOS 18.5以上のiPhone SimulatorでユニットテストとUIテスト。
+- iOS 18.5以上の検証専用 `SafeQR QA iPhone` SimulatorでユニットテストとUIテスト。既存があれば再利用し、なければ作成する。
 
 ツールがない場合は失敗する。ビルド・テストのログと `.xcresult` は `.artifacts/` に保存し、Gitに含めない。
 GitHub ActionsではPRとmainへのpushで同じスクリプトを実行し、結果をArtifactに保存する。
 
-既存の個人用Simulatorを避ける場合は、専用デバイスのUUIDを指定する。
+チェック時は専用Simulatorへアプリをインストールし、そのSimulator内でSafeQRのカメラ許可を付与する。実機の権限は変更しない。別の検証専用デバイスを使う場合はUUIDを指定する。
 
 ```sh
 SAFEQR_SIMULATOR_ID=<検証専用デバイスのUUID> make check

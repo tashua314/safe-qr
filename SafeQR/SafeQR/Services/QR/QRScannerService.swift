@@ -183,30 +183,27 @@ class QRScannerService: NSObject {
                 })
             }
 
-            // ボタンのtagに応じてテストURLを選択
+            // .invalidを使い、Simulatorのテストで実在のスキャン先へ接続しない。
             let testURL: String
             let buttonTag = sender?.tag ?? 0
 
             switch buttonTag {
             case 0: // 安全URL
-                testURL = "https://www.google.com"
+                testURL = "https://example.invalid"
                 print("🟢 テスト: 安全URL")
-            case 1: // 注意URL（長いパスを持つURL）
-                testURL = "https://example-very-long-subdomain.suspicious-brand-name.com/very/long/path/that/exceeds/normal/length/limits/and/triggers/caution/level/detection/with/additional/parameters?param1=value1&param2=value2&param3=value3&param4=value4"
+            case 1: // 注意URL（ブランド偽装3点）
+                testURL = "https://paypal.example.invalid"
                 print("🟡 テスト: 注意URL")
-            case 2: // 危険URL（Punycodeドメインを模擬）
-                testURL = "https://xn--80akhbyknj4f.fake-site.com/login"
+            case 2: // 危険URL（Punycodeとブランド偽装の複合加点）
+                testURL = "https://xn--e1afmkfd-paypal.example.invalid/login"
                 print("🔴 テスト: 危険URL")
             default:
-                testURL = "https://www.google.com"
+                testURL = "https://example.invalid"
                 print("🟢 テスト: デフォルト安全URL")
             }
 
-            // MVVM構造のため、NotificationCenterを使用
-            NotificationCenter.default.post(
-                name: .qrCodeDetected,
-                object: testURL
-            )
+            // ViewControllerが監視するpublisherへ実機と同じ経路で配信する。
+            scanResultSubject.send(testURL)
         }
 
         #if targetEnvironment(simulator)
@@ -396,7 +393,7 @@ extension QRScannerService: AVCaptureMetadataOutputObjectsDelegate {
             // プロトコル対応：Publisherにも通知
             scanResultSubject.send(stringValue)
 
-            // MVVM構造のため、NotificationCenterを使用
+            // 既存の通知経路も保持する。publisherへの配信は一度だけ。
             NotificationCenter.default.post(
                 name: .qrCodeDetected,
                 object: stringValue
