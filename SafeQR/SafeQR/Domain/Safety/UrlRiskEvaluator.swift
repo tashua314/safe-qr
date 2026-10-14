@@ -67,7 +67,12 @@ class UrlRiskEvaluator {
      * @return: 詳細評価結果
      */
     func evaluateWithDetails(url: String) -> DetailedEvaluationResult {
-        guard let urlObject = URL(string: url) else {
+        // 評価器は履歴などからも呼ばれるため、スキャナー入口の検証だけに依存しない。
+        guard let components = URLComponents(string: url),
+              let scheme = components.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = components.host, !host.isEmpty,
+              let urlObject = components.url else {
             return DetailedEvaluationResult(
                 finalSafetyLevel: .danger,
                 totalScore: 999,
@@ -232,7 +237,8 @@ class UrlRiskEvaluator {
         guard let host = url.host else { return nil }
         
         let parts = host.split(separator: ".")
-        if parts.count > 4 {
+        // 主ドメインを2ラベルとする目安で、3階層を超えるサブドメインを加点する。
+        if parts.count > 5 {
             return DetailedEvaluationResult.EvaluationIssue(
                 category: .deepSubdomain,
                 description: "サブドメイン深い構造",
@@ -309,6 +315,14 @@ class UrlRiskEvaluator {
             ("cao", ["cao.go.jp"])
         ]
         
+        // 正規ドメインのaccounts/loginサブドメインを、汎用の金融語で誤判定しない。
+        let isOfficialDomain = brandPatterns.contains { _, domains in
+            domains.contains { host == $0 || host.hasSuffix("." + $0) }
+        }
+        if isOfficialDomain {
+            return nil
+        }
+
         for (brand, legitimateDomains) in brandPatterns {
             // より厳密な文字列マッチング（単語境界を考慮）
             if isWordMatch(host: host, brand: brand) {
