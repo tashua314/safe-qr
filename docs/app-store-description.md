@@ -45,7 +45,8 @@ SafeQRは、スキャンしたQRコードに含まれるURLの安全性を自動
 - プライバシーを重視した設定オプション
 
 **🛡️ プライバシー保護**
-- スキャンしたURLの生データは外部に送信されません
+- Google安全性照会はSHA-256の先頭4バイトのみを送信（URL全文は送信しません）。IP等の通信情報はGoogleへ届きます
+- タイトル取得・ブラウザ表示は対象サイトへ通信します
 - すべての履歴データは端末内にのみ保存
 - 不要な権限の要求は一切ありません
 
@@ -73,7 +74,7 @@ SafeQRで、安全で快適なQRコード体験をお楽しみください。
 QRコードリーダー,バーコード,セキュリティ,安全,スキャナー,プライバシー,フィッシング対策,URL,カメラ,履歴
 
 ### プロモーションテキスト（170文字以内）
-危険なURLを事前に警告する安全第一のQRコードリーダー。Google Safe Browsing連携で高精度な脅威検出。履歴管理機能付きで使いやすく、プライバシーも完全保護。
+危険なURLを事前に警告する安全第一のQRコードリーダー。Google Safe Browsing連携で高精度な脅威検出。履歴管理機能付きで使いやすく、Googleへの照会はURL全文を送らない方式です。
 
 ---
 
@@ -113,7 +114,8 @@ SafeQR automatically evaluates the safety of URLs contained in scanned QR codes 
 - Privacy-focused configuration options
 
 **🛡️ Privacy Protection**
-- Raw URL data never sent to external servers
+- Google safety checks send only 4-byte SHA-256 prefixes, not raw URLs. Google receives network information such as your IP address
+- Title retrieval and browsing contact the destination website
 - All history data stored locally on device only
 - No unnecessary permission requests
 

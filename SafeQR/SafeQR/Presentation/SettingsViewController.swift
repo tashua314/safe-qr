@@ -44,7 +44,7 @@ class SettingsViewController: UIViewController {
             case .safety:
                 return "危険なサイトの検出レベルを調整できます。「強」にするとより多くのサイトで警告が表示されます。"
             case .privacy:
-                return "個人情報は一切収集しません。URLの内容も外部に送信されません。"
+                return "外部チェックON時は、URLを変換したハッシュの先頭4バイトとIP等の通信情報がGoogleに届きます。候補が推測される可能性があります。タイトル取得やページ表示は対象サイトへ通信します。"
             case .history:
                 return "履歴は端末内にのみ保存され、最大50件まで記録されます。51件目以降は古いものから削除されます。"
             case .app:
@@ -262,7 +262,7 @@ extension SettingsViewController: UITableViewDataSource {
 
         cell.configure(
             title: "外部安全性チェック",
-            subtitle: "Google脅威データベースでより正確に判定",
+            subtitle: "URL全文を送らずGoogleへハッシュの一部を照会",
             isOn: settingsStore.isExternalReputationEnabled
         ) { [weak self] isOn in
             // スイッチ変更時の処理
