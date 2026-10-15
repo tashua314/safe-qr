@@ -1,22 +1,2 @@
-// Local.xcconfig
-// ローカル開発環境設定（.xcconfigファイルをXcodeプロジェクトで使用する場合）
-//
-// 使用方法:
-// 1. このファイルをXcodeプロジェクトに追加
-// 2. プロジェクト設定でDebugビルド設定にこのファイルを適用
-// 3. Info.plistで $(SAFE_BROWSING_API_KEY) として参照
-
-// Google Safe Browsing API Key (開発用)
-// 実際のキーに置き換えてください
-SAFE_BROWSING_API_KEY = YOUR_DEV_API_KEY_HERE
-
-// アプリケーション設定
-PRODUCT_BUNDLE_IDENTIFIER = jp.techguide.SafeQR.dev
-PRODUCT_NAME = SafeQR (Dev)
-
-// デバッグ用フラグ
-DEBUG_MODE = YES
-ENABLE_LOGGING = YES
-
-// 開発環境用のカスタム設定
-APP_ENVIRONMENT = development
+// 旧パスとの互換用。XcodeターゲットはDebug.xcconfigを直接参照する。
+#include "Debug.xcconfig"
