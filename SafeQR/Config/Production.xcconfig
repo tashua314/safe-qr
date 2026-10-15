@@ -1,22 +1,2 @@
-// Production.xcconfig
-// 本番環境設定（.xcconfigファイルをXcodeプロジェクトで使用する場合）
-//
-// 使用方法:
-// 1. このファイルをXcodeプロジェクトに追加
-// 2. プロジェクト設定でReleaseビルド設定にこのファイルを適用
-// 3. Info.plistで $(SAFE_BROWSING_API_KEY) として参照
-
-// Google Safe Browsing API Key (本番用)
-// 実際のキーに置き換えてください
-SAFE_BROWSING_API_KEY = YOUR_PROD_API_KEY_HERE
-
-// アプリケーション設定
-PRODUCT_BUNDLE_IDENTIFIER = jp.techguide.SafeQR
-PRODUCT_NAME = SafeQR
-
-// 本番用フラグ
-DEBUG_MODE = NO
-ENABLE_LOGGING = NO
-
-// 本番環境用のカスタム設定
-APP_ENVIRONMENT = production
+// 旧パスとの互換用。XcodeターゲットはRelease.xcconfigを直接参照する。
+#include "Release.xcconfig"
