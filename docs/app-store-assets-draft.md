@@ -1,6 +1,6 @@
-# 申請画像の候補（未承認・未提出）
+# 申請画像の原本撮影記録（ストア未提出）
 
-2026-10-16。利用者は原本4枚の採用を保留し、魅力を伝えるストア画像を希望した。[読み取る場面から伝える画像案](store-artwork-v3/README.md)を優先候補とする。この文書は原本の撮影情報として保持する。既存QA原本を、Appleの[画像仕様](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)と照合した。形式・寸法が合うことだけで、App Reviewの承認や提出準備の完了とは扱わない。
+2026-10-16。利用者は原本4枚の採用を保留し、魅力を伝えるストア画像を希望した。その後、[読み取る場面から伝える掲載画像](store-artwork-v3/README.md)6枚と掲載順を2026-10-16の回答「ok」で採用した。この文書は原本の撮影情報として保持する。既存QA原本を、Appleの[画像仕様](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)と照合した。形式・寸法が合うことだけで、App Reviewの承認や提出準備の完了とは扱わない。
 
 ## iPhoneの候補
 
@@ -26,11 +26,11 @@ iPhone16Pro Simulator / iOS26.5の実装画面。検証用の模擬履歴を使�
 
 `simctl io screenshot --type=jpeg`で実画面から直接取得したJPEG原本。PNG出力にはalpha channelがあったため、提出候補へ採用せず検証用に分離した。JPEGの寸法・alphaなし・SHA256・目視確認を完了した。撮影後は専用iPadのcameraをgrantへ戻し、起動前と同じShutdown状態へ戻した。通常の実機と専用iPhoneの状態は変更していない。
 
-構造化した撮影情報は[manifest.json](app-store-candidates/manifest.json)。以前のiPad QA画像は背後にテストUIが写るため、引き続き提出候補に含めない。4枚はいずれも未承認の候補であり、App Store Connectにはアップロードしていない。
+構造化した撮影情報は[manifest.json](app-store-candidates/manifest.json)。以前のiPad QA画像は背後にテストUIが写るため、引き続き提出候補に含めない。原本4枚をそのまま載せる案は未採用で、撮影記録として保存する。採用した構成はv3の各3枚であり、App Store Connectにはアップロードしていない。
 
-## 最終確定前の確認
+## 現在の採用と公開前の確認
 
-- iPhone2枚・iPad2枚は許容寸法・alphaなし・撮影状態・ハッシュを確認済み。利用者による掲載画像の最終採否は未確定。
-- 候補画像と日本語ストア説明の対応、模擬履歴を使う説明、掲載順を利用者が確認する。
+- iPhone2枚・iPad2枚は許容寸法・alphaなし・撮影状態・ハッシュを確認済み。掲載用にはv3の6枚を利用者確認済み。
+- 掲載順と画像内コピーは利用者確認済み。申請文全体の最終確認とは区別する。模擬履歴・生成使用イメージを実利用履歴・実機カメラ撮影として扱わない。
 - 公開Gitの完全SHA固定URLがHTTP200で開けることを確認する。期限付きCI Artifactを永続リンクに使わない。
 - App Store Connectへのアップロード、公開、審査提出は別の段階で行う。現時点では実施していない。

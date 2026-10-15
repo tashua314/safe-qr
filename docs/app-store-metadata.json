@@ -32,7 +32,7 @@
         "email": null
       },
       "demoAccountRequired": false,
-      "notes": "申請前の下書き。カメラ画像・動画は保存せず、QRのURLを評価する。外部チェックは既定OFF。ON時はGoogle Safe Browsing v5 hashes.searchへ4byte SHA-256 prefixだけを送り、完全ハッシュは端末内照合。注意・危険・外部未確認では開封確認が必要で、許可前にタイトル取得とブラウザー表示をしない。履歴再訪も同様。タイトル取得は元URLだけでリダイレクトを追わない。判定には見逃し・誤警告があり得る。実機の基本動作、本番API認証、開発用署名/exportは確認済み。別Bundle IDの新規Releaseで初回カメラ拒否の案内・履歴/設定も確認し、通常版データは保持した。カメラ待機10分の記録は完了。CPU高値に対するレイアウト循環修正はPR #28、修正後実機CPUは未確認。利用者判断で30分連続・多数回スキャン等の負荷テストを省略した。Leaks、温度/電池、UI遅延は未確認。運営者はTechGuide合同会社、公開窓口は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)と利用者確認済み。サポートURL https://techguide.jp/safeqr/ とプライバシーURL https://techguide.jp/safeqr/privacy/ の公開を確認済み。無料・日本のみ・Apple標準EULAの申請方針は利用者確認済み。実際の用途と外部API条件の適合、年齢/App Privacyの確定は未完了。審査用の氏名・電話・メールは利用者確認済みの非公開資料に分離し、公開Gitでは値をnullに保つ。App Store向け配布・アップロード・審査提出は未実施。詳細はrelease-validation.mdを参照する。",
+      "notes": "申請前の下書き。カメラ画像・動画は保存せず、QRのURLを評価する。外部チェックは既定OFF。ON時はGoogle Safe Browsing v5 hashes.searchへ4byte SHA-256 prefixだけを送り、完全ハッシュは端末内照合。注意・危険・外部未確認では開封確認が必要で、許可前にタイトル取得とブラウザー表示をしない。履歴再訪も同様。タイトル取得は元URLだけでリダイレクトを追わない。判定には見逃し・誤警告があり得る。実機の基本動作、本番API認証、開発用署名/exportは確認済み。別Bundle IDの新規Releaseで初回カメラ拒否の案内・履歴/設定も確認し、通常版データは保持した。カメラ待機10分の記録は完了。CPU高値に対するレイアウト循環修正はPR #28、修正後実機CPUは未確認。利用者判断で30分連続・多数回スキャン等の負荷テストを省略した。Leaks、温度/電池、UI遅延は未確認。運営者はTechGuide合同会社、公開窓口は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)と利用者確認済み。サポートURL https://techguide.jp/safeqr/ とプライバシーURL https://techguide.jp/safeqr/privacy/ の公開を確認済み。無料・日本のみ・Apple標準EULAの申請方針は利用者確認済み。当面は無料アプリ単独で提供し会社の集客・有償サービスへの誘導・顧客向けサービスには使わないと利用者確認済み。広告・課金等で収益化しない既存方針と合わせ、Googleの販売・収益目的でないという条件に照合した。Googleの個別承認ではなく用途変更前に再確認する。年齢/App Privacyの確定は未完了。審査用の氏名・電話・メールは利用者確認済みの非公開資料に分離し、公開Gitでは値をnullに保つ。App Store向け配布・アップロード・審査提出は未実施。詳細はrelease-validation.mdを参照する。",
       "contactStatus": "user_confirmed_private_not_submitted"
     },
     "support": {
@@ -59,7 +59,7 @@
       "questionnaireDraft": "app-store-questionnaire-draft.md"
     },
     "screenshots": {
-      "status": "draft",
+      "status": "draft_user_confirmed",
       "specificationsCheckedAt": "2026-10-16",
       "specificationsURL": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
       "iphoneDynamicIslandMedium": {
@@ -74,13 +74,25 @@
           2752
         ]
       },
-      "notes": "利用者提案に応じ、QRにカメラを向ける使用イメージを導入に追加。写真は生成・実カメラ画面とは異なると注記し、同じ画像内に端末ごとの実際の注意画面を掲載。1枚目を新規作成、2枚目の拒否操作と3枚目の履歴はv2を再利用し各3枚の構成。注意点が見つかると/注意が出たらという条件と見逃し/誤警告を明示。原本と前案は保存。未承認・未アップロード・未提出。",
-      "candidateInventory": "store-artwork-v3/README.md"
+      "notes": "利用者提案に応じ、QRにカメラを向ける使用イメージを導入に追加。写真は生成・実カメラ画面とは異なると注記し、同じ画像内に端末ごとの実際の注意画面を掲載。1枚目を新規作成、2枚目の拒否操作と3枚目の履歴はv2を再利用し各3枚の構成。注意点が見つかると/注意が出たらという条件と見逃し/誤警告を明示。原本と前案は保存。2026-10-16の利用者回答「ok」で6枚・画像内コピーと掲載順を採用。未アップロード・未提出。",
+      "candidateInventory": "store-artwork-v3/README.md",
+      "userConfirmation": {
+        "date": "2026-10-16",
+        "scope": "掲載画像6枚と画像内コピー・掲載順",
+        "sequence": [
+          "QRにかざす",
+          "注意が出たら戻る",
+          "履歴を見返す"
+        ],
+        "sourceRevision": "2c6e711fd15686313eedf5b6696f36fb7cebc2b5",
+        "record": "https://github.com/tashua314/safe-qr/issues/8"
+      }
     },
     "externalServiceUse": {
-      "status": "planned_non_commercial_phase",
-      "notes": "当面は広告・有料販売・課金等で収益化せず、販売・収益獲得目的の利用を避ける方針。実際の配布用途がSafe Browsing条件に合うことは公開前に確認する。収益化開始前にWeb Risk APIへの移行・検証と料金/通信/プライバシー案内の確認を完了する。移行は未実装。",
-      "source": "https://developers.google.com/safe-browsing/reference/Appropriate.Usage"
+      "status": "non_commercial_purpose_user_confirmed",
+      "notes": "2026-10-16利用者確認：当面は無料アプリ単独で提供し、会社の集客・有償サービスへの誘導・顧客向けサービスの一部として使う予定はない。広告・有料販売・課金等で収益化しない既存方針と合わせ、販売・収益目的でないという公式条件に沿うと判断する。無料や会社名義という一点だけで判断せず、確認済み用途に基づく判断でGoogleの個別承認ではない。用途変更前には再確認する。収益化開始前にWeb Risk APIへの移行・検証と料金/通信/プライバシー案内の確認を完了する。移行は未実装。",
+      "source": "https://developers.google.com/safe-browsing/reference/Appropriate.Usage",
+      "conditionsCheckedAt": "2026-10-16"
     },
     "appPrivacy": {
       "status": "draft_requires_verification",
