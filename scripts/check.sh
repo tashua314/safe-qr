@@ -13,7 +13,6 @@ mkdir -p "$SAFEQR_ARTIFACTS"
 SAFEQR_TIMES="$SAFEQR_ARTIFACTS/phase-times.log"
 : > "$SAFEQR_TIMES"
 SAFEQR_STARTED_AT="$(date +%s)"
-SAFEQR_BOOT_PID=""
 SAFEQR_RESTORE_CAMERA=0
 
 record_time() {
@@ -28,17 +27,12 @@ write_summary() {
             while IFS=$'\t' read -r phase seconds result; do
                 printf '| %s | %s | %s |\n' "$phase" "$seconds" "$result"
             done < "$SAFEQR_TIMES"
-            echo 'Simulator readiness wait is the remaining wait after overlapping boot with builds.'
         } >> "$GITHUB_STEP_SUMMARY"
     fi
 }
 cleanup() {
     local status=$?
     trap - EXIT
-    if [[ -n "$SAFEQR_BOOT_PID" ]]; then
-        kill "$SAFEQR_BOOT_PID" 2>/dev/null || true
-        wait "$SAFEQR_BOOT_PID" 2>/dev/null || true
-    fi
     if [[ "$SAFEQR_RESTORE_CAMERA" == 1 ]]; then
         if ! xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" grant camera jp.techguide.SafeQR; then
             echo '検証専用Simulatorのカメラ権限復元に失敗しました。' >&2
@@ -70,22 +64,13 @@ SAFEQR_DERIVED_DATA="$SAFEQR_ARTIFACTS/DerivedData"
 COMMON=(-project SafeQR/SafeQR.xcodeproj -scheme SafeQR -derivedDataPath "$SAFEQR_DERIVED_DATA" CODE_SIGNING_ALLOWED=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES)
 DESTINATION="platform=iOS Simulator,id=$SAFEQR_SIMULATOR_ID"
 
-# 専用端末の起動を先に開始し、Debug/Releaseビルドと準備時間を重ねる。
-xcrun simctl bootstatus "$SAFEQR_SIMULATOR_ID" -b > "$SAFEQR_ARTIFACTS/simulator-boot.log" 2>&1 &
-SAFEQR_BOOT_PID=$!
 run_phase Debug-build-for-testing "$SAFEQR_ARTIFACTS/Debug-build.log" xcodebuild "${COMMON[@]}" \
     -configuration Debug -destination "$DESTINATION" build-for-testing
 run_phase Release-build "$SAFEQR_ARTIFACTS/Release-build.log" xcodebuild "${COMMON[@]}" \
     -configuration Release -destination 'generic/platform=iOS Simulator' build
 
-SAFEQR_WAIT_STARTED="$(date +%s)"
-if ! wait "$SAFEQR_BOOT_PID"; then
-    SAFEQR_BOOT_PID=""
-    cat "$SAFEQR_ARTIFACTS/simulator-boot.log"
-    exit 1
-fi
-SAFEQR_BOOT_PID=""
-record_time Simulator-readiness-wait "$(( $(date +%s) - SAFEQR_WAIT_STARTED ))" 0
+# 初回起動とコンパイルを競合させない。起動時間全体を独立して記録する。
+run_phase Simulator-boot "$SAFEQR_ARTIFACTS/simulator-boot.log" xcrun simctl bootstatus "$SAFEQR_SIMULATOR_ID" -b
 xcrun simctl install "$SAFEQR_SIMULATOR_ID" "$SAFEQR_DERIVED_DATA/Build/Products/Debug-iphonesimulator/SafeQR.app"
 xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" grant camera jp.techguide.SafeQR
 

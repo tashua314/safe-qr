@@ -13,13 +13,13 @@
 
 ## macOSで維持する検証
 
-専用Simulatorの起動を先に開始する。Debugはbuild-for-testingでアプリとテストを一度だけ生成し、Release buildも行う。Simulator準備を待ってからアプリを導入し、通常とカメラ拒否をtest-without-buildingで実行する。
+Debugはbuild-for-testingでアプリとテストを一度だけ生成し、Release buildも行う。その後に専用Simulatorを起動してアプリを導入し、通常とカメラ拒否をtest-without-buildingで実行する。初回起動とコンパイルを同時に行う試行ではmacOSジョブが12分13秒から16分35秒へ延びたため、両者を直列にして再計測する。同時起動だけが原因とは断定しない。
 
-全単体/UIテスト、Releaseの警告検査、権限拒否の個別実行とskip 0を維持する。失敗時は自分で起動したbootstatus監視を終了し、変更した専用Simulatorのカメラ権限を復元する。実機の権限は操作しない。
+全単体/UIテスト、Releaseの警告検査、権限拒否の個別実行とskip 0を維持する。失敗時も変更した専用Simulatorのカメラ権限を復元する。実機の権限は操作しない。
 
 ## 証跡と時間
 
-各工程と合計を.artifacts/phase-times.logへ記録し、GitHubのStep summaryにも表示する。Simulatorの準備待ちはビルド後に残った待ち時間で、起動の全所要時間とは異なる。合計と工程時間の単純な加算は一致しない場合がある。
+各工程と合計を.artifacts/phase-times.logへ記録し、GitHubのStep summaryにも表示する。Simulator-bootは起動時間全体を記録する。端末の選択・作成やアプリ導入などもあるため、合計と工程時間の単純な加算は一致しない場合がある。
 
 ログ/xcresultは7日保存する。保存先を限定し、秘密設定ファイルやDerivedDataをアップロードしない。PR画面キャプチャはGitの完全コミットSHAに固定し、期限付きArtifactへ置き換えない。
 
