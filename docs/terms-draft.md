@@ -1,9 +1,13 @@
 # 利用条件の下書き
 
-2026-10-15。未公開・未確定。運営者はTechGuide合同会社、連絡先はy.takahashi@techguide.jpと確認済み。適用開始日・配布方針を確定してから、Apple標準EULAと独自規約の扱いを確認する。この文書は利用者への同意取得や法的確認の完了を示さない。
+2026-10-16。申請下書きの方針を利用者が「無料・日本のみ・Apple標準EULA」と確認した。運営者はTechGuide合同会社、連絡先はy.takahashi@techguide.jp。独自EULAは追加しない方針とする。実際のApp Store Connect設定、適用開始日、契約の承諾、公開、審査提出は未実施。
+
+Appleは独自EULAを指定しなければ標準EULAが適用されると案内している。[AppleのEULA設定の説明](https://developer.apple.com/help/app-store-connect/manage-app-information/provide-a-custom-license-agreement/)、[Apple標準EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)
+
+以下はアプリの挙動・案内を整理したもので、Apple標準EULAを書き換える独自条項や、法的確認の完了を示すものではない。
 
 SafeQRはQRコードからURLを読み取り、端末内のルールと任意の外部情報で危険の可能性を表示する。安全性の保証ではなく、危険なサイトの見逃しや害のないサイトの誤警告があり得る。リンク先と入力内容を確認して利用する。
 
-外部チェックは任意。ネットワーク、設定、サービスの利用条件・クォータにより利用できない場合がある。その場合は未確認として表示する。履歴・設定の保存と削除、対象サイトへの通信はprivacy-policy-draft.mdに記載する。
+外部チェックは任意。ネットワーク、設定、サービスの利用条件・クォータにより利用できない場合がある。その場合は未確認として表示する。履歴・設定の保存と削除、対象サイトへの通信は[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)を参照する。
 
-提供地域・価格、責任範囲、利用停止、規約変更などの条項は未確定。公開前に運営方針と適用される条件へ合わせ、未確定のまま配布しない。
+無料配布だけでSafe Browsingの非商用条件に適合すると断定しない。実際の用途、年齢/App Privacyの申告、審査用連絡先の不足情報、ストア画像の採否は公開前に確認する。将来の収益化開始前にはWeb Riskへの移行・検証と料金・通信・プライバシー案内の確認を完了する。移行は未実装。
