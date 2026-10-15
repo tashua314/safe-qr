@@ -122,11 +122,7 @@ class OpenConfirmViewController: UIViewController {
     }
 
     private func setupDetailToggleButton() {
-        print("🔍 詳細ボタン設定: detectedIssues.count = \(detectedIssues.count)")
-        print("🔍 詳細情報: \(detectedIssues)")
-
         guard !detectedIssues.isEmpty else {
-            print("🔍 詳細情報が空のため、ボタンを非表示にします")
             detailToggleButton.isHidden = true
             return
         }

@@ -165,6 +165,7 @@ class EnhancedUrlRiskEvaluator {
     ) {
         let totalResponseTime = Date().timeIntervalSince(startTime) * 1000
 
+        AppLog.duration(.externalCheckFinished, milliseconds: totalResponseTime)
         switch apiResultWrapper {
         case let .success(apiResult):
             // 最終的な安全性レベルを決定（より厳格な方を採用）
@@ -185,7 +186,7 @@ class EnhancedUrlRiskEvaluator {
 
         case let .failure(error):
             // API失敗時はローカル評価にフォールバック
-            print("Safe Browsing API Error: \(error.localizedDescription)")
+            AppLog.error(.externalCheckFailed, code: error.diagnosticCode)
 
             let result = EvaluationResult(
                 finalSafetyLevel: localResult,

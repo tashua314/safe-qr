@@ -150,26 +150,6 @@ protocol ScannerCoordinatorProtocol: CoordinatorProtocol {
     func openURL(_ url: String)
 }
 
-// MARK: - Logger Protocol
-
-protocol LoggerProtocol {
-    func log(_ message: String, level: LogLevel, category: LogCategory)
-    func error(_ message: String, error: Error?, category: LogCategory)
-}
-
-enum LogLevel {
-    case debug, info, warning, error
-}
-
-enum LogCategory: String, CaseIterable {
-    case qrProcessing = "QR_PROCESSING"
-    case urlEvaluation = "URL_EVALUATION"
-    case networking = "NETWORKING"
-    case ui = "UI"
-    case history = "HISTORY"
-    case security = "SECURITY"
-}
-
 // MARK: - Dependency Injection Protocol
 
 protocol DIContainerProtocol {

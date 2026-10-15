@@ -336,7 +336,7 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
                 }
 
             } catch {
-                print("正規表現エラー: \(error)")
+                AppLog.error(.titleParseFailed, code: (error as NSError).code)
                 continue
             }
         }

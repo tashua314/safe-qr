@@ -70,11 +70,9 @@ class QRCodeProcessor: QRCodeProcessorProtocol {
 
         // 5. 重複チェック
         if processedURLs.contains(qrCode) {
-            print("🔄 重複URL検出: \(qrCode)")
             return .duplicate
         }
 
-        print("✅ QRコード検証成功: \(qrCode)")
         return .valid(qrCode)
     }
 
@@ -83,7 +81,6 @@ class QRCodeProcessor: QRCodeProcessorProtocol {
      */
     func setLightEnabled(_ enabled: Bool) {
         qrScannerService.setTorchEnabled(enabled)
-        print("🔦 ライト設定: \(enabled ? "ON" : "OFF")")
     }
 
     /**
@@ -91,7 +88,6 @@ class QRCodeProcessor: QRCodeProcessorProtocol {
      */
     func resetProcessedURLs() {
         processedURLs.removeAll()
-        print("🗑️ 処理済みURLリストをリセット")
     }
 
     // MARK: - Private Methods
@@ -115,7 +111,6 @@ class QRCodeProcessor: QRCodeProcessorProtocol {
 
         // 2. ローカルネットワークアドレスのチェック
         if let host = url.host, isLocalNetworkAddress(host) {
-            print("⚠️ ローカルネットワークアドレス検出: \(host)")
             // 設定に応じて許可/拒否
             return AppConstants.Security.allowLocalNetwork ? .valid(url.absoluteString) : .invalid(.unsupportedScheme)
         }

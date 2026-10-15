@@ -114,7 +114,7 @@ class ScannerViewModel: ObservableObject {
         do {
             try historyRepository.saveRecord(url: url, safetyLevel: safetyLevel, title: nil)
         } catch {
-            print("履歴保存に失敗しました")
+            AppLog.error(.historySaveFailed, code: (error as NSError).code)
         }
     }
 
@@ -129,7 +129,7 @@ class ScannerViewModel: ObservableObject {
                     do {
                         try self.historyRepository.updateTitle(url: url, title: title)
                     } catch {
-                        print("タイトル更新に失敗しました")
+                        AppLog.error(.titleUpdateFailed, code: (error as NSError).code)
                     }
                 }
             }

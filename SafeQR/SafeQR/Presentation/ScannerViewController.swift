@@ -206,8 +206,6 @@ class ScannerViewController: UIViewController {
 
         qrScannerService.startScanning()
         isScanning = true
-
-        print("📷 QRスキャン開始")
     }
 
     /**
@@ -218,8 +216,6 @@ class ScannerViewController: UIViewController {
 
         qrScannerService.stopScanning()
         isScanning = false
-
-        print("📷 QRスキャン停止")
     }
 
     /**

@@ -131,39 +131,6 @@ class QRScannerService: NSObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 // mockView内でスタックビューだけを最前面に（他のビューは影響しない）
                 mockView.bringSubviewToFront(stackView)
-
-                print("📱 テストボタン設定完了:")
-                print("  - StackView Frame: \(stackView.frame)")
-                print("  - StackView Bounds: \(stackView.bounds)")
-                print("  - StackView isUserInteractionEnabled: \(stackView.isUserInteractionEnabled)")
-                print("  - StackView arrangedSubviews count: \(stackView.arrangedSubviews.count)")
-                print("  - mockView.frame: \(mockView.frame)")
-                print("  - mockView.isUserInteractionEnabled: \(mockView.isUserInteractionEnabled)")
-
-                // 各ボタンの情報も出力
-                for (index, button) in stackView.arrangedSubviews.enumerated() {
-                    if let btn = button as? UIButton {
-                        print("  - Button[\(index)] tag: \(btn.tag), title: \(btn.title(for: .normal) ?? "no title")")
-                    }
-                }
-
-                // 親ビューのsubviews確認
-                if let parentView = mockView.superview {
-                    print("  - 親ビューのsubviews数: \(parentView.subviews.count)")
-                    for (index, subview) in parentView.subviews.enumerated() {
-                        print("    \(index): \(type(of: subview)) - isUserInteractionEnabled: \(subview.isUserInteractionEnabled)")
-                    }
-                }
-
-                // タッチ可能かテスト（最初のボタンでテスト）
-                if let firstButton = stackView.arrangedSubviews.first {
-                    let testPoint = CGPoint(x: firstButton.frame.midX, y: firstButton.frame.midY)
-                    if let hitView = mockView.hitTest(testPoint, with: nil) {
-                        print("  - hitTest結果: \(type(of: hitView))")
-                    } else {
-                        print("  - hitTest結果: nil（タッチ不可）")
-                    }
-                }
             }
         }
 
@@ -190,16 +157,12 @@ class QRScannerService: NSObject {
             switch buttonTag {
             case 0: // 安全URL
                 testURL = "https://example.invalid"
-                print("🟢 テスト: 安全URL")
             case 1: // 注意URL（ブランド偽装3点）
                 testURL = "https://paypal.example.invalid"
-                print("🟡 テスト: 注意URL")
             case 2: // 危険URL（Punycodeとブランド偽装の複合加点）
                 testURL = "https://xn--e1afmkfd-paypal.example.invalid/login"
-                print("🔴 テスト: 危険URL")
             default:
                 testURL = "https://example.invalid"
-                print("🟢 テスト: デフォルト安全URL")
             }
 
             // ViewControllerが監視するpublisherへ実機と同じ経路で配信する。
@@ -250,14 +213,11 @@ class QRScannerService: NSObject {
     }
 
     private func configureCameraSession(in view: UIView) {
-        print("📷 カメラセッション設定開始")
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
-            print("❌ カメラデバイス取得失敗")
+            AppLog.error(.cameraUnavailable, code: 0)
             delegate?.qrScannerService(self, didFailWithError: .cameraNotAvailable)
             return
         }
-
-        print("✅ カメラデバイス取得成功: \(videoCaptureDevice.localizedName)")
 
         do {
             let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
@@ -287,8 +247,6 @@ class QRScannerService: NSObject {
             previewLayer.videoGravity = .resizeAspectFill
             view.layer.addSublayer(previewLayer)
 
-            print("📺 プレビューレイヤー設定完了: frame=\(previewLayer.frame)")
-
             self.captureSession = captureSession
             videoPreviewLayer = previewLayer
 
@@ -304,7 +262,6 @@ class QRScannerService: NSObject {
 
     func startScanning() {
         guard let captureSession = captureSession else {
-            print("⚠️ startScanning: captureSession is nil")
             return
         }
 
@@ -314,7 +271,6 @@ class QRScannerService: NSObject {
                 captureSession.startRunning()
                 DispatchQueue.main.async {
                     self?.isScanning = true
-                    print("📷 カメラスキャン開始")
                 }
             }
         }
@@ -336,16 +292,13 @@ class QRScannerService: NSObject {
     func setTorchEnabled(_ enabled: Bool) {
         #if targetEnvironment(simulator)
             // シミュレータでは何もしない
-            print("🔦 シミュレータ: トーチ設定 \(enabled ? "ON" : "OFF")")
             return
         #else
             guard let device = AVCaptureDevice.default(for: .video) else {
-                print("⚠️ トーチ設定: デバイス取得失敗")
                 return
             }
 
             guard device.hasTorch else {
-                print("⚠️ トーチ設定: フラッシュ未対応デバイス")
                 return
             }
 
@@ -355,18 +308,16 @@ class QRScannerService: NSObject {
                 if enabled {
                     if device.torchMode == .off {
                         try device.setTorchModeOn(level: 1.0)
-                        print("🔦 フラッシュライト ON")
                     }
                 } else {
                     if device.torchMode == .on {
                         device.torchMode = .off
-                        print("🔦 フラッシュライト OFF")
                     }
                 }
 
                 device.unlockForConfiguration()
             } catch {
-                print("❌ フラッシュライト制御エラー: \(error.localizedDescription)")
+                AppLog.error(.torchFailed, code: (error as NSError).code)
             }
         #endif
     }
