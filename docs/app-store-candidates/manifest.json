@@ -1,0 +1,50 @@
+{
+  "status": "draft_pending_user_image_approval",
+  "uploadPerformed": false,
+  "specificationsCheckedAt": "2026-10-16",
+  "specificationsURL": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/",
+  "captures": [
+    {
+      "file": "docs/app-store-candidates/ipad-settings-camera-denied.jpg",
+      "state": "カメラ拒否時の設定。厳しさ標準・外部OFF",
+      "device": "iPad Pro 13-inch (M4) Simulator",
+      "os": "iPadOS26.5 (23F77)",
+      "configuration": "Release",
+      "buildRevision": "fd89997defc4826deed99a75a0ef2d579a9dddd8",
+      "appSourceRevision": "b3c7b9f5afbff22df93c85bcdf88a99f9ee37f16",
+      "capturedAt": "2026-10-16 JST",
+      "cameraPermission": "denied",
+      "externalCheck": "OFF",
+      "apiKeyConfigured": false,
+      "pixels": [
+        2064,
+        2752
+      ],
+      "format": "JPEG",
+      "alphaChannel": false,
+      "sha256": "e237c3460042d466fe293941d83fb23b0f9d21a0eacd59678c0c56098bfc7b99",
+      "captureMethod": "xcrun simctl io screenshot --type=jpeg; original, no resize/composite"
+    },
+    {
+      "file": "docs/app-store-candidates/ipad-history-camera-denied.jpg",
+      "state": "カメラ拒否時の既存模擬履歴3件",
+      "device": "iPad Pro 13-inch (M4) Simulator",
+      "os": "iPadOS26.5 (23F77)",
+      "configuration": "Release",
+      "buildRevision": "fd89997defc4826deed99a75a0ef2d579a9dddd8",
+      "appSourceRevision": "b3c7b9f5afbff22df93c85bcdf88a99f9ee37f16",
+      "capturedAt": "2026-10-16 JST",
+      "cameraPermission": "denied",
+      "externalCheck": "OFF",
+      "apiKeyConfigured": false,
+      "pixels": [
+        2064,
+        2752
+      ],
+      "format": "JPEG",
+      "alphaChannel": false,
+      "sha256": "17f00df89dee11605fe8504bd66831bf4a96ea144f267da1a9db1cb2e5a24f9a",
+      "captureMethod": "xcrun simctl io screenshot --type=jpeg; original, no resize/composite"
+    }
+  ]
+}
