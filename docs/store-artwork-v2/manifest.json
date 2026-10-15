@@ -23,7 +23,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "1d4cbe1191e8673fcf56950931f33bf95faebffbf169311eb94ede5603ab4880"
+      "sha256": "5b41fa05008c4ad85cb788c88799d3e7cf86fcaed5bd2ef580456a82dee4ddd4"
     },
     {
       "file": "ipad-02-stop-without-opening.png",
@@ -33,7 +33,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "9adf7c75701a69fcdbaddc3dad78d05922250134c8843eeac924643da9541e1d"
+      "sha256": "98fc9f629bc5aad5c1661e157d3024ef5a12536d18611f56896178037a344cde"
     },
     {
       "file": "ipad-03-find-again.png",
@@ -43,7 +43,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "051061c3b6335349e0d71e039d997dee259fbec2426d9dffa890e4f8d867948f"
+      "sha256": "3d938bc4ce84d9c9588cdd9d01909f693dff3c05c32a7aca1773c12a05941893"
     },
     {
       "file": "iphone-01-before-open.png",
@@ -53,7 +53,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "f8e8e2a910f3cb8db6471c226ff8f1fcc00f4784af18f8b771f1ee3b69535eef"
+      "sha256": "a61dccdf4221b02229b6954a1d8d7f36e812eacdc561fb596399590cf639ace1"
     },
     {
       "file": "iphone-02-stop-without-opening.png",
@@ -63,7 +63,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "e09eeff53c3dc0689c54e9b0117add359047c19291026b127a5283c4a52cc803"
+      "sha256": "7e5e93425da577127667886d1c81f58c51d97430838a582297444446d4113450"
     },
     {
       "file": "iphone-03-find-again.png",
@@ -73,7 +73,7 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "121948cdaa8807d24333fd0dfc039fb4abf4aa3f3db1d1895242515b5af86fe5"
+      "sha256": "10fbd45b369215d125c4de9b342f2e4ef679c4dddb8b5150d5bdedd4e1de81e9"
     },
     {
       "file": "overview.png",
@@ -83,7 +83,8 @@
       ],
       "hasAlpha": false,
       "colorType": 2,
-      "sha256": "d5c09cce6a698483f533a705436decc983e3f1d839cbe958c7df8d8c6fd1ec5d"
+      "sha256": "121513f7986ff7fb2a129ca7434600a834c7fe7f9a806b1c5c9abdb772075dbb"
     }
-  ]
+  ],
+  "confirmationCopy": "注意画面が出た場合に確認できるという条件を明示。安全URLで毎回選択画面が出るとは案内しない。"
 }
