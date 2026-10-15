@@ -1,0 +1,110 @@
+{
+  "status": "draft_not_approved_not_uploaded",
+  "createdAt": "2026-10-16",
+  "composition": "generated background + HTML typography + actual app screenshots; iPad real screenshot cropped/enlarged, explicitly labeled",
+  "appSourceRevision": "b3c7b9f5afbff22df93c85bcdf88a99f9ee37f16",
+  "ipadRawCapture": {
+    "file": "ipad-caution-history-camera-denied.jpg",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "hasAlpha": false,
+    "sha256": "8c33fdda3b9bf648cf13b5497304e1442b3a5fb995b1546140fc13e48ed8242e",
+    "device": "iPad Pro 13-inch M4 Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "state": "camera denied, external check OFF, .invalid mock history; cancellation only, no destination opened"
+  },
+  "images": [
+    {
+      "file": "app-icon.png",
+      "pixels": [
+        180,
+        180
+      ],
+      "colorType": 6,
+      "hasAlpha": true,
+      "sha256": "4aa813d61c50c007d27bff9461c5379b223fd4450663ee3f768d634a5a370b64"
+    },
+    {
+      "file": "generated-background-v1.png",
+      "pixels": [
+        852,
+        1846
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "5432b0a25f51c560612000f497f2bf41ddc0e70bdb13952c4fc976f9ea736e36"
+    },
+    {
+      "file": "ipad-01-check-before-open.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "99c2ae3bff378023b5e4fe6ade064a46831e80c3056fafcbad50e27ab06a54c8"
+    },
+    {
+      "file": "ipad-02-local-history.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "f0951571ad9ea9ebccaf4ac95705034c24feacc654b8c88a2a1b4f6910a12e4b"
+    },
+    {
+      "file": "ipad-03-optional-check.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "d10fea3e55abc5d1cc9c1ad4067fad4f847febd27a7f1fe3c3a4b262fd791b12"
+    },
+    {
+      "file": "iphone-01-check-before-open.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "ca4c9689db8e1c5f13e9e49d3ab2dd8d95362e6d6972e119a30b05c244ee56af"
+    },
+    {
+      "file": "iphone-02-local-history.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "7c0cc08ce2cfb0cefdb4184bd0278f489f343ebe71707af550b8b9fec4523647"
+    },
+    {
+      "file": "iphone-03-optional-check.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "96e4276bcf5c05e5ed3b6c36e503c2a0149ab0f80926a96fea408660f70b4a38"
+    },
+    {
+      "file": "overview.png",
+      "pixels": [
+        1200,
+        1600
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "0c73c35fbf86edc6e281f3957fa04953a6003e43b9707bdac95f2fed0dfbfc81"
+    }
+  ]
+}

@@ -36,4 +36,4 @@ UserDefaultsの必須理由API宣言はIssue #31 / PR #32で対応する。理�
 
 ## 最終確定に必要な入力
 
-運営者TechGuide合同会社・問い合わせ先y.takahashi@techguide.jpは利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。無料・日本のみ・Apple標準EULAの申請方針は2026-10-16利用者確認済み。実際の用途とSafe Browsing条件の適合、年齢の最終回答、外部事業者の処理の確認を残す。申請画像・説明も確定前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。
+運営者TechGuide合同会社・公開窓口[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)は利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。無料・日本のみ・Apple標準EULAの申請方針は2026-10-16利用者確認済み。実際の用途とSafe Browsing条件の適合、年齢の最終回答、外部事業者の処理の確認を残す。申請画像・説明も確定前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。

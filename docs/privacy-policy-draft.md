@@ -1,6 +1,6 @@
 # SafeQR プライバシーポリシー（下書き）
 
-最終更新日：2026-10-16。運営者はTechGuide合同会社、お問い合わせ先は[y.takahashi@techguide.jp](mailto:y.takahashi@techguide.jp)。利用者向け公開版は[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)。2026-10-16にHTTP200を確認済み。この文書は実装の確認用下書きで、App Store Privacy回答の確定とは別に扱う。
+最終更新日：2026-10-16。運営者はTechGuide合同会社、お問い合わせ先は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)。利用者向け公開版は[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)。2026-10-16にHTTP200を確認済み。この文書は実装の確認用下書きで、App Store Privacy回答の確定とは別に扱う。
 
 ## カメラと端末内の履歴
 
@@ -26,8 +26,8 @@ QRコードの読み取りにカメラを使用する。アプリはカメラ画
 
 ## 本Webサイト
 
-公開ページはアプリとは別にAWSのホスティングとGoogle Analyticsによるアクセス解析を利用する。アプリのQR内容や履歴をサイトの解析へ送信する機能はない。メールで受け取った返信先・相談内容は問い合わせ対応・連絡のために使う。必要のない個人情報を送らないよう案内する。
+公開ページはアプリとは別にAWSのホスティングとGoogle Analyticsによるアクセス解析を利用する。アプリのQR内容や履歴をサイトの解析へ送信する機能はない。フォームへ入力いただいた情報は問い合わせ対応・連絡のために使う。必要のない個人情報を送らないよう案内する。
 
 ## お問い合わせ・申請前の確認
 
-運営者：TechGuide合同会社。お問い合わせ：[y.takahashi@techguide.jp](mailto:y.takahashi@techguide.jp)。[サポート](https://techguide.jp/safeqr/)・[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)を公開済み。App Storeのプライバシー回答は、第三者サービスを含む実際のデータ処理と現在のAppleの質問項目を確認してから確定する。この文書だけで法的要件やApple基準への適合を確認したことにはしない。
+運営者：TechGuide合同会社。お問い合わせ：[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)。[サポート](https://techguide.jp/safeqr/)・[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)を公開済み。App Storeのプライバシー回答は、第三者サービスを含む実際のデータ処理と現在のAppleの質問項目を確認してから確定する。この文書だけで法的要件やApple基準への適合を確認したことにはしない。
