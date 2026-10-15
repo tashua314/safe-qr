@@ -24,6 +24,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A04A00010000000000000001 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/Debug.xcconfig; sourceTree = "<group>"; };
+		A04A00010000000000000002 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/Release.xcconfig; sourceTree = "<group>"; };
 		D62E60DC2E5A7EA0000D7763 /* SafeQR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SafeQR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D62E60F22E5A7EA2000D7763 /* SafeQRTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SafeQRTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D62E60FC2E5A7EA2000D7763 /* SafeQRUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SafeQRUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +90,8 @@
 		D62E60D32E5A7EA0000D7763 = {
 			isa = PBXGroup;
 			children = (
+				A04A00010000000000000001 /* Debug.xcconfig */,
+				A04A00010000000000000002 /* Release.xcconfig */,
 				D62E60DE2E5A7EA0000D7763 /* SafeQR */,
 				D62E60F52E5A7EA2000D7763 /* SafeQRTests */,
 				D62E60FF2E5A7EA2000D7763 /* SafeQRUITests */,
@@ -284,6 +288,7 @@
 /* Begin XCBuildConfiguration section */
 		D62E61062E5A7EA2000D7763 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A04A00010000000000000001 /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -312,6 +317,7 @@
 		};
 		D62E61072E5A7EA2000D7763 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A04A00010000000000000002 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -1,13 +1,3 @@
-// Debug環境設定
-// ローカル開発用の設定
-
-// Google Safe Browsing API Key (開発用)
-SAFE_BROWSING_API_KEY = YOUR_DEV_API_KEY_HERE
-
-// アプリケーション設定
-PRODUCT_BUNDLE_IDENTIFIER = jp.techguide.SafeQR.dev
-PRODUCT_NAME = SafeQR (Dev)
-
-// デバッグ用フラグ
-DEBUG_MODE = YES
-ENABLE_LOGGING = YES
+// 未設定のままでもビルドでき、外部照会は設定未完了になる。
+SAFE_BROWSING_API_KEY =
+#include? "Local-Keys.xcconfig"

@@ -4,11 +4,7 @@ import Foundation
 /// v5 hashes.searchへSHA-256の4バイトprefixだけを送り、完全ハッシュは端末で照合する。
 class SafeBrowsingAPIClient {
     struct Configuration {
-        var apiKey: () -> String? = {
-            guard let key = Bundle.main.object(forInfoDictionaryKey: "SafeBrowsingAPIKey") as? String,
-                  !key.isEmpty, key != "YOUR_API_KEY_HERE" else { return nil }
-            return key
-        }
+        var apiKey: () -> String? = { SafeBrowsingAPIKey.fromBundle() }
 
         var externalEnabled: () -> Bool = { SettingsStore.shared.isExternalReputationEnabled }
         var suffixList: PublicSuffixList? = .bundled
@@ -97,7 +93,7 @@ class SafeBrowsingAPIClient {
         guard configuration.externalEnabled() else { completion(.failure(.disabled))
             return
         }
-        guard let key = configuration.apiKey() else { completion(.failure(.apiKeyMissing))
+        guard let key = SafeBrowsingAPIKey.validated(configuration.apiKey()) else { completion(.failure(.apiKeyMissing))
             return
         }
         guard let suffixList = configuration.suffixList else { completion(.failure(.suffixListUnavailable))
