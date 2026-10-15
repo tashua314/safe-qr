@@ -319,7 +319,9 @@ class ScannerViewController: UIViewController {
         }
 
         let safariVC = SFSafariViewController(url: urlObject)
+        safariVC.delegate = self
         present(safariVC, animated: true)
+        safariVC.presentationController?.delegate = self
     }
 
     // MARK: - Error Handling
@@ -343,5 +345,15 @@ class ScannerViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
 
         present(alert, animated: true)
+    }
+}
+
+extension ScannerViewController: SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        controller.dismiss(animated: true) { [weak self] in self?.viewModel.resetScan() }
+    }
+
+    func presentationControllerDidDismiss(_: UIPresentationController) {
+        viewModel.resetScan()
     }
 }

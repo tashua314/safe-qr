@@ -67,6 +67,46 @@ final class SafeQRUITests: XCTestCase {
     }
 
     @MainActor
+    func testApprovedScanAndHistoryResumeAfterBrowserCloses() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
+        app.buttons["設定"].tap()
+        app.segmentedControls.buttons["標準"].tap()
+        if app.switches.firstMatch.value as? String != "0" { app.switches.firstMatch.tap() }
+        app.buttons["閉じる"].tap()
+        app.buttons["注意URL テスト"].tap()
+        XCTAssertTrue(app.buttons["続行する"].waitForExistence(timeout: 5))
+        app.buttons["続行する"].tap()
+        closeBrowser(app)
+        app.buttons["注意URL テスト"].tap()
+        XCTAssertTrue(app.buttons["やめる（推奨）"].waitForExistence(timeout: 5))
+        app.buttons["やめる（推奨）"].tap()
+        app.buttons["履歴"].tap()
+        let row = app.staticTexts["paypal.example.invalid"].firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        row.tap()
+        XCTAssertTrue(app.buttons["続行する"].waitForExistence(timeout: 5))
+        app.buttons["続行する"].tap()
+        closeBrowser(app)
+        row.tap()
+        XCTAssertTrue(app.buttons["やめる（推奨）"].waitForExistence(timeout: 5))
+        app.buttons["やめる（推奨）"].tap()
+        app.buttons["閉じる"].tap()
+    }
+
+    @MainActor
+    private func closeBrowser(_ app: XCUIApplication) {
+        let done = app.otherElements["TopBrowserBar"].buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完了", "閉じる", "Close"]))
+            .firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 10))
+        // iOS26のSafariはURL欄とAX領域が重なるため、角ではなく丸い閉じるボタンの中心を押す。
+        done.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(done.waitForNonExistence(timeout: 10))
+    }
+
+    @MainActor
     private func prepareNonDefaultSettings(_ app: XCUIApplication) {
         XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
         app.buttons["設定"].tap()
