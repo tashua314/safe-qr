@@ -12,15 +12,15 @@
       "ja": {
         "displayName": "SafeQR",
         "subtitle": "安全なQRコードリーダー",
-        "description": "危険なURLから身を守りながら、安心してQRコードをスキャンできるアプリです。ITリテラシーに関係なく、誰でも簡単に安全なQRコード体験を楽しめます。\n\n🔒 安全性を最優先に設計\nSafeQRは、スキャンしたQRコードに含まれるURLの安全性を自動的に判定し、危険なサイトへのアクセスを事前に警告します。フィッシングサイトやマルウェア配布サイトなど、様々な脅威からあなたのデバイスと個人情報を守ります。\n\n✨ 主な機能\n\n🎯 高精度な危険度判定\n- 独自のURL解析エンジンによる即座の安全性評価\n- Google Safe Browsing APIとの連携による高精度な脅威検出\n- 安全、注意、危険の3段階で分かりやすく表示\n\n📱 使いやすいインターface\n- カメラを起動して即座にスキャン開始\n- 大きく見やすいプレビュー画面\n- シンプルで直感的な操作性\n- フラッシュライト機能でどんな環境でもスキャン可能\n\n📚 充実した履歴管理\n- スキャンしたQRコードの履歴を最大50件まで保存\n- ウェブページのタイトルを自動取得して見やすく表示\n- 同じURLを再度スキャンした場合は訪問回数をカウント\n- 履歴からワンタップで再アクセス可能\n\n⚙️ カスタマイズ可能な設定\n- 安全性判定の厳しさを3段階で調整可能\n- 外部セキュリティサービスのON/OFF切り替え\n- プライバシーを重視した設定オプション\n\n🛡️ プライバシー保護\n- スキャンしたURLの生データは外部に送信されません\n- すべての履歴データは端末内にのみ保存\n- 不要な権限の要求は一切ありません",
+        "description": "危険なURLから身を守りながら、安心してQRコードをスキャンできるアプリです。ITリテラシーに関係なく、誰でも簡単に安全なQRコード体験を楽しめます。\n\n🔒 安全性を最優先に設計\nSafeQRは、スキャンしたQRコードに含まれるURLの安全性を自動的に判定し、危険なサイトへのアクセスを事前に警告します。フィッシングサイトやマルウェア配布サイトなど、様々な脅威からあなたのデバイスと個人情報を守ります。\n\n✨ 主な機能\n\n🎯 高精度な危険度判定\n- 独自のURL解析エンジンによる即座の安全性評価\n- Google Safe Browsing APIとの連携による高精度な脅威検出\n- 安全、注意、危険の3段階で分かりやすく表示\n\n📱 使いやすいインターface\n- カメラを起動して即座にスキャン開始\n- 大きく見やすいプレビュー画面\n- シンプルで直感的な操作性\n- フラッシュライト機能でどんな環境でもスキャン可能\n\n📚 充実した履歴管理\n- スキャンしたQRコードの履歴を最大50件まで保存\n- ウェブページのタイトルを自動取得して見やすく表示\n- 同じURLを再度スキャンした場合は訪問回数をカウント\n- 履歴からワンタップで再アクセス可能\n\n⚙️ カスタマイズ可能な設定\n- 安全性判定の厳しさを3段階で調整可能\n- 外部セキュリティサービスのON/OFF切り替え\n- プライバシーを重視した設定オプション\n\n🛡️ プライバシー保護\n- Google安全性照会はSHA-256の先頭4バイトのみを送信（URL全文は送信しません）。IP等の通信情報はGoogleへ届きます\n- タイトル取得・ブラウザ表示は対象サイトへ通信します\n- すべての履歴データは端末内にのみ保存\n- 不要な権限の要求は一切ありません",
         "keywords": "QRコードリーダー,バーコード,セキュリティ,安全,スキャナー,プライバシー,フィッシング対策,URL,カメラ,履歴",
-        "promotionalText": "危険なURLを事前に警告する安全第一のQRコードリーダー。Google Safe Browsing連携で高精度な脅威検出。履歴管理機能付きで使いやすく、プライバシーも完全保護。",
+        "promotionalText": "危険なURLを事前に警告する安全第一のQRコードリーダー。Google Safe Browsing連携で高精度な脅威検出。履歴管理機能付きで使いやすく、Googleへの照会はURL全文を送らない方式です。",
         "releaseNotes": "初回リリースです。安全で快適なQRコードスキャンをお楽しみください。"
       },
       "en": {
         "displayName": "SafeQR",
         "subtitle": "Security-First QR Code Reader",
-        "description": "Scan QR codes safely with automatic URL safety detection. Protect yourself from malicious websites while enjoying a seamless QR code experience, regardless of your technical expertise.\n\n🔒 Security-First Design\nSafeQR automatically evaluates the safety of URLs contained in scanned QR codes and warns you about dangerous sites before you visit them. Protect your device and personal information from phishing sites, malware distribution sites, and other online threats.\n\n✨ Key Features\n\n🎯 High-Precision Threat Detection\n- Instant safety evaluation with proprietary URL analysis engine\n- High-accuracy threat detection powered by Google Safe Browsing API\n- Clear 3-level safety indication: Safe, Caution, Danger\n\n📱 User-Friendly Interface\n- Instant scanning with camera activation\n- Large, clear preview screen\n- Simple and intuitive operation\n- Flashlight support for scanning in any environment\n\n📚 Comprehensive History Management\n- Store up to 50 scanned QR code records\n- Automatic web page title retrieval for easy identification\n- Visit count tracking for repeated URLs\n- One-tap re-access from history\n\n⚙️ Customizable Settings\n- 3-level safety strictness adjustment\n- Toggle external security service integration\n- Privacy-focused configuration options\n\n🛡️ Privacy Protection\n- Raw URL data never sent to external servers\n- All history data stored locally on device only\n- No unnecessary permission requests",
+        "description": "Scan QR codes safely with automatic URL safety detection. Protect yourself from malicious websites while enjoying a seamless QR code experience, regardless of your technical expertise.\n\n🔒 Security-First Design\nSafeQR automatically evaluates the safety of URLs contained in scanned QR codes and warns you about dangerous sites before you visit them. Protect your device and personal information from phishing sites, malware distribution sites, and other online threats.\n\n✨ Key Features\n\n🎯 High-Precision Threat Detection\n- Instant safety evaluation with proprietary URL analysis engine\n- High-accuracy threat detection powered by Google Safe Browsing API\n- Clear 3-level safety indication: Safe, Caution, Danger\n\n📱 User-Friendly Interface\n- Instant scanning with camera activation\n- Large, clear preview screen\n- Simple and intuitive operation\n- Flashlight support for scanning in any environment\n\n📚 Comprehensive History Management\n- Store up to 50 scanned QR code records\n- Automatic web page title retrieval for easy identification\n- Visit count tracking for repeated URLs\n- One-tap re-access from history\n\n⚙️ Customizable Settings\n- 3-level safety strictness adjustment\n- Toggle external security service integration\n- Privacy-focused configuration options\n\n🛡️ Privacy Protection\n- Google safety checks send only 4-byte SHA-256 prefixes, not raw URLs. Google receives network information such as your IP address\n- Title retrieval and browsing contact the destination website\n- All history data stored locally on device only\n- No unnecessary permission requests",
         "keywords": "QR code reader,barcode scanner,security,safety,privacy,phishing protection,URL scanner,camera,history",
         "promotionalText": "Security-first QR code reader with automatic dangerous URL warnings. High-precision threat detection via Google Safe Browsing. History management with privacy protection.",
         "releaseNotes": "Initial release. Enjoy safe and comfortable QR code scanning."
@@ -46,7 +46,7 @@
       "demoAccount": {
         "required": false
       },
-      "notes": "このアプリはカメラ権限が必要です。QRコードのスキャンに使用され、画像や動画の保存は行いません。外部APIとしてGoogle Safe Browsing APIを使用していますが、URLの生データは送信せず、ハッシュ化された情報のみを送信します。"
+      "notes": "カメラはQRコードのスキャンに使用し、画像や動画を保存しません。外部チェックは任意ONで、Google Safe Browsing v5 hashes.searchへSHA-256の先頭4バイトをbase64で送信し、完全ハッシュを端末内で照合します。URL全文はGoogleへ送らず、IP等の通信情報は届きます。タイトル取得とブラウザ表示は対象サイトへ通信します。警告と通信のタイミングはIssue #2の修正後に最終確認してください。申請用の下書きです。"
     },
     "screenshots": {
       "required": {
@@ -96,19 +96,35 @@
       "シンプルで分かりやすいUI"
     ],
     "keywords": {
-      "primary": ["QRコードリーダー", "セキュリティ", "安全"],
-      "secondary": ["バーコード", "プライバシー", "フィッシング対策"],
-      "longTail": ["安全なQRコード", "危険URL検出", "プライバシー重視"]
+      "primary": [
+        "QRコードリーダー",
+        "セキュリティ",
+        "安全"
+      ],
+      "secondary": [
+        "バーコード",
+        "プライバシー",
+        "フィッシング対策"
+      ],
+      "longTail": [
+        "安全なQRコード",
+        "危険URL検出",
+        "プライバシー重視"
+      ]
     }
   },
   "releaseStrategy": {
     "softLaunch": {
-      "regions": ["Japan"],
+      "regions": [
+        "Japan"
+      ],
       "duration": "1-2 weeks",
       "goals": "初期フィードバック収集、バグ修正"
     },
     "globalLaunch": {
-      "regions": ["Worldwide"],
+      "regions": [
+        "Worldwide"
+      ],
       "timing": "ソフトローンチ完了後",
       "goals": "グローバル展開、ユーザー獲得"
     }

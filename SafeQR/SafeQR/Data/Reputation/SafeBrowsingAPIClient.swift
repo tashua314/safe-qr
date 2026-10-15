@@ -1,83 +1,51 @@
-import CommonCrypto
+import CryptoKit
 import Foundation
 
-/**
- * Google Safe Browsing API v4 クライアント
- * プライバシー保護のため、URLハッシュプレフィックスを使用
- * 高精度な脅威検出とリアルタイム更新を提供
- */
+/// v5 hashes.searchへSHA-256の4バイトprefixだけを送り、完全ハッシュは端末で照合する。
 class SafeBrowsingAPIClient {
-    // MARK: - 定数
-
-    /// Safe Browsing API v4 エンドポイント
-    private let apiEndpoint = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    /// ハッシュプレフィックス長（プライバシーとパフォーマンスのバランス）
-    private let hashPrefixLength = 4 // 4バイト = 32bit
-
-    /// API タイムアウト（秒）
-    private let timeoutInterval: TimeInterval = 5.0
-
-    /// キャッシュ有効期限（秒）
-    private let cacheValidityDuration: TimeInterval = 24 * 60 * 60 // 24時間
-
-    // MARK: - プロパティ
-
-    /// APIキー（Info.plistまたは環境変数から取得）
-    private var apiKey: String? {
-        // Info.plistから取得
-        if let key = Bundle.main.object(forInfoDictionaryKey: "SafeBrowsingAPIKey") as? String,
-           !key.isEmpty, key != "YOUR_API_KEY_HERE" {
+    struct Configuration {
+        var apiKey: () -> String? = {
+            guard let key = Bundle.main.object(forInfoDictionaryKey: "SafeBrowsingAPIKey") as? String,
+                  !key.isEmpty, key != "YOUR_API_KEY_HERE" else { return nil }
             return key
         }
 
-        // デバッグ時の警告
-        #if DEBUG
-            print("⚠️ Safe Browsing APIキーが設定されていません。")
-            print("  Info.plistに 'SafeBrowsingAPIKey' を追加してください。")
-            print("  取得方法: https://developers.google.com/safe-browsing/v4/get-started")
-        #endif
-
-        return nil
+        var externalEnabled: () -> Bool = { SettingsStore.shared.isExternalReputationEnabled }
+        var suffixList: PublicSuffixList? = .bundled
+        var now: () -> Date = Date.init
     }
 
-    /// 設定ストア
-    private let settingsStore = SettingsStore.shared
+    private let configuration: Configuration
+    private let session: URLSession
+    private let cache = SafeBrowsingHashCache()
+    private let endpoint = "https://safebrowsing.googleapis.com/v5/hashes:search"
 
-    /// キャッシュストレージ
-    private let cache = URLCache.shared
+    init(configuration: Configuration = Configuration(), session: URLSession? = nil) {
+        self.configuration = configuration
+        if let session = session {
+            self.session = session
+        } else {
+            let settings = URLSessionConfiguration.ephemeral
+            settings.timeoutIntervalForRequest = 5
+            settings.timeoutIntervalForResource = 5
+            settings.urlCache = nil
+            settings.httpCookieStorage = nil
+            settings.httpShouldSetCookies = false
+            self.session = URLSession(configuration: settings, delegate: SafeBrowsingSessionDelegate(), delegateQueue: nil)
+        }
+    }
 
-    /// URLセッション
-    private lazy var urlSession: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = timeoutInterval
-        config.timeoutIntervalForResource = timeoutInterval
-        config.urlCache = cache
-        return URLSession(configuration: config)
-    }()
-
-    // MARK: - 型定義
-
-    /// Safe Browsing 脅威タイプ
     enum ThreatType: String, CaseIterable {
         case malware = "MALWARE"
-        case socialEngineering = "SOCIAL_ENGINEERING" // フィッシング
+        case socialEngineering = "SOCIAL_ENGINEERING"
         case unwantedSoftware = "UNWANTED_SOFTWARE"
         case potentiallyHarmfulApplication = "POTENTIALLY_HARMFUL_APPLICATION"
 
         var safetyLevel: SafetyLevel {
-            switch self {
-            case .malware, .potentiallyHarmfulApplication:
-                return .danger
-            case .socialEngineering:
-                return .danger
-            case .unwantedSoftware:
-                return .caution
-            }
+            self == .unwantedSoftware ? .caution : .danger
         }
     }
 
-    /// API レスポンス結果
     struct SafeBrowsingResult {
         let isURLSafe: Bool
         let detectedThreats: [ThreatType]
@@ -85,16 +53,9 @@ class SafeBrowsingAPIClient {
         let responseTime: Double
         let cacheHit: Bool
 
-        static let safe = SafeBrowsingResult(
-            isURLSafe: true,
-            detectedThreats: [],
-            safetyLevel: .safe,
-            responseTime: 0,
-            cacheHit: false
-        )
+        static let safe = SafeBrowsingResult(isURLSafe: true, detectedThreats: [], safetyLevel: .safe, responseTime: 0, cacheHit: false)
     }
 
-    /// APIエラー
     enum SafeBrowsingError: Error {
         case invalidURL
         case apiKeyMissing
@@ -102,376 +63,156 @@ class SafeBrowsingAPIClient {
         case apiError(Int, String)
         case parsingError
         case timeout
+        case suffixListUnavailable
+        case cacheExpired
 
         var localizedDescription: String {
             switch self {
-            case .invalidURL:
-                return "無効なURLです"
-            case .apiKeyMissing:
-                return "APIキーが設定されていません"
-            case let .networkError(error):
-                return "ネットワークエラー: \(error.localizedDescription)"
-            case let .apiError(code, message):
-                if code == 403 {
-                    return "APIキー認証エラー [403]: APIキーが無効または未設定です。Info.plistを確認してください。"
-                }
-                return "APIエラー [\(code)]: \(message)"
-            case .parsingError:
-                return "レスポンス解析エラー"
-            case .timeout:
-                return "タイムアウトしました"
+            case .invalidURL: return "無効なURLです"
+            case .apiKeyMissing: return "APIキーが設定されていません"
+            case let .networkError(error): return "ネットワークエラー: \(error.localizedDescription)"
+            case let .apiError(code, message): return "APIエラー [\(code)]: \(message)"
+            case .parsingError: return "レスポンス解析エラー"
+            case .timeout: return "タイムアウトしました"
+            case .suffixListUnavailable: return "URL判定用リソースが読み込めません"
+            case .cacheExpired: return "外部判定の有効期限が切れました"
             }
         }
     }
 
-    // MARK: - 公開メソッド
-
-    /**
-     * URLの安全性をチェック
-     * @param url: チェック対象URL
-     * @param completion: 完了コールバック
-     */
     func checkURL(_ url: String, completion: @escaping (Result<SafeBrowsingResult, SafeBrowsingError>) -> Void) {
-        // 外部API使用が無効な場合
-        guard settingsStore.isExternalReputationEnabled else {
-            completion(.success(.safe))
+        guard configuration.externalEnabled() else { completion(.success(.safe))
             return
         }
-
-        // APIキーチェック
-        guard let apiKey = apiKey else {
-            completion(.failure(.apiKeyMissing))
+        guard let key = configuration.apiKey() else { completion(.failure(.apiKeyMissing))
             return
         }
-
-        // URL妥当性チェック
-        guard let urlObject = URL(string: url) else {
+        guard let suffixList = configuration.suffixList else { completion(.failure(.suffixListUnavailable))
+            return
+        }
+        let fullHashes: Set<Data>
+        do {
+            fullHashes = try SafeBrowsingURLHasher(suffixList: suffixList).fullHashes(for: url)
+        } catch {
             completion(.failure(.invalidURL))
             return
         }
-
-        let startTime = Date()
-
-        // キャッシュチェック
-        if let cachedResult = getCachedResult(for: url) {
-            let result = SafeBrowsingResult(
-                isURLSafe: cachedResult.isURLSafe,
-                detectedThreats: cachedResult.detectedThreats,
-                safetyLevel: cachedResult.safetyLevel,
-                responseTime: Date().timeIntervalSince(startTime) * 1000,
-                cacheHit: true
-            )
-            completion(.success(result))
+        let start = configuration.now()
+        let prefixes = Set(fullHashes.map { Data($0.prefix(4)) })
+        let cached = cache.lookup(prefixes, now: start)
+        if cached.missing.isEmpty {
+            completion(.success(evaluate(cached.hashes, candidates: fullHashes, start: start, cacheHit: true)))
             return
         }
-
-        // APIリクエスト実行
-        performAPIRequest(urlObject, apiKey: apiKey, startTime: startTime, completion: completion)
-    }
-
-    /**
-     * 複数URLの一括チェック
-     * @param urls: チェック対象URL配列
-     * @param completion: 完了コールバック（URL: 結果のマップ）
-     */
-    func checkURLs(_ urls: [String], completion: @escaping ([String: SafeBrowsingResult]) -> Void) {
-        let dispatchGroup = DispatchGroup()
-        var results: [String: SafeBrowsingResult] = [:]
-        let resultsQueue = DispatchQueue(label: "safebrowsing.results", attributes: .concurrent)
-
-        for url in urls {
-            dispatchGroup.enter()
-            checkURL(url) { result in
-                resultsQueue.async(flags: .barrier) {
-                    switch result {
-                    case let .success(safeBrowsingResult):
-                        results[url] = safeBrowsingResult
-                    case .failure:
-                        // エラーの場合は安全として扱う（フォールバック）
-                        results[url] = .safe
-                    }
-                    dispatchGroup.leave()
-                }
-            }
-        }
-
-        dispatchGroup.notify(queue: .main) {
-            completion(results)
-        }
-    }
-
-    // MARK: - プライベートメソッド
-
-    /**
-     * APIリクエストの実行
-     */
-    private func performAPIRequest(
-        _ url: URL,
-        apiKey: String,
-        startTime: Date,
-        completion: @escaping (Result<SafeBrowsingResult, SafeBrowsingError>) -> Void
-    ) {
-        guard let request = buildAPIRequest(for: url, apiKey: apiKey) else {
-            completion(.failure(.invalidURL))
+        guard let request = makeRequest(prefixes: cached.missing, key: key) else { completion(.failure(.invalidURL))
             return
         }
-
-        urlSession.dataTask(with: request) { [weak self] data, response, error in
+        session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
-                self?.handleAPIResponse(
-                    payload: ResponsePayload(data: data, response: response, error: error),
-                    url: url.absoluteString,
-                    startTime: startTime,
-                    completion: completion
-                )
+                let result = self.handleResponse(data: data, response: response, error: error, prefixes: cached.missing)
+                completion(result.flatMap { hashes in
+                    let freshCache = self.cache.lookup(prefixes.subtracting(cached.missing), now: self.configuration.now())
+                    guard freshCache.missing.isEmpty else { return .failure(.cacheExpired) }
+                    return .success(self.evaluate(freshCache.hashes + hashes, candidates: fullHashes, start: start, cacheHit: false))
+                })
             }
         }.resume()
     }
 
-    /**
-     * APIリクエストの構築
-     */
-    private func buildAPIRequest(for url: URL, apiKey: String) -> URLRequest? {
-        guard var urlComponents = URLComponents(string: apiEndpoint) else {
-            return nil
+    func checkURLs(_ urls: [String], completion: @escaping ([String: SafeBrowsingResult]) -> Void) {
+        let group = DispatchGroup()
+        let lock = NSLock()
+        var results = [String: SafeBrowsingResult]()
+        for url in urls {
+            group.enter()
+            checkURL(url) { result in
+                lock.lock()
+                switch result {
+                case let .success(value): results[url] = value
+                case .failure: results[url] = .safe
+                }
+                lock.unlock()
+                group.leave()
+            }
         }
+        group.notify(queue: .main) { completion(results) }
+    }
 
-        // APIキーをクエリパラメータに追加
-        urlComponents.queryItems = [URLQueryItem(name: "key", value: apiKey)]
-
-        guard let requestURL = urlComponents.url else {
-            return nil
+    private func makeRequest(prefixes: Set<Data>, key: String) -> URLRequest? {
+        guard var components = URLComponents(string: endpoint) else { return nil }
+        components.queryItems = [URLQueryItem(name: "key", value: key)] + prefixes.sorted { $0.lexicographicallyPrecedes($1) }.map {
+            URLQueryItem(name: "hashPrefixes", value: $0.base64EncodedString())
         }
-
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        // リクエストボディの構築
-        let requestBody = buildRequestBody(for: url)
-        request.httpBody = requestBody
-
+        // URLComponentsは「+」をそのまま残すが、gRPC queryはフォームとして復号する。
+        components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        guard let url = components.url else { return nil }
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        request.httpMethod = "GET"
         return request
     }
 
-    /**
-     * Safe Browsing API v4 リクエストボディの構築
-     */
-    private func buildRequestBody(for url: URL) -> Data? {
-        let urlString = url.absoluteString
-
-        let requestData: [String: Any] = [
-            "client": [
-                "clientId": "safeqr-ios",
-                "clientVersion": "1.0.0"
-            ],
-            "threatInfo": [
-                "threatTypes": ThreatType.allCases.map { $0.rawValue },
-                "platformTypes": ["IOS"],
-                "threatEntryTypes": ["URL"],
-                "threatEntries": [
-                    ["url": urlString]
-                ]
-            ]
-        ]
-
-        return try? JSONSerialization.data(withJSONObject: requestData)
+    private struct HashResponse: Decodable {
+        let fullHashes: [SafeBrowsingHashCache.FullHash]?
+        let cacheDuration: String
     }
 
-    /**
-     * SHA256ハッシュプレフィックスの生成
-     * プライバシー保護のため、フルハッシュではなくプレフィックスのみ送信
-     */
-    private func generateSHA256HashPrefix(for string: String) -> String {
-        guard let data = string.data(using: .utf8) else {
-            return ""
-        }
-
-        var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-        data.withUnsafeBytes {
-            _ = CC_SHA256($0.baseAddress, CC_LONG(data.count), &hash)
-        }
-
-        // 指定された長さのプレフィックスのみを返す
-        let prefixData = Data(hash.prefix(hashPrefixLength))
-        return prefixData.map { String(format: "%02hhx", $0) }.joined()
-    }
-
-    /**
-     * APIレスポンスの処理
-     */
-    private struct ResponsePayload {
-        let data: Data?
-        let response: URLResponse?
-        let error: Error?
-    }
-
-    private func handleAPIResponse(
-        payload: ResponsePayload,
-        url: String,
-        startTime: Date,
-        completion: @escaping (Result<SafeBrowsingResult, SafeBrowsingError>) -> Void
-    ) {
-        let data = payload.data
-        let response = payload.response
-        let error = payload.error
-        let responseTime = Date().timeIntervalSince(startTime) * 1000 // ミリ秒
-
-        // エラーチェック
+    private func handleResponse(
+        data: Data?, response: URLResponse?, error: Error?, prefixes: Set<Data>
+    ) -> Result<[SafeBrowsingHashCache.FullHash], SafeBrowsingError> {
         if let error = error {
-            let safeBrowsingError: SafeBrowsingError
-            if (error as NSError).code == NSURLErrorTimedOut {
-                safeBrowsingError = .timeout
-            } else {
-                safeBrowsingError = .networkError(error)
-            }
-            completion(.failure(safeBrowsingError))
-            return
+            return .failure((error as NSError).code == NSURLErrorTimedOut ? .timeout : .networkError(error))
         }
-
-        // HTTPステータスチェック
-        if let httpResponse = response as? HTTPURLResponse {
-            guard 200 ... 299 ~= httpResponse.statusCode else {
-                let message = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
-                completion(.failure(.apiError(httpResponse.statusCode, message)))
-                return
-            }
+        guard let response = response as? HTTPURLResponse else { return .failure(.parsingError) }
+        guard response.statusCode == 200 else {
+            return .failure(.apiError(response.statusCode, HTTPURLResponse.localizedString(forStatusCode: response.statusCode)))
         }
-
-        // データ存在チェック
-        guard let data = data else {
-            completion(.failure(.parsingError))
-            return
+        guard let data = data, let parsed = try? JSONDecoder().decode(HashResponse.self, from: data),
+              parsed.cacheDuration.range(of: "^[0-9]+(?:\\.[0-9]{1,9})?s$", options: .regularExpression) != nil,
+              let duration = Double(parsed.cacheDuration.dropLast()), duration.isFinite else { return .failure(.parsingError) }
+        let hashes = parsed.fullHashes ?? []
+        guard hashes.allSatisfy({ $0.fullHash.count == 32 && prefixes.contains(Data($0.fullHash.prefix(4))) }) else {
+            return .failure(.parsingError)
         }
-
-        // JSONパース
-        do {
-            let result = try parseAPIResponse(data, responseTime: responseTime)
-
-            // 結果をキャッシュ
-            cacheResult(result, for: url)
-
-            completion(.success(result))
-        } catch {
-            completion(.failure(.parsingError))
-        }
+        cache.store(hashes, prefixes: prefixes, duration: duration, now: configuration.now())
+        return .success(hashes)
     }
 
-    /**
-     * APIレスポンスのJSONパース
-     */
-    private func parseAPIResponse(_ data: Data, responseTime: Double) throws -> SafeBrowsingResult {
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-
-        // "matches" フィールドが存在し、空でない場合は脅威検出
-        if let matches = json?["matches"] as? [[String: Any]], !matches.isEmpty {
-            var detectedThreats: [ThreatType] = []
-            var highestSeverity: SafetyLevel = .safe
-
-            for match in matches {
-                if let threatTypeString = match["threatType"] as? String,
-                   let threatType = ThreatType(rawValue: threatTypeString) {
-                    detectedThreats.append(threatType)
-
-                    // より厳しい安全性レベルを採用
-                    if threatType.safetyLevel.rawValue > highestSeverity.rawValue {
-                        highestSeverity = threatType.safetyLevel
-                    }
-                }
+    private func evaluate(
+        _ hashes: [SafeBrowsingHashCache.FullHash],
+        candidates: Set<Data>,
+        start: Date,
+        cacheHit: Bool
+    ) -> SafeBrowsingResult {
+        var threats = Set<ThreatType>()
+        for hash in hashes where candidates.contains(hash.fullHash) {
+            for detail in hash.fullHashDetails ?? [] {
+                let attributes = detail.attributes ?? []
+                // v5:未知の値を含むdetail、CANARY、FRAME_ONLYはトップレベルで適用しない。
+                guard let threat = ThreatType(rawValue: detail.threatType), attributes.isEmpty else { continue }
+                threats.insert(threat)
             }
-
-            return SafeBrowsingResult(
-                isURLSafe: false,
-                detectedThreats: detectedThreats,
-                safetyLevel: highestSeverity,
-                responseTime: responseTime,
-                cacheHit: false
-            )
-        } else {
-            // マッチなし = 安全
-            return SafeBrowsingResult(
-                isURLSafe: true,
-                detectedThreats: [],
-                safetyLevel: .safe,
-                responseTime: responseTime,
-                cacheHit: false
-            )
         }
-    }
-
-    // MARK: - キャッシュ機能
-
-    /**
-     * 結果をキャッシュに保存
-     */
-    private func cacheResult(_ result: SafeBrowsingResult, for url: String) {
-        let cacheKey = "safebrowsing_\(url.sha256)"
-        let cacheData = [
-            "isURLSafe": result.isURLSafe,
-            "detectedThreats": result.detectedThreats.map { $0.rawValue },
-            "safetyLevel": result.safetyLevel.rawValue,
-            "cachedAt": Date().timeIntervalSince1970
-        ] as [String: Any]
-
-        if let data = try? JSONSerialization.data(withJSONObject: cacheData) {
-            UserDefaults.standard.set(data, forKey: cacheKey)
-        }
-    }
-
-    /**
-     * キャッシュから結果を取得
-     */
-    private func getCachedResult(for url: String) -> SafeBrowsingResult? {
-        let cacheKey = "safebrowsing_\(url.sha256)"
-
-        guard let data = UserDefaults.standard.data(forKey: cacheKey),
-              let cacheData = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let cachedAt = cacheData["cachedAt"] as? TimeInterval else {
-            return nil
-        }
-
-        // キャッシュ有効期限チェック
-        let age = Date().timeIntervalSince1970 - cachedAt
-        if age > cacheValidityDuration {
-            // 期限切れキャッシュを削除
-            UserDefaults.standard.removeObject(forKey: cacheKey)
-            return nil
-        }
-
-        // キャッシュデータの復元
-        guard let isURLSafe = cacheData["isURLSafe"] as? Bool,
-              let safetyLevelRaw = cacheData["safetyLevel"] as? Int16,
-              let safetyLevel = SafetyLevel(rawValue: safetyLevelRaw),
-              let threatTypeStrings = cacheData["detectedThreats"] as? [String] else {
-            return nil
-        }
-
-        let detectedThreats = threatTypeStrings.compactMap { ThreatType(rawValue: $0) }
-
+        let sorted = threats.sorted { $0.rawValue < $1.rawValue }
+        let level = sorted.map(\.safetyLevel).max { $0.rawValue < $1.rawValue } ?? .safe
         return SafeBrowsingResult(
-            isURLSafe: isURLSafe,
-            detectedThreats: detectedThreats,
-            safetyLevel: safetyLevel,
-            responseTime: 0,
-            cacheHit: true
+            isURLSafe: sorted.isEmpty, detectedThreats: sorted, safetyLevel: level,
+            responseTime: configuration.now().timeIntervalSince(start) * 1000, cacheHit: cacheHit
         )
     }
 }
 
-// MARK: - String拡張（SHA256ハッシュ用）
+private final class SafeBrowsingSessionDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _: URLSession, task _: URLSessionTask, willPerformHTTPRedirection _: HTTPURLResponse,
+        newRequest _: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        // キーとhash prefixを別の送信先へ転送しない。
+        completionHandler(nil)
+    }
+}
 
 extension String {
-    /// SHA256ハッシュ値を取得（キャッシュキー用）
     var sha256: String {
-        guard let data = data(using: .utf8) else {
-            return self
-        }
-
-        var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-        data.withUnsafeBytes {
-            _ = CC_SHA256($0.baseAddress, CC_LONG(data.count), &hash)
-        }
-
-        return hash.map { String(format: "%02hhx", $0) }.joined()
+        SHA256.hash(data: Data(utf8)).map { String(format: "%02x", $0) }.joined()
     }
 }

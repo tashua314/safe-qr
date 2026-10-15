@@ -14,8 +14,8 @@ public protocol UrlRiskEvaluating {
 
 // レピュテーション
 public protocol ReputationChecking {
-    /// 引数はドメインハッシュ等（URL生値は渡さない）
-    func check(domainHash: String) -> SafetyLevel? // nil=不明
+    /// 端末でURLから候補を生成し、GoogleへはSHA-256の先頭4バイトだけを送る。
+    func checkURL(_ url: String, completion: @escaping (Result<SafeBrowsingAPIClient.SafeBrowsingResult, SafeBrowsingAPIClient.SafeBrowsingError>) -> Void)
 }
 
 // 履歴
@@ -42,3 +42,5 @@ public protocol QRScannerService {
     func stopSession()
 }
 ```
+
+実装の送信契約は [reputation-design.md](reputation-design.md) を参照。上記は設計概要であり、現在の型は `Common/Protocols.swift` 等で定義する。
