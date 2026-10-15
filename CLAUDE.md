@@ -2,7 +2,7 @@
 
 SafeQRはiOS/iPadOS18.5以降、UIKit、Swift5言語モードのQRリーダー。純正フレームワークだけを使う。起動画面にStoryboardがあり、各機能画面はコードで構築する。
 
-画面はScannerViewModelのCombine状態を購読する。DIContainerはサービスをキャッシュするため、同じ型のresolve反復だけでは新規生成・解放を検証できない。現在の評価経路はEnhancedUrlRiskEvaluator→SafeBrowsingAPIClient。旧ReputationClientモックを製品の外部判定に使わない。
+画面はScannerViewModelのCombine状態を購読する。DIContainerは通常のresolveでfactoryから生成し、resolveSingletonや明示登録の共有インスタンスは保持する。DI解決の反復は短いsmokeテストとして扱い、解放は対象を弱参照で別途確認する。現在の評価経路はEnhancedUrlRiskEvaluator→SafeBrowsingAPIClient。旧ReputationClientモックを製品の外部判定に使わない。
 
 - ローカル判定は0–1=safe、2–3=caution、4以上=danger。入力不正は設定に関係なくdanger。詳細とテストはdocs/safety-design.mdを参照。
 - 外部チェックは既定OFF。ON時の送信はv5の4byte hash prefix。失敗・未知・未照会をsafeの確認へ変換しない。

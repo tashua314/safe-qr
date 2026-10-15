@@ -17,7 +17,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | カメラ拒否 | 専用SimulatorのOS権限をrevokeし、拒否案内→設定→履歴の1テスト成功（skip 0）。終了時にgrantへ戻した | `CameraPermissionUITests`個別実行 |
 | 履歴 | in-memory単体テストで同一URLの更新・50件上限等を確認。操作テストで全削除の取消、削除、再表示後の空状態を確認 | `HistoryRepositoryTestsNew` / UIテスト |
 | 同意と通信 | 承認前・拒否・履歴再訪・古い完了・遅い危険判定・HTTP302の通信契約をテスト。外部OFF・401/403等・未知/不正応答もモックで検証 | `ScanConsentTests` / `HtmlTitleRedirectTests` / SafeBrowsing系テスト |
-| メモリ | resident_size取得失敗をテスト失敗とし、別途新規ViewModel/画面/評価器/title fetcherが解放されることを弱参照で確認 | `MemoryLeakTestsSimple`6件。DI共有キャッシュの反復は短いsmokeテスト |
+| メモリ | resident_size取得失敗をテスト失敗とし、別途新規ViewModel/QR scanner service/評価器/title fetcherが解放されることを弱参照で確認 | `MemoryLeakTestsSimple`6件。DI解決の反復は短いsmokeテスト |
 | Instruments | Release SimulatorへLeaksの60秒記録を試行したが、5分以上「Starting recording」のまま。中断し、有効な測定結果は得ていない | 実機Instruments・長時間測定は未完了 |
 | 実機向けarchive | `generic/platform=iOS`のRelease archive成功。Bundle ID `jp.techguide.SafeQR`、version1.0/build1、iPhone/iPad、minimum18.5、PSL resourceを確認 | CODE_SIGNING_ALLOWED=NO。配布署名や提出の確認ではない |
 | 本番API設定 | archiveの生成Info.plistはmissing。実キーの値を表示せず確認 | 認証・本番クォータは未確認 |
