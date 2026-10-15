@@ -59,7 +59,7 @@
     },
     "screenshots": {
       "status": "draft",
-      "specificationsCheckedAt": "2026-10-15",
+      "specificationsCheckedAt": "2026-10-16",
       "specificationsURL": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
       "iphoneDynamicIslandMedium": {
         "portraitPixels": [
@@ -73,7 +73,8 @@
           2752
         ]
       },
-      "notes": "Simulatorの実画面を保存する。モックカメラを実機撮影に見せかけない。アップロード・審査未実施。"
+      "notes": "iPhone PNG2枚・iPad JPEG2枚を候補として整理。iPadはカメラ拒否状態の実画面でテストUIの写り込みなし。全候補の寸法・alphaなし・SHA256を確認済み。模擬履歴を実利用履歴や実機カメラ撮影に見せかけない。掲載画像の最終採否・アップロード・審査は未実施。",
+      "candidateInventory": "app-store-assets-draft.md"
     },
     "externalServiceUse": {
       "status": "planned_non_commercial_phase",

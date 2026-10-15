@@ -18,6 +18,9 @@
 - [x] 本番APIキーをAPI/Bundle IDへ制限して接続し、認証・既定クォータを読み戻す。実API7ケース、最終署名ReleaseのGoogle危険警告/出典/ブロックと再起動後オフライン未確認/キャンセルを確認（#21 / #22、#23 / #24）。
 - [x] 開発用の署名・provisioning・Release archive/export・実機インストール/通常起動を確認する。
 - [ ] 実機の全通信を取得する監査の要否・実施範囲を公開前に判断する。OFF/同意/拒否・prefix限定・リダイレクト拒否・429等は自動テスト済み。パケット監査・クォータ枯渇試験は未実施。
+- [x] 最新main b3c7b9fから署名付きRelease archiveを生成し、本番キー一致・manifest同梱・codesignを値の公開なしで再検証する（開発用署名。App Store向け配布や実機確認とは区別）。
+- [x] [申請画像の候補](app-store-assets-draft.md)にiPhone2枚・iPad2枚を準備し、実画面・許容寸法・alphaなし・SHA256を確認する。iPadはカメラ拒否時の画面でテストUI写り込みなし。
+- [ ] ストア掲載画像・説明・順序を利用者が最終確認する。未承認の候補を提出済みとは扱わない。
 - [ ] App Store向け配布・TestFlight/アップロード・審査提出は、資料の確定と利用者の許可後に別途実施する。
 - [x] 運営者TechGuide合同会社、問い合わせ先y.takahashi@techguide.jpを利用者回答で確認する。
 - [x] [サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)を既存TechGuideサイトへ公開し、HTTP200と相互リンクを確認する（corporate #62 / PR #63）。

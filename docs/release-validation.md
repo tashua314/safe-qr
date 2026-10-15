@@ -1,6 +1,6 @@
 # リリース前の検証記録
 
-更新日：2026-10-15。公開判定は保留。CI成功や文書更新だけでIssue #8を閉じない。
+更新日：2026-10-16。公開判定は保留。CI成功や文書更新だけでIssue #8を閉じない。
 最新のAPI検証ソースはPR #24の最終HEAD `6bd50d1666e848140bebc20b8e5bac4def6f156b`。独立レビューとCI成功後にmain `5e1a783071b1b875fb55960e48b30efc7579dd32`へマージし、tree一致を確認した。以下では過去のSimulator確認、今回の実機/API確認、未完了条件を区別する。最新の進行状況は[Issue #8](https://github.com/tashua314/safe-qr/issues/8)も参照する。
 
 先行するPR #16の対象HEADは `9fdbdaed74a4928fd3c72742c31e98cc9361c2d9`。CI改善PR #18の最終HEADは `2e16b0cd2547e04c22d9aa538c448b0d1c6bb28e`。その後のAPI互換修正でアプリとテストを変更しているため、先行テストを最終ソースの全端末確認へ読み替えない。
@@ -8,6 +8,8 @@
 レイアウト循環の修正は[PR #28](https://github.com/tashua314/safe-qr/pull/28)、対象HEAD `d13c1ff348253bf4708c6825fcc5b308eaa0ec98`。独立レビュー承認と[CI全3ジョブ成功](https://github.com/tashua314/safe-qr/actions/runs/38748795685)後にmain `9e3a62d4347cf05a7c9d8bd654840ae0151683d9`へマージし、レビュー/CI済みtreeとの一致を確認した。実機にインストールした版は修正前であり、修正後の実機CPU改善は未確認。
 
 2026-10-15、利用者の「負荷テストはスキップでOK」により、30分連続使用・多数回スキャン・繰り返し遷移などの負荷シナリオは未実施のまま省略した。合格とは扱わず、実施待ちを公開準備の条件から外す。既存の自動回帰テスト・レビュー・CIは維持する。
+
+2026-10-16、最新main `b3c7b9f5afbff22df93c85bcdf88a99f9ee37f16` からローカルの署名付きRelease archiveを生成した。codesignのdeep/strict検証、Bundle ID `jp.techguide.SafeQR`、version1.0/build1、minimum18.5、profileのBundle ID一致と有効期限、本番キーの設定一致（値は非公開）、UserDefaults / CA92.1のmanifest同梱を確認。使用したのは開発用署名で、App Store配布用のexport・アップロード・審査提出はしていない。実機インストール/起動・CPU再測定も行っていない。
 
 ## 環境と確認できた範囲
 
@@ -57,7 +59,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
 | 申請情報 | 運営者はTechGuide合同会社、問い合わせ先はy.takahashi@techguide.jpと利用者確認済み。[サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)はcorporate PR #63を独立レビュー/CI後にマージし、Amplify job69成功と2026-10-16のHTTP200を確認済み。審査用氏名/電話等は未確定 |
 | 配布条件 | 2026-10-16利用者確認：申請下書きは無料・日本のみ・Apple標準EULA。App Store Connectへの保存・契約の承諾・提出は未実施。実際の用途とSafe Browsing非商用条件の適合、年齢/App Privacyは未確定。収益化開始前にWeb Riskへ移行・検証する方針で、無料だけで非商用と断定しない |
-| ストア画像 | QAのPNGは下書き。実機カメラのモックを実機撮影として提出しない。最新のApple仕様を確認し、状態・説明を整えてから申請する |
+| ストア画像 | [候補一覧](app-store-assets-draft.md)にiPhone2枚・iPad2枚を整理。iPadはRelease・カメラ拒否状態の設定/模擬履歴を撮影し、テストUI写り込みなし。全候補の寸法・alphaなし・SHA256を確認済み。掲載画像の最終採否は未確定。QAのPNGは下書き。実機カメラのモックを実機撮影として提出しない。最新のApple仕様を確認し、状態・説明を整えてから申請する |
 
 年齢・App Privacyの[回答案](app-store-questionnaire-draft.md)は実装とApple公式資料から準備した下書き。年齢やデータ収集/トラッキングの最終回答、App Store Connectでの保存・提出を確定したものではない。
 
