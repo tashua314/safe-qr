@@ -168,6 +168,8 @@ class SafeBrowsingAPIClient {
         guard let url = components.url else { return nil }
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.httpMethod = "GET"
+        // iOSアプリに制限したGoogle APIキーの照合にBundle IDが必要。
+        request.setValue(Bundle.main.bundleIdentifier, forHTTPHeaderField: "X-Ios-Bundle-Identifier")
         return request
     }
 

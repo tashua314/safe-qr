@@ -50,6 +50,7 @@ final class SafeBrowsingPrivacyTests: XCTestCase {
         XCTAssertTrue(try check(client, url: input).isURLSafe)
         let request = try XCTUnwrap(requests.first)
         XCTAssertEqual(request.httpMethod, "GET")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Ios-Bundle-Identifier"), "jp.techguide.SafeQR", "iOS制限付きキーで必要なアプリ識別子を送る")
         XCTAssertNil(request.httpBody)
         let url = try XCTUnwrap(request.url)
         XCTAssertEqual(url.host, "safebrowsing.googleapis.com")
