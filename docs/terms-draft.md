@@ -1,6 +1,6 @@
 # 利用条件の下書き
 
-2026-10-16。申請下書きの方針を利用者が「無料・日本のみ・Apple標準EULA」と確認した。運営者はTechGuide合同会社、連絡先はy.takahashi@techguide.jp。独自EULAは追加しない方針とする。実際のApp Store Connect設定、適用開始日、契約の承諾、公開、審査提出は未実施。
+2026-10-16。申請下書きの方針を利用者が「無料・日本のみ・Apple標準EULA」と確認した。運営者はTechGuide合同会社、公開窓口は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)。独自EULAは追加しない方針とする。実際のApp Store Connect設定、適用開始日、契約の承諾、公開、審査提出は未実施。
 
 Appleは独自EULAを指定しなければ標準EULAが適用されると案内している。[AppleのEULA設定の説明](https://developer.apple.com/help/app-store-connect/manage-app-information/provide-a-custom-license-agreement/)、[Apple標準EULA](https://www.apple.com/legal/internet-services/itunes/dev/stdeula/)
 

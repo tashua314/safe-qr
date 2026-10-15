@@ -1,6 +1,6 @@
 # 申請画像の候補（未承認・未提出）
 
-2026-10-16。既存QA原本から候補を選び、Appleの[画像仕様](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)と照合した。形式・寸法が合うことだけで、App Reviewの承認や提出準備の完了とは扱わない。
+2026-10-16。利用者は原本4枚の採用を保留し、魅力を伝えるストア画像を希望した。[新しい訴求画像案](store-artwork/README.md)を優先候補とする。この文書は原本の撮影情報として保持する。既存QA原本を、Appleの[画像仕様](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)と照合した。形式・寸法が合うことだけで、App Reviewの承認や提出準備の完了とは扱わない。
 
 ## iPhoneの候補
 

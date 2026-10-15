@@ -22,9 +22,9 @@
 - [x] [申請画像の候補](app-store-assets-draft.md)にiPhone2枚・iPad2枚を準備し、実画面・許容寸法・alphaなし・SHA256を確認する。iPadはカメラ拒否時の画面でテストUI写り込みなし。
 - [ ] ストア掲載画像・説明・順序を利用者が最終確認する。未承認の候補を提出済みとは扱わない。
 - [ ] App Store向け配布・TestFlight/アップロード・審査提出は、資料の確定と利用者の許可後に別途実施する。
-- [x] 運営者TechGuide合同会社、問い合わせ先y.takahashi@techguide.jpを利用者回答で確認する。
+- [x] 運営者TechGuide合同会社、公開窓口[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)を利用者回答で確認する。
 - [x] [サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)を既存TechGuideサイトへ公開し、HTTP200と相互リンクを確認する（corporate #62 / PR #63）。
-- [ ] 審査用の氏名・電話などをApp Store Connect向けに確定する。
+- [x] 審査用の氏名・電話・メールを利用者回答で確認し、非公開資料へ分離する。App Store Connectへの入力は未実施。
 - [x] 当面は収益化せず、収益化開始前にWeb Riskへ移行・検証を完了する方針を記録する。
 - [x] 申請下書きの無料・日本のみ・Apple標準EULAを利用者回答で確認する。Apple側の設定保存・契約の承諾・提出とは区別する。
 - [ ] 実際の用途と外部APIの非商用条件の適合、年齢レーティング・App Privacyを確定する。
@@ -32,3 +32,10 @@
 - [ ] 実機と申請情報が揃った時点で下書きを確定し、Issue #8の公開判断を完了する。
 
 検証環境・結果・対象コミットは[release-validation.md](release-validation.md)に記録する。資料更新PRの反映だけでIssue #8を閉じない。
+
+### 2026-10-16 追加の申請準備
+
+- [x] 審査用の氏名・電話・メールを利用者回答で確認し、非公開資料へ分離する。公開Gitの連絡先値はnullを維持する。
+- [x] 公開問い合わせ窓口を既存フォームへ統一する資料を用意する。
+- [x] 生成背景とアプリ実画面によるストア画像の構成案をiPhone/iPad各3枚用意する。
+- [ ] 新しい画像6枚の採否・掲載順を利用者が確認する。アップロード・審査提出は未実施。

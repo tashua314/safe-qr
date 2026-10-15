@@ -57,7 +57,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | 性能の確認範囲 | 30分連続や多数回スキャン等の負荷テストは利用者判断で省略。実機10分待機の記録とレイアウト循環修正の回帰テストは確認済み。修正後の実機CPU、Leaks、温度・電池・UI遅延は未確認のまま残す |
 | 通信の確認範囲 | 本番認証と実機オンライン/オフラインは確認済み。OFF/同意/拒否・prefix限定・リダイレクト拒否・429等の失敗は自動テスト。実機の全通信を取得するパケット監査やクォータ枯渇試験は未実施 |
 | 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
-| 申請情報 | 運営者はTechGuide合同会社、問い合わせ先はy.takahashi@techguide.jpと利用者確認済み。[サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)はcorporate PR #63を独立レビュー/CI後にマージし、Amplify job69成功と2026-10-16のHTTP200を確認済み。審査用氏名/電話等は未確定 |
+| 申請情報 | 運営者はTechGuide合同会社、公開窓口は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)と利用者確認済み。[サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)はcorporate PR #63を独立レビュー/CI後にマージし、Amplify job69成功と2026-10-16のHTTP200を確認済み。審査用連絡先は利用者確認済み・非公開資料へ分離（値は公開Gitへ記載しない） |
 | 配布条件 | 2026-10-16利用者確認：申請下書きは無料・日本のみ・Apple標準EULA。App Store Connectへの保存・契約の承諾・提出は未実施。実際の用途とSafe Browsing非商用条件の適合、年齢/App Privacyは未確定。収益化開始前にWeb Riskへ移行・検証する方針で、無料だけで非商用と断定しない |
 | ストア画像 | [候補一覧](app-store-assets-draft.md)にiPhone2枚・iPad2枚を整理。iPadはRelease・カメラ拒否状態の設定/模擬履歴を撮影し、テストUI写り込みなし。全候補の寸法・alphaなし・SHA256を確認済み。掲載画像の最終採否は未確定。QAのPNGは下書き。実機カメラのモックを実機撮影として提出しない。最新のApple仕様を確認し、状態・説明を整えてから申請する |
 
