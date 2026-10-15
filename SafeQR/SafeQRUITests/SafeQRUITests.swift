@@ -10,6 +10,9 @@ final class SafeQRUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
         app.launch()
+        prepareNonDefaultSettings(app)
+        app.terminate()
+        app.launch()
         XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["注意URL テスト"].waitForExistence(timeout: 10))
         capture(app, name: "Scanner")
@@ -17,7 +20,13 @@ final class SafeQRUITests: XCTestCase {
         app.buttons["設定"].tap()
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["外部安全性チェック"].exists)
-        XCTAssertTrue(app.segmentedControls.buttons["標準"].exists)
+        XCTAssertTrue(app.segmentedControls.buttons["強"].isSelected, "再起動後も強設定が保存される")
+        let externalSwitch = app.switches.firstMatch
+        XCTAssertEqual(externalSwitch.value as? String, "1")
+        app.segmentedControls.buttons["標準"].tap()
+        externalSwitch.tap()
+        XCTAssertTrue(app.segmentedControls.buttons["標準"].isSelected)
+        XCTAssertEqual(externalSwitch.value as? String, "0")
         capture(app, name: "Settings")
         app.buttons["閉じる"].tap()
 
@@ -39,6 +48,16 @@ final class SafeQRUITests: XCTestCase {
         capture(app, name: "History after mock scans")
         app.buttons["閉じる"].tap()
         XCTAssertTrue(app.buttons["注意URL テスト"].exists)
+    }
+
+    @MainActor
+    private func prepareNonDefaultSettings(_ app: XCUIApplication) {
+        XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
+        app.buttons["設定"].tap()
+        XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 5))
+        app.segmentedControls.buttons["強"].tap()
+        if app.switches.firstMatch.value as? String != "1" { app.switches.firstMatch.tap() }
+        app.buttons["閉じる"].tap()
     }
 
     @MainActor

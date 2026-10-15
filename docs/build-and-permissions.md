@@ -12,11 +12,17 @@ xcodebuild -runFirstLaunch
 xcodebuild -list -project SafeQR/SafeQR.xcodeproj
 xcodebuild -downloadPlatform iOS -architectureVariant arm64
 xcrun simctl list devices available
-brew install swiftlint swiftformat
+make tools
 ```
 
 Intel MacではSimulator取得時の `-architectureVariant arm64` を省略する。
 Xcodeの初回セットアップはOS側の開発コンポーネントを更新する。プロジェクトの読み込み成功とアプリのビルド成功はそれぞれ確認する。
+
+## チェックツールの固定
+
+SwiftLint 0.63.2 / SwiftFormat 0.61.1をローカルとCIで使用する。`make tools` は各公式GitHub Releaseのアーカイブを取得し、`scripts/tool-config.sh` のSHA-256を照合してから `.artifacts/tools/` へ展開する。システムのHomebrewや他プロジェクトのツールは変更しない。既存PATHのツールが同じバージョンであればそれも使用できるが、違う場合はチェックを失敗させる。
+
+CIで自動取得した最新版とローカル版の整形ルールが異なる問題を再現したため、検証した組合せを固定した。更新時はバージョン・公式アーカイブのdigestを変更し、整形差分と全チェックをまとめて検証する。
 
 ## 品質チェック
 
@@ -52,3 +58,7 @@ UIKitの画面セルは個別ファイルへ分離し、警告ダイアログの
 Simulatorの成功は、実機カメラ・ライト・バッテリー・配布署名・App Store申請の確認を意味しない。
 これらの実機・配布確認はリリース準備の記録で別途扱う。
 APIキーは `.xcconfig` で注入し、値をGit・CIログ・検証記録へ出さない。設定方法は `SafeQR/Config/README.md` を参照する。
+
+## Core Dataのテスト
+
+履歴テストはアプリと同じNSManagedObjectModelインスタンスを参照し、各テストのstoreは独立したin-memory構成にする。modelを毎回再読込して同一entity classへ重複登録すると曖昧性警告が出るため、modelとstoreの独立性を分ける。2026-10-15に履歴15件を再実行し成功、model重複・unique match警告が出ないことを確認した。
