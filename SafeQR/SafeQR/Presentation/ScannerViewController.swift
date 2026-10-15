@@ -80,12 +80,8 @@ class ScannerViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        // 完了時に再レイアウトを要求すると待機中も循環するため、プレビューのサイズ更新だけ行う。
         updateCameraPreviewLayout()
-
-        // UIManagerが完全に初期化されている場合のみレイアウト更新
-        if isViewLoaded {
-            uiManager.updateLayout()
-        }
     }
 
     deinit {
