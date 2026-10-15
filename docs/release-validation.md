@@ -1,7 +1,7 @@
 # リリース前の検証記録
 
-更新日：2026-10-15。公開判定は保留。Issue #8をこのPRの反映だけで閉じない。
-対象ソースは`80724c4d9b9939a2afea98abe388cf106547574d`（レビュー済みPR #15の統合tree）に、この文書を含むIssue #8の差分を加えたもの。PR本文・CIには検証した最終HEADを記載する。
+更新日：2026-10-15。公開判定は保留。CI成功や文書更新だけでIssue #8を閉じない。
+アプリとUIテストの検証対象はPR #16の最終HEAD `9fdbdaed74a4928fd3c72742c31e98cc9361c2d9`。その後、アプリとUIテストを変更せず、CI改善のPR #18（最終HEAD `2e16b0cd2547e04c22d9aa538c448b0d1c6bb28e`）をmain `200fe60654095f04d2f0519f2c5c6e09cbb1b9e4`へ反映した。CI結果と公開前の未確認事項を以下で区別する。
 
 ## 環境と確認できた範囲
 
@@ -9,7 +9,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 
 | 項目 | 環境・結果 | 証跡 |
 |---|---|---|
-| 品質チェック | strict lint、format、ログ方針、plist検査がローカルで成功。最終PRのGitHub CIはランナー起動拒否で未実行 | `scripts/check.sh`のローカル結果。CI成果物の保存設定は修正済みだが、保存成功は次の実行で確認する |
+| 品質チェック | strict lint、format、ログ方針、plist検査がローカルと公開後CIで成功。CI改善後も全検証が成功 | [PR #16のCI](https://github.com/tashua314/safe-qr/actions/runs/38687487667)、[PR #18の最終CI](https://github.com/tashua314/safe-qr/actions/runs/38706185299)。検証ログと通常/カメラ拒否個別の両xcresultを保存・読み戻し済み |
 | Debug / Release | iOS26.5 Simulatorの署名なしビルド成功 | ローカルbuild.log |
 | iPhone全テスト | XCTest99件・Swift Testing1件・UI9件成功。通常スイートの権限拒否1件は個別実行へ分離 | 専用iPhone16Pro Simulator / iOS26.5 |
 | 小画面と旧OS | 先行全テスト96件・追加1件・UI9件成功。Google案内/TTL修正後も関連単体15件・設定/詳細UI2件が成功 | 専用iPhone SE (3rd generation) / iOS18.6 |
