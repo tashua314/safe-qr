@@ -36,7 +36,8 @@ jobs:
     name: iOS lint, build, and tests
     needs: changes
     if: needs.changes.outputs.ios_required == 'true'
-    runs-on: macos-26
+    # 同じXcode世代の標準IntelランナーでSimulator用のメモリを確保する。
+    runs-on: macos-26-intel
     timeout-minutes: 40
     steps:
       - name: Checkout
