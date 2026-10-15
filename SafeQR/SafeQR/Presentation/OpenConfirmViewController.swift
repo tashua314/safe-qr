@@ -1,10 +1,6 @@
 import UIKit
 
-/**
- * URL開封確認ダイアログ
- * 危険度が注意（caution）または危険（danger）の場合に表示
- * ITリテラシーが低いユーザーでも理解しやすい優しい文言と明確なボタン配置
- */
+/// URLの開封確認。内容が長い場合も拒否・開封ボタンまでスクロールできる。
 class OpenConfirmViewController: UIViewController {
     // MARK: - Properties
 
@@ -22,6 +18,11 @@ class OpenConfirmViewController: UIViewController {
     private let backgroundView = UIView()
 
     private let dialogContainer = UIView()
+    private let dialogScrollView = UIScrollView()
+    private let googleAdvisoryView = GoogleSafetyAdvisoryView()
+    private let googleThreats: [SafeBrowsingAPIClient.ThreatType]
+    private var collapsedDetailConstraint: NSLayoutConstraint?
+    private var detailBottomConstraint: NSLayoutConstraint?
 
     private let warningIconLabel = UILabel()
 
@@ -52,7 +53,11 @@ class OpenConfirmViewController: UIViewController {
 
     // MARK: - Initializer
 
-    init(url: String, safetyLevel: SafetyLevel, detectedIssues: [String] = [], isExternalCheckUnverified: Bool = false) {
+    init(
+        url: String, safetyLevel: SafetyLevel, detectedIssues: [String] = [], isExternalCheckUnverified: Bool = false,
+        googleThreats: [SafeBrowsingAPIClient.ThreatType] = []
+    ) {
+        self.googleThreats = googleThreats
         self.isExternalCheckUnverified = isExternalCheckUnverified
         self.url = url
         self.safetyLevel = safetyLevel
@@ -87,12 +92,14 @@ class OpenConfirmViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .clear
         setupBackgroundView()
+        setupDialogScrollView()
         setupDialogContainer()
         setupWarningIcon()
         setupTitleLabel()
         setupUrlLabel()
         setupDescriptionLabel()
         setupAdviceLabel()
+        setupGoogleAdvisory()
         setupDetailToggleButton()
         setupDetailContainer()
         setupButtons()
@@ -161,9 +168,11 @@ class OpenConfirmViewController: UIViewController {
         NSLayoutConstraint.activate([
             detailLabel.topAnchor.constraint(equalTo: detailContainer.topAnchor, constant: 12),
             detailLabel.leadingAnchor.constraint(equalTo: detailContainer.leadingAnchor, constant: 12),
-            detailLabel.trailingAnchor.constraint(equalTo: detailContainer.trailingAnchor, constant: -12),
-            detailLabel.bottomAnchor.constraint(equalTo: detailContainer.bottomAnchor, constant: -12)
+            detailLabel.trailingAnchor.constraint(equalTo: detailContainer.trailingAnchor, constant: -12)
         ])
+        collapsedDetailConstraint = detailContainer.heightAnchor.constraint(equalToConstant: 0)
+        collapsedDetailConstraint?.isActive = true
+        detailBottomConstraint = detailLabel.bottomAnchor.constraint(equalTo: detailContainer.bottomAnchor, constant: -12)
     }
 
     private func setupButtons() {
@@ -208,47 +217,6 @@ class OpenConfirmViewController: UIViewController {
         buttonStackView.addArrangedSubview(alternativeButton)
     }
 
-    private func setButtonContentInsets(_ button: UIButton, insets: UIEdgeInsets) {
-        if #available(iOS 15.0, *) {
-            // iOS 15以降はUIButton.Configurationを使用
-            var config: UIButton.Configuration
-
-            if button == recommendedButton {
-                config = UIButton.Configuration.filled()
-                config.baseBackgroundColor = .systemBlue
-                config.baseForegroundColor = .white
-                config.cornerStyle = .medium
-            } else if button == alternativeButton {
-                config = UIButton.Configuration.plain()
-                config.background.strokeColor = .systemRed
-                config.background.strokeWidth = 1
-                config.baseForegroundColor = .systemRed
-                config.cornerStyle = .medium
-            } else {
-                config = UIButton.Configuration.tinted()
-                config.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
-                config.baseForegroundColor = .systemBlue
-                config.cornerStyle = .small
-            }
-
-            config.contentInsets = NSDirectionalEdgeInsets(
-                top: insets.top,
-                leading: insets.left,
-                bottom: insets.bottom,
-                trailing: insets.right
-            )
-
-            let title = button.title(for: .normal)
-            button.configuration = config
-            if let title = title {
-                button.setTitle(title, for: .normal)
-            }
-        } else {
-            // iOS 13-14は従来のcontentEdgeInsetsを使用
-            button.contentEdgeInsets = insets
-        }
-    }
-
     private func setupConstraints() {
         var constraints = [
             backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -256,10 +224,15 @@ class OpenConfirmViewController: UIViewController {
             backgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            dialogContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            dialogContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            dialogContainer.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            dialogContainer.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            dialogScrollView.contentLayoutGuide.widthAnchor.constraint(equalTo: dialogScrollView.frameLayoutGuide.widthAnchor),
+            dialogScrollView.contentLayoutGuide.heightAnchor
+                .constraint(greaterThanOrEqualTo: dialogScrollView.frameLayoutGuide.heightAnchor),
+            dialogContainer.centerXAnchor.constraint(equalTo: dialogScrollView.contentLayoutGuide.centerXAnchor),
+            dialogContainer.centerYAnchor.constraint(equalTo: dialogScrollView.contentLayoutGuide.centerYAnchor),
+            dialogContainer.topAnchor.constraint(greaterThanOrEqualTo: dialogScrollView.contentLayoutGuide.topAnchor, constant: 20),
+            dialogContainer.bottomAnchor.constraint(lessThanOrEqualTo: dialogScrollView.contentLayoutGuide.bottomAnchor, constant: -20),
+            dialogContainer.leadingAnchor.constraint(greaterThanOrEqualTo: dialogScrollView.contentLayoutGuide.leadingAnchor, constant: 20),
+            dialogContainer.trailingAnchor.constraint(lessThanOrEqualTo: dialogScrollView.contentLayoutGuide.trailingAnchor, constant: -20),
             dialogContainer.widthAnchor.constraint(lessThanOrEqualToConstant: 400), // 最大幅制限
 
             warningIconLabel.topAnchor.constraint(equalTo: dialogContainer.topAnchor, constant: 24),
@@ -285,9 +258,23 @@ class OpenConfirmViewController: UIViewController {
             alternativeButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
         ]
 
+        let viewportHeight = dialogScrollView.contentLayoutGuide.heightAnchor
+            .constraint(equalTo: dialogScrollView.frameLayoutGuide.heightAnchor)
+        viewportHeight.priority = .defaultLow
+        let preferredWidth = dialogContainer.widthAnchor.constraint(equalTo: dialogScrollView.frameLayoutGuide.widthAnchor, constant: -40)
+        preferredWidth.priority = .defaultHigh
+        constraints += [viewportHeight, preferredWidth]
+        let informationBottom = googleThreats.isEmpty ? adviceLabel.bottomAnchor : googleAdvisoryView.bottomAnchor
+        if !googleThreats.isEmpty {
+            constraints += [
+                googleAdvisoryView.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 12),
+                googleAdvisoryView.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
+                googleAdvisoryView.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24)
+            ]
+        }
         if !detectedIssues.isEmpty {
             constraints.append(contentsOf: [
-                detailToggleButton.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 12),
+                detailToggleButton.topAnchor.constraint(equalTo: informationBottom, constant: 12),
                 detailToggleButton.centerXAnchor.constraint(equalTo: dialogContainer.centerXAnchor),
 
                 detailContainer.topAnchor.constraint(equalTo: detailToggleButton.bottomAnchor, constant: 8),
@@ -301,7 +288,7 @@ class OpenConfirmViewController: UIViewController {
             ])
         } else {
             constraints.append(contentsOf: [
-                buttonStackView.topAnchor.constraint(equalTo: adviceLabel.bottomAnchor, constant: 24),
+                buttonStackView.topAnchor.constraint(equalTo: informationBottom, constant: 24),
                 buttonStackView.leadingAnchor.constraint(equalTo: dialogContainer.leadingAnchor, constant: 24),
                 buttonStackView.trailingAnchor.constraint(equalTo: dialogContainer.trailingAnchor, constant: -24),
                 buttonStackView.bottomAnchor.constraint(equalTo: dialogContainer.bottomAnchor, constant: -24)
@@ -384,14 +371,12 @@ class OpenConfirmViewController: UIViewController {
     private func setupAccessibility() {
         // VoiceOver用の設定
         dialogContainer.isAccessibilityElement = false
-        dialogContainer.accessibilityElements = [
-            titleLabel,
-            urlLabel,
-            descriptionLabel,
-            adviceLabel,
-            recommendedButton,
-            alternativeButton
-        ]
+        var elements: [Any] = [titleLabel, urlLabel, descriptionLabel, adviceLabel]
+        if !googleThreats.isEmpty { elements.append(googleAdvisoryView) }
+        if !detectedIssues.isEmpty { elements.append(detailToggleButton) }
+        if isDetailExpanded { elements.append(detailLabel) }
+        elements += [recommendedButton, alternativeButton]
+        dialogContainer.accessibilityElements = elements
 
         // VoiceOver用のラベル設定
         titleLabel.accessibilityTraits = .header
@@ -444,6 +429,9 @@ class OpenConfirmViewController: UIViewController {
 
     @objc private func toggleDetailTapped() {
         isDetailExpanded.toggle()
+        collapsedDetailConstraint?.isActive = !isDetailExpanded
+        detailBottomConstraint?.isActive = isDetailExpanded
+        setupAccessibility()
 
         UIView.animate(
             withDuration: 0.3,
@@ -483,13 +471,6 @@ class OpenConfirmViewController: UIViewController {
     }
 }
 
-// MARK: - UILabel Extension
-
-/*
- * UILabel拡張：テキストインセット対応
- * URLラベルのボックス表示に使用
- */
-
 private extension OpenConfirmViewController {
     private func setupBackgroundView() {
         backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
@@ -509,7 +490,7 @@ private extension OpenConfirmViewController {
         dialogContainer.layer.shadowOffset = CGSize(width: 0, height: 8)
         dialogContainer.layer.shadowRadius = 16
         dialogContainer.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(dialogContainer)
+        dialogScrollView.addSubview(dialogContainer)
     }
 
     private func setupWarningIcon() {
@@ -546,5 +527,73 @@ private extension OpenConfirmViewController {
         urlLabel.textInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
 
         dialogContainer.addSubview(urlLabel)
+    }
+}
+
+private extension OpenConfirmViewController {
+    func setupDialogScrollView() {
+        dialogScrollView.accessibilityIdentifier = "開封確認"
+        dialogScrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dialogScrollView)
+        NSLayoutConstraint.activate([
+            dialogScrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            dialogScrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            dialogScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dialogScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+        let tap = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
+        tap.delegate = self
+        tap.cancelsTouchesInView = false
+        dialogScrollView.addGestureRecognizer(tap)
+    }
+
+    func setupGoogleAdvisory() {
+        guard !googleThreats.isEmpty else { return }
+        googleAdvisoryView.configure(threats: googleThreats)
+        dialogContainer.addSubview(googleAdvisoryView)
+    }
+}
+
+extension OpenConfirmViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard let target = touch.view else { return false }
+        return !target.isDescendant(of: dialogContainer)
+    }
+}
+
+private extension OpenConfirmViewController {
+    func setButtonContentInsets(_ button: UIButton, insets: UIEdgeInsets) {
+        var config: UIButton.Configuration
+
+        if button == recommendedButton {
+            config = UIButton.Configuration.filled()
+            config.baseBackgroundColor = .systemBlue
+            config.baseForegroundColor = .white
+            config.cornerStyle = .medium
+        } else if button == alternativeButton {
+            config = UIButton.Configuration.plain()
+            config.background.strokeColor = .systemRed
+            config.background.strokeWidth = 1
+            config.baseForegroundColor = .systemRed
+            config.cornerStyle = .medium
+        } else {
+            config = UIButton.Configuration.tinted()
+            config.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+            config.baseForegroundColor = .systemBlue
+            config.cornerStyle = .small
+        }
+
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: insets.top,
+            leading: insets.left,
+            bottom: insets.bottom,
+            trailing: insets.right
+        )
+
+        let title = button.title(for: .normal)
+        button.configuration = config
+        if let title = title {
+            button.setTitle(title, for: .normal)
+        }
     }
 }

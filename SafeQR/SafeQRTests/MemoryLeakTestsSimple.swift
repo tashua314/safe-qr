@@ -116,14 +116,14 @@ class MemoryLeakTestsSimple: XCTestCase {
      * 統合メモリテスト
      * 複数コンポーネントを組み合わせて使用
      */
-    func testAggregateMemoryManagement() {
+    func testAggregateMemoryManagement() throws {
         print("🧪 Starting aggregate memory management test...")
 
-        let initialMemory = getMemoryUsage()
+        let initialMemory = try getMemoryUsage()
         print("📊 Initial memory usage: \(String(format: "%.1f", initialMemory)) MB")
 
         for batch in 0 ..< 3 {
-            autoreleasepool {
+            try autoreleasepool {
                 // バッチ処理
                 for _ in 0 ..< 10 {
                     autoreleasepool {
@@ -143,7 +143,7 @@ class MemoryLeakTestsSimple: XCTestCase {
                     }
                 }
 
-                let currentMemory = getMemoryUsage()
+                let currentMemory = try getMemoryUsage()
                 let memoryDelta = currentMemory - initialMemory
                 let formattedMemory = String(format: "%.1f", currentMemory)
                 let formattedDelta = String(format: "%.1f", memoryDelta)
@@ -154,7 +154,7 @@ class MemoryLeakTestsSimple: XCTestCase {
         }
 
         // 最終メモリ使用量チェック
-        let finalMemory = getMemoryUsage()
+        let finalMemory = try getMemoryUsage()
         let totalMemoryDelta = finalMemory - initialMemory
 
         print("🎯 Aggregate memory test completed")
@@ -171,12 +171,36 @@ class MemoryLeakTestsSimple: XCTestCase {
         print("✅ Aggregate memory test passed")
     }
 
+    func testIndependentComponentsAreReleased() {
+        weak var retainedModel: ScannerViewModel?
+        weak var retainedScanner: QRScannerService?
+        weak var retainedEvaluator: EnhancedUrlRiskEvaluator?
+        weak var retainedTitles: HtmlTitleFetcher?
+        autoreleasepool {
+            let scanner = QRScannerService()
+            let evaluator = EnhancedUrlRiskEvaluator()
+            let titles = HtmlTitleFetcher()
+            let model = ScannerViewModel(
+                qrProcessor: QRCodeProcessor(qrScannerService: scanner), urlEvaluator: evaluator,
+                historyRepository: HistoryRepository(coreDataStack: TestCoreDataStack()), titleFetcher: titles
+            )
+            retainedModel = model
+            retainedScanner = scanner
+            retainedEvaluator = evaluator
+            retainedTitles = titles
+        }
+        XCTAssertNil(retainedModel)
+        XCTAssertNil(retainedScanner)
+        XCTAssertNil(retainedEvaluator)
+        XCTAssertNil(retainedTitles)
+    }
+
     // MARK: - Helper Methods
 
     /**
      * 現在のメモリ使用量を取得（MB単位）
      */
-    private func getMemoryUsage() -> Double {
+    private func getMemoryUsage() throws -> Double {
         var taskInfo = mach_task_basic_info()
         var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
 
@@ -191,10 +215,9 @@ class MemoryLeakTestsSimple: XCTestCase {
             }
         }
 
-        if result == KERN_SUCCESS {
-            return Double(taskInfo.resident_size) / (1024.0 * 1024.0)
-        } else {
-            return 0.0
+        guard result == KERN_SUCCESS, taskInfo.resident_size > 0 else {
+            throw NSError(domain: "SafeQR.MemoryMeasurement", code: Int(result))
         }
+        return Double(taskInfo.resident_size) / (1024.0 * 1024.0)
     }
 }

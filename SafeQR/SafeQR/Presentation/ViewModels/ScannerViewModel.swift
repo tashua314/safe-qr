@@ -103,7 +103,8 @@ class ScannerViewModel: ObservableObject {
             safetyLevel: result.finalSafetyLevel,
             evaluationMethod: mapEvaluationMethod(result.evaluationMethod),
             responseTime: result.responseTime,
-            detectedIssues: extractDetectedIssues(result, url: url)
+            detectedIssues: extractDetectedIssues(result, url: url),
+            googleThreats: result.apiResult?.detectedThreats ?? []
         )
         if recordOnEvaluation { saveToHistory(url: url, safetyLevel: result.finalSafetyLevel) }
         scanStatus = .evaluated
@@ -174,6 +175,7 @@ struct URLEvaluationResult {
     let evaluationMethod: EvaluationMethod
     let responseTime: Double
     let detectedIssues: [String]
+    let googleThreats: [SafeBrowsingAPIClient.ThreatType]
 
     var requiresConfirmation: Bool {
         safetyLevel != .safe || evaluationMethod == .fallback

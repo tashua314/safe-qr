@@ -268,7 +268,8 @@ class ScannerViewController: UIViewController {
             url: result.url,
             safetyLevel: result.safetyLevel,
             detectedIssues: result.detectedIssues,
-            isExternalCheckUnverified: result.evaluationMethod == .fallback
+            isExternalCheckUnverified: result.evaluationMethod == .fallback,
+            googleThreats: result.googleThreats
         )
 
         confirmVC.onUserDecision = { [weak self] shouldOpen in

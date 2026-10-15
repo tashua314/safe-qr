@@ -97,6 +97,74 @@ final class SafeQRUITests: XCTestCase {
     }
 
     @MainActor
+    func testWarningLayoutEvidence() {
+        let app = XCUIApplication()
+        for (orientation, name) in [(UIDeviceOrientation.portrait, "Portrait details"), (.landscapeLeft, "Landscape details")] {
+            XCUIDevice.shared.orientation = orientation
+            app.launch()
+            XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
+            app.buttons["設定"].tap()
+            app.segmentedControls.buttons["標準"].tap()
+            if app.switches.firstMatch.value as? String != "0" { app.switches.firstMatch.tap() }
+            app.buttons["閉じる"].tap()
+            app.buttons["危険URL テスト"].tap()
+            XCTAssertTrue(app.staticTexts["危険な可能性があります"].waitForExistence(timeout: 5))
+            let toggle = app.buttons["詳細を確認 ▼"]
+            XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+            let scroll = app.scrollViews["開封確認"]
+            for _ in 0 ..< 4 where !toggle.isHittable {
+                scroll.swipeUp()
+            }
+            XCTAssertTrue(toggle.isHittable)
+            toggle.tap()
+            let block = app.buttons["ブロックする（推奨）"]
+            for _ in 0 ..< 5 where !block.isHittable {
+                scroll.swipeUp()
+            }
+            XCTAssertTrue(block.isHittable)
+            capture(app, name: name)
+            block.tap()
+            app.terminate()
+        }
+        XCUIDevice.shared.orientation = .portrait
+    }
+
+    @MainActor
+    func testHistoryDeleteConfirmationAndEmptyState() {
+        XCUIDevice.shared.orientation = .portrait
+        let app = XCUIApplication()
+        app.launch()
+        XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
+        app.buttons["設定"].tap()
+        app.segmentedControls.buttons["標準"].tap()
+        if app.switches.firstMatch.value as? String != "0" { app.switches.firstMatch.tap() }
+        app.buttons["閉じる"].tap()
+        app.buttons["危険URL テスト"].tap()
+        XCTAssertTrue(app.buttons["ブロックする（推奨）"].waitForExistence(timeout: 5))
+        app.buttons["ブロックする（推奨）"].tap()
+        app.buttons["履歴"].tap()
+        let record = app.staticTexts["xn--e1afmkfd-paypal.example.invalid"].firstMatch
+        XCTAssertTrue(record.waitForExistence(timeout: 5))
+        app.buttons["編集"].tap()
+        app.buttons["すべて削除"].tap()
+        let alert = app.alerts["すべて削除"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.staticTexts["すべての履歴を削除しますか？\nこの操作は取り消せません。"].exists)
+        capture(app, name: "History delete confirmation")
+        alert.buttons["キャンセル"].tap()
+        XCTAssertTrue(record.exists, "キャンセルでは履歴を残す")
+        app.buttons["すべて削除"].tap()
+        alert.buttons["削除"].tap()
+        XCTAssertTrue(record.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["編集"].isEnabled)
+        capture(app, name: "History empty after deletion")
+        app.buttons["閉じる"].tap()
+        app.buttons["履歴"].tap()
+        XCTAssertFalse(record.exists, "再表示後も削除を保持する")
+        app.buttons["閉じる"].tap()
+    }
+
+    @MainActor
     private func closeBrowser(_ app: XCUIApplication) {
         let done = app.otherElements["TopBrowserBar"].buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完了", "閉じる", "Close"]))
             .firstMatch
@@ -111,14 +179,15 @@ final class SafeQRUITests: XCTestCase {
         XCTAssertTrue(app.buttons["設定"].waitForExistence(timeout: 10))
         app.buttons["設定"].tap()
         XCTAssertTrue(app.navigationBars["設定"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.textViews["外部チェックの説明"].exists, "利用開始前にGoogle出典と精度の限界を表示する")
         app.segmentedControls.buttons["強"].tap()
         if app.switches.firstMatch.value as? String != "1" { app.switches.firstMatch.tap() }
         app.buttons["閉じる"].tap()
     }
 
     @MainActor
-    private func capture(_ app: XCUIApplication, name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
+    private func capture(_: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)

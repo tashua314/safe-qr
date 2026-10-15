@@ -45,4 +45,18 @@ if ! xcodebuild "${COMMON[@]}" -configuration Debug -destination "platform=iOS S
     cat "$SAFEQR_ARTIFACTS/tests.log"
     exit 1
 fi
+# 拒否状態は通常スイートと分離し、CIでも必ず実行する。終了/失敗時は専用端末の許可を戻す。
+trap 'xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" grant camera jp.techguide.SafeQR' EXIT
+xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" revoke camera jp.techguide.SafeQR
+SAFEQR_DENIED_RESULT="$SAFEQR_ARTIFACTS/CameraDenied-$(date +%s)-$$.xcresult"
+if ! TEST_RUNNER_SAFEQR_TEST_CAMERA_DENIED=1 xcodebuild "${COMMON[@]}" -configuration Debug \
+    -destination "platform=iOS Simulator,id=$SAFEQR_SIMULATOR_ID" -parallel-testing-enabled NO \
+    -only-testing:SafeQRUITests/CameraPermissionUITests -resultBundlePath "$SAFEQR_DENIED_RESULT" test \
+    > "$SAFEQR_ARTIFACTS/tests-camera-denied.log" 2>&1; then
+    cat "$SAFEQR_ARTIFACTS/tests-camera-denied.log"
+    exit 1
+fi
+xcrun simctl privacy "$SAFEQR_SIMULATOR_ID" grant camera jp.techguide.SafeQR
+trap - EXIT
+echo "カメラ権限拒否の個別テスト: 成功"
 echo "lint・整形・Debug/Releaseビルド・iOSテスト: 成功"

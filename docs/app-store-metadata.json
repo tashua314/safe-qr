@@ -1,132 +1,78 @@
 {
+  "status": "draft",
+  "updatedAt": "2026-10-15",
   "appStoreMetadata": {
     "basicInfo": {
       "appName": "SafeQR",
-      "subtitle": "安全なQRコードリーダー",
       "bundleId": "jp.techguide.SafeQR",
-      "sku": "safeqr-jp-001",
-      "category": "Utilities",
-      "secondaryCategory": "Productivity"
+      "minimumOS": "18.5",
+      "category": "Utilities"
     },
     "localization": {
       "ja": {
         "displayName": "SafeQR",
-        "subtitle": "安全なQRコードリーダー",
-        "description": "危険なURLから身を守りながら、安心してQRコードをスキャンできるアプリです。ITリテラシーに関係なく、誰でも簡単に安全なQRコード体験を楽しめます。\n\n🔒 安全性を最優先に設計\nSafeQRは、スキャンしたQRコードに含まれるURLの安全性を自動的に判定し、危険なサイトへのアクセスを事前に警告します。フィッシングサイトやマルウェア配布サイトなど、様々な脅威からあなたのデバイスと個人情報を守ります。\n\n✨ 主な機能\n\n🎯 高精度な危険度判定\n- 独自のURL解析エンジンによる即座の安全性評価\n- Google Safe Browsing APIとの連携による高精度な脅威検出\n- 安全、注意、危険の3段階で分かりやすく表示\n\n📱 使いやすいインターface\n- カメラを起動して即座にスキャン開始\n- 大きく見やすいプレビュー画面\n- シンプルで直感的な操作性\n- フラッシュライト機能でどんな環境でもスキャン可能\n\n📚 充実した履歴管理\n- スキャンしたQRコードの履歴を最大50件まで保存\n- ウェブページのタイトルを自動取得して見やすく表示\n- 同じURLを再度スキャンした場合は訪問回数をカウント\n- 履歴からワンタップで再アクセス可能\n\n⚙️ カスタマイズ可能な設定\n- 安全性判定の厳しさを3段階で調整可能\n- 外部セキュリティサービスのON/OFF切り替え\n- プライバシーを重視した設定オプション\n\n🛡️ プライバシー保護\n- Google安全性照会はSHA-256の先頭4バイトのみを送信（URL全文は送信しません）。IP等の通信情報はGoogleへ届きます\n- タイトル取得・ブラウザ表示は対象サイトへ通信します\n- すべての履歴データは端末内にのみ保存\n- 不要な権限の要求は一切ありません",
-        "keywords": "QRコードリーダー,バーコード,セキュリティ,安全,スキャナー,プライバシー,フィッシング対策,URL,カメラ,履歴",
-        "promotionalText": "危険なURLを事前に警告する安全第一のQRコードリーダー。Google Safe Browsing連携で高精度な脅威検出。履歴管理機能付きで使いやすく、Googleへの照会はURL全文を送らない方式です。",
-        "releaseNotes": "初回リリースです。安全で快適なQRコードスキャンをお楽しみください。"
+        "subtitle": "QRのリンクを開く前に確認",
+        "description": "SafeQRは、QRコードのリンクを開く前に危険度を確認するアプリです。\n\n主な機能\n・カメラでQRコードを読み取り\n・端末内のルールで注意・危険な可能性を表示\n・注意・危険・外部チェック未確認では、開くか選ぶ確認画面を表示\n・履歴を端末内に最大50件保存し、個別・一括削除に対応\n・同じURLの再スキャン回数と最終判定を記録\n・履歴からの再訪も安全性を再確認\n・安全確認の厳しさを弱・標準・強から選択\n\n通信とプライバシー\n外部チェックは既定OFFです。ONにすると、Google Safe BrowsingへURL候補のSHA-256先頭4バイトを送り、端末内で完全ハッシュを比較します。URL全文はGoogleへ送りませんが、IP等の通信情報が届き、ハッシュの一部から候補が推測される可能性があります。\n\nタイトル取得とブラウザー表示は対象サイトへ通信します。注意・危険・外部未確認では開封を許可するまで開始しません。取得できたタイトルは端末内の履歴へ保存します。\n\n判定は安全性を保証しません。危険なサイトの見逃しや、安全なサイトへの誤警告が起こる可能性があります。リンク先や入力情報を確認してください。\n\niOS/iPadOS18.5以降に対応。現在のアプリ画面は日本語です。",
+        "keywords": "QRコード,リーダー,スキャナー,URL,履歴,プライバシー",
+        "promotionalText": "URLの危険度を確認してから開くQRリーダー。履歴は端末内に最大50件。外部チェックは任意で設定できます。"
       },
       "en": {
         "displayName": "SafeQR",
-        "subtitle": "Security-First QR Code Reader",
-        "description": "Scan QR codes safely with automatic URL safety detection. Protect yourself from malicious websites while enjoying a seamless QR code experience, regardless of your technical expertise.\n\n🔒 Security-First Design\nSafeQR automatically evaluates the safety of URLs contained in scanned QR codes and warns you about dangerous sites before you visit them. Protect your device and personal information from phishing sites, malware distribution sites, and other online threats.\n\n✨ Key Features\n\n🎯 High-Precision Threat Detection\n- Instant safety evaluation with proprietary URL analysis engine\n- High-accuracy threat detection powered by Google Safe Browsing API\n- Clear 3-level safety indication: Safe, Caution, Danger\n\n📱 User-Friendly Interface\n- Instant scanning with camera activation\n- Large, clear preview screen\n- Simple and intuitive operation\n- Flashlight support for scanning in any environment\n\n📚 Comprehensive History Management\n- Store up to 50 scanned QR code records\n- Automatic web page title retrieval for easy identification\n- Visit count tracking for repeated URLs\n- One-tap re-access from history\n\n⚙️ Customizable Settings\n- 3-level safety strictness adjustment\n- Toggle external security service integration\n- Privacy-focused configuration options\n\n🛡️ Privacy Protection\n- Google safety checks send only 4-byte SHA-256 prefixes, not raw URLs. Google receives network information such as your IP address\n- Title retrieval and browsing contact the destination website\n- All history data stored locally on device only\n- No unnecessary permission requests",
-        "keywords": "QR code reader,barcode scanner,security,safety,privacy,phishing protection,URL scanner,camera,history",
-        "promotionalText": "Security-first QR code reader with automatic dangerous URL warnings. High-precision threat detection via Google Safe Browsing. History management with privacy protection.",
-        "releaseNotes": "Initial release. Enjoy safe and comfortable QR code scanning."
+        "subtitle": "Check QR links before opening",
+        "description": "SafeQR checks the risk of a QR-code link before you open it.\n\nFeatures\n- Scan QR codes with the camera\n- Assess possible risks using on-device rules\n- Confirm before opening caution, danger, or externally unverified results\n- Keep up to 50 history records on your device, with individual and bulk deletion\n- Track repeated scans and the latest risk result\n- Recheck links opened from history\n- Choose low, standard, or high strictness\n\nNetwork use\nExternal checks are off by default. When enabled, SafeQR sends 4-byte SHA-256 prefixes of URL candidates to Google Safe Browsing and compares full hashes on your device. The raw URL is not sent to Google, but network information such as your IP address is visible and prefixes may allow candidates to be inferred.\n\nTitle retrieval and browsing contact the destination website. They start only after you allow opening when a warning or an unverified result is shown. Retrieved titles are stored with local history.\n\nRisk checks do not guarantee safety. Risky sites may be missed and harmless sites may be flagged. Check the destination and the information you enter.\n\nRequires iOS/iPadOS18.5 or later. The app interface is currently in Japanese.",
+        "keywords": "QR,reader,scanner,URL,history,privacy",
+        "promotionalText": "Check QR links before opening. Keep up to 50 local history records. Optional external safety checks."
       }
-    },
-    "pricing": {
-      "basePrice": 0,
-      "currency": "USD",
-      "availability": "worldwide"
-    },
-    "ageRating": {
-      "rating": "4+",
-      "contentDescriptors": [],
-      "reasons": "No objectionable content"
     },
     "appReviewInfo": {
       "contact": {
-        "firstName": "[要設定]",
-        "lastName": "[要設定]",
-        "phone": "[要設定]",
-        "email": "[要設定]"
+        "firstName": null,
+        "lastName": null,
+        "phone": null,
+        "email": null
       },
-      "demoAccount": {
-        "required": false
-      },
-      "notes": "カメラはQRコードのスキャンに使用し、画像や動画を保存しません。外部チェックは任意ONで、Google Safe Browsing v5 hashes.searchへSHA-256の先頭4バイトをbase64で送信し、完全ハッシュを端末内で照合します。URL全文はGoogleへ送らず、IP等の通信情報は届きます。タイトル取得とブラウザ表示は対象サイトへ通信します。警告と通信のタイミングはIssue #2の修正後に最終確認してください。申請用の下書きです。"
+      "demoAccountRequired": false,
+      "notes": "申請前の下書き。カメラ画像・動画は保存せず、QRのURLを評価する。外部チェックは既定OFF。ON時はGoogle Safe Browsing v5 hashes.searchへ4byte SHA-256 prefixだけを送り、完全ハッシュは端末内照合。注意・危険・外部未確認では開封確認が必要で、許可前にタイトル取得とブラウザー表示をしない。履歴再訪も同様。タイトル取得は元URLだけでリダイレクトを追わない。判定には見逃し・誤警告があり得る。実機カメラ、本番API認証、署名配布、年齢質問、運営者/窓口/公開URLの確定を待って申請する。"
+    },
+    "support": {
+      "operator": null,
+      "supportURL": null,
+      "privacyPolicyURL": null,
+      "contact": null,
+      "status": "利用者回答: 未定"
+    },
+    "pricing": {
+      "status": "planned_free_phase",
+      "proposedBasePrice": 0,
+      "availability": null,
+      "notes": "当面は収益化しない方針。価格・配布地域の申請設定は別途確定する。"
+    },
+    "ageRating": {
+      "status": "unanswered",
+      "notes": "App Store Connectの現在の質問でWeb表示等を確認して確定する"
     },
     "screenshots": {
-      "required": {
-        "iPhone65": {
-          "count": 5,
-          "size": "1242x2208",
-          "descriptions": [
-            "メイン画面 - カメラプレビューとスキャン機能",
-            "危険URL警告画面 - セキュリティ警告の詳細表示",
-            "履歴一覧画面 - スキャン履歴の管理",
-            "設定画面 - セキュリティレベルの調整",
-            "安全URL確認画面 - 安全なURLの表示"
-          ]
-        },
-        "iPhone55": {
-          "count": 5,
-          "size": "1242x2208",
-          "descriptions": "Same as iPhone 6.5\""
-        }
+      "status": "draft",
+      "specificationsCheckedAt": "2026-10-15",
+      "specificationsURL": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
+      "iphoneDynamicIslandMedium": {
+        "portraitPixels": [
+          1206,
+          2622
+        ]
       },
-      "optional": {
-        "iPad129": {
-          "count": 5,
-          "size": "2048x2732",
-          "descriptions": "iPad版のスクリーンショット"
-        }
-      }
+      "ipad13": {
+        "portraitPixels": [
+          2064,
+          2752
+        ]
+      },
+      "notes": "Simulatorの実画面を保存する。モックカメラを実機撮影に見せかけない。アップロード・審査未実施。"
     },
-    "appIcon": {
-      "size": "1024x1024",
-      "format": "PNG",
-      "filename": "icon.png",
-      "notes": "角丸なし、透過なしのアイコン"
-    }
-  },
-  "marketingStrategy": {
-    "targetAudience": [
-      "セキュリティ意識の高いユーザー",
-      "QRコードを頻繁に利用するビジネスパーソン",
-      "ITリテラシーが低めの高齢者",
-      "子どもの安全を考える保護者"
-    ],
-    "valueProposition": "安全性を最優先にしたQRコードリーダー",
-    "competitiveAdvantage": [
-      "URL安全性の事前判定機能",
-      "プライバシー保護の徹底",
-      "シンプルで分かりやすいUI"
-    ],
-    "keywords": {
-      "primary": [
-        "QRコードリーダー",
-        "セキュリティ",
-        "安全"
-      ],
-      "secondary": [
-        "バーコード",
-        "プライバシー",
-        "フィッシング対策"
-      ],
-      "longTail": [
-        "安全なQRコード",
-        "危険URL検出",
-        "プライバシー重視"
-      ]
-    }
-  },
-  "releaseStrategy": {
-    "softLaunch": {
-      "regions": [
-        "Japan"
-      ],
-      "duration": "1-2 weeks",
-      "goals": "初期フィードバック収集、バグ修正"
-    },
-    "globalLaunch": {
-      "regions": [
-        "Worldwide"
-      ],
-      "timing": "ソフトローンチ完了後",
-      "goals": "グローバル展開、ユーザー獲得"
+    "externalServiceUse": {
+      "status": "planned_non_commercial_phase",
+      "notes": "当面は広告・有料販売・課金等で収益化せず、販売・収益獲得目的の利用を避ける方針。実際の配布用途がSafe Browsing条件に合うことは公開前に確認する。収益化開始前にWeb Risk APIへの移行・検証と料金/通信/プライバシー案内の確認を完了する。移行は未実装。",
+      "source": "https://developers.google.com/safe-browsing/reference/Appropriate.Usage"
     }
   }
 }

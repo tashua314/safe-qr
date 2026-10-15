@@ -1,46 +1,19 @@
-# ドメインI/F（抜粋）
+# 現在の内部インターフェース
 
-```swift
-// 危険度
-public enum SafetyLevel: Int { case safe = 0, caution = 1, danger = 2 }
+2026-10-15時点。外部向け公開APIではなく、アプリ内部のSwift型と責務を示す。型定義の正本はソースに置く。
 
-// 厳しさ
-public enum Strictness { case low, standard, high }
+| 責務 | 実装・契約 | 主な動作 |
+|---|---|---|
+| カメラ | `QRScannerServiceProtocol` / `QRScannerService` | `scanResult: AnyPublisher<String, Never>`、権限要求、開始/停止、トーチ、プレビュー。SimulatorはDebugのテスト用URLボタンを使う |
+| QR内容の検証 | `QRCodeProcessorProtocol` / `QRCodeProcessor` | URL形式とスキームを検証し、許可しない入力を拒否する |
+| ローカル判定 | `UrlRiskEvaluator` | URL文字列と厳しさから`SafetyLevel`を返す。safeは安全の保証ではない |
+| 完全評価 | `URLEvaluationServiceProtocol` / `EnhancedUrlRiskEvaluator` | `evaluateComplete(url:completion:)`で外部照会を待つ。外部失敗/未知はfallbackとして保持 |
+| Google照会 | `SafeBrowsingAPIClientProtocol` | `checkURL`はResult、`checkURLs`はURLごとのResultを返す。失敗をsafeへ置き換えない |
+| 開封の状態管理 | `ScannerViewModel` | ready → processing → requiresConfirmationまたはopening。同じ判定への承認は一度だけ消費し、古い完了通知を無視する |
+| タイトル | `HtmlTitleFetcherProtocol` | `fetchTitle(from:completion:)`。開封承認後だけ対象ホストへ通信し、タイトル取得のリダイレクトには追従しない |
+| 履歴 | `HistoryRepositoryProtocol` / `HistoryRepository` | URLはString、Core Dataの`ScanRecord`へ保存。同一URLは更新・回数加算、最新50件まで。削除・全削除・タイトル更新 |
+| 設定 | `SettingsStoreProtocol` | `SafetyStrictness`と外部照会ON/OFFを保存し、Combineで変更を通知する |
 
-// 評価器
-public protocol UrlRiskEvaluating {
-    func evaluate(url: URL, strictness: Strictness, reputation: ReputationChecking?) -> SafetyLevel
-}
+プロトコルの正本は[Common/Protocols.swift](../SafeQR/SafeQR/Common/Protocols.swift)。`ScanRecord`は公開structではなくCore Dataモデルである。
 
-// レピュテーション
-public protocol ReputationChecking {
-    /// 端末でURLから候補を生成し、GoogleへはSHA-256の先頭4バイトだけを送る。
-    func checkURL(_ url: String, completion: @escaping (Result<SafeBrowsingAPIClient.SafeBrowsingResult, SafeBrowsingAPIClient.SafeBrowsingError>) -> Void)
-}
-
-// 履歴
-public struct ScanRecord {
-    public let id: UUID
-    public let url: URL
-    public var title: String?
-    public var safety: SafetyLevel
-    public var scannedAt: Date
-    public var visitCount: Int
-}
-
-public protocol HistoryRepository {
-    func upsert(_ record: ScanRecord) throws // 既存URLならvisitCount+1, scannedAt更新
-    func recent(limit: Int) throws -> [ScanRecord]
-    func delete(id: UUID) throws
-    func deleteAll() throws
-    var maxRecords: Int { get } // 50 固定
-}
-// スキャナ
-public protocol QRScannerService {
-    var onDetectURL: ((URL) -> Void)? { get set }
-    func startSession() throws
-    func stopSession()
-}
-```
-
-実装の送信契約は [reputation-design.md](reputation-design.md) を参照。上記は設計概要であり、現在の型は `Common/Protocols.swift` 等で定義する。
+外部送信は[reputation-design.md](reputation-design.md)、通信の同意条件は[scan-consent-design.md](scan-consent-design.md)、ログは[logging-policy.md](logging-policy.md)を参照。

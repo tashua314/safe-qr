@@ -56,6 +56,7 @@ class SettingsViewController: UIViewController {
     /// セルの種類定義
     private enum CellType {
         case safetyStrictness // 厳しさ設定
+        case reputationNotice // 利用開始前に精度の限界とGoogle出典を表示
         case externalReputation // 外部照会設定
         case historyInfo // 履歴情報
         case appVersion // アプリバージョン
@@ -115,6 +116,7 @@ class SettingsViewController: UIViewController {
         // セルの登録
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "DefaultCell")
         tableView.register(SwitchTableViewCell.self, forCellReuseIdentifier: "SwitchCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "AdvisoryCell")
         tableView.register(SegmentedTableViewCell.self, forCellReuseIdentifier: "SegmentedCell")
 
         // テーブルビューの外観設定
@@ -157,7 +159,7 @@ class SettingsViewController: UIViewController {
         case .safety:
             return .safetyStrictness
         case .privacy:
-            return .externalReputation
+            return row == 0 ? .reputationNotice : .externalReputation
         case .history:
             return .historyInfo
         case .app:
@@ -187,8 +189,10 @@ extension SettingsViewController: UITableViewDataSource {
         guard let sectionType = Section(rawValue: section) else { return 0 }
 
         switch sectionType {
-        case .safety, .privacy, .history:
+        case .safety, .history:
             return 1
+        case .privacy:
+            return 2
         case .app:
             return 2 // バージョン情報 + アプリ情報
         }
@@ -208,6 +212,8 @@ extension SettingsViewController: UITableViewDataSource {
         switch cellType {
         case .safetyStrictness:
             return configureSafetyStrictnessCell(at: indexPath)
+        case .reputationNotice:
+            return configureReputationNoticeCell(at: indexPath)
         case .externalReputation:
             return configureExternalReputationCell(at: indexPath)
         case .historyInfo:
@@ -252,6 +258,23 @@ extension SettingsViewController: UITableViewDataSource {
     /**
      * 外部レピュテーション設定セルの構成
      */
+    private func configureReputationNoticeCell(at indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "AdvisoryCell", for: indexPath)
+        cell.selectionStyle = .none
+        if cell.contentView.subviews.isEmpty {
+            let notice = GoogleSafetyAdvisoryView()
+            notice.configureIntroduction()
+            cell.contentView.addSubview(notice)
+            NSLayoutConstraint.activate([
+                notice.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+                notice.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -16),
+                notice.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 12),
+                notice.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -12)
+            ])
+        }
+        return cell
+    }
+
     private func configureExternalReputationCell(at indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
             withIdentifier: "SwitchCell",
