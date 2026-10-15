@@ -4,8 +4,11 @@ check:
 	@scripts/check.sh
 
 lint:
-	@swiftlint lint --strict --no-cache
-	@swiftformat SafeQR/SafeQR SafeQR/SafeQRTests SafeQR/SafeQRUITests --lint --cache ignore
+	@scripts/lint.sh
 
 format:
 	@scripts/format.sh
+
+.PHONY: tools
+tools:
+	./scripts/install-check-tools.sh

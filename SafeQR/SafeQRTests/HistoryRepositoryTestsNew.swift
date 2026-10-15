@@ -363,7 +363,10 @@ class HistoryRepositoryTestsNew: XCTestCase {
  * 独立したインメモリストアを使用
  */
 class TestCoreDataStack: CoreDataStack {
-    private var _persistentContainer = NSPersistentContainer(name: "SafeQR")
+    /// entity classのmodel登録を重複させず、各テストのstoreだけを独立させる。
+    private let _persistentContainer = NSPersistentContainer(
+        name: "SafeQR", managedObjectModel: CoreDataStack.shared.persistentContainer.managedObjectModel
+    )
 
     override init() {
         super.init()
@@ -371,7 +374,7 @@ class TestCoreDataStack: CoreDataStack {
     }
 
     private func setupInMemoryPersistentContainer() {
-        let container = NSPersistentContainer(name: "SafeQR")
+        let container = _persistentContainer
 
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
@@ -389,8 +392,6 @@ class TestCoreDataStack: CoreDataStack {
         }
 
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-
-        _persistentContainer = container
     }
 
     override var viewContext: NSManagedObjectContext {

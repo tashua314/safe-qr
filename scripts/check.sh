@@ -2,11 +2,13 @@
 set -euo pipefail
 SAFEQR_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$SAFEQR_ROOT"
+source "$SAFEQR_ROOT/scripts/tool-config.sh"
 
 for tool in swiftlint swiftformat xcodebuild python3; do
     command -v "$tool" >/dev/null || { echo "$tool が必要です。" >&2; exit 1; }
 done
 
+safeqr_require_check_tools
 xcodebuild -version
 swiftlint version
 swiftformat --version
