@@ -46,8 +46,24 @@ final class SafeQRUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["paypal.example.invalid"].firstMatch.exists)
         XCTAssertTrue(app.staticTexts["xn--e1afmkfd-paypal.example.invalid"].firstMatch.exists)
         capture(app, name: "History after mock scans")
+        app.staticTexts["xn--e1afmkfd-paypal.example.invalid"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["危険な可能性があります"].waitForExistence(timeout: 5))
+        capture(app, name: "History revisit warning")
+        app.buttons["ブロックする（推奨）"].tap()
         app.buttons["閉じる"].tap()
         XCTAssertTrue(app.buttons["注意URL テスト"].exists)
+
+        // CIはAPIキー未設定。未照会をsafeとして自動開封しないことを画面でも確認する。
+        app.buttons["設定"].tap()
+        if app.switches.firstMatch.value as? String != "1" { app.switches.firstMatch.tap() }
+        app.buttons["閉じる"].tap()
+        app.buttons["安全URL テスト"].tap()
+        XCTAssertTrue(app.staticTexts["外部チェックは未確認です"].waitForExistence(timeout: 10))
+        capture(app, name: "Unverified external warning")
+        app.buttons["やめる（推奨）"].tap()
+        app.buttons["設定"].tap()
+        if app.switches.firstMatch.value as? String != "0" { app.switches.firstMatch.tap() }
+        app.buttons["閉じる"].tap()
     }
 
     @MainActor

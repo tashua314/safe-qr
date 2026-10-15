@@ -320,7 +320,7 @@ class ScannerUIManager: ScannerUIManagerProtocol {
         case .ready:
             statusLabel.text = "QRコードをカメラに向けてください"
             statusLabel.textColor = .white
-        case .processing:
+        case .processing, .opening:
             statusLabel.text = "処理中..."
             statusLabel.textColor = .systemYellow
         case .evaluated:
@@ -341,7 +341,7 @@ class ScannerUIManager: ScannerUIManagerProtocol {
         switch status {
         case .ready:
             scanOverlayView.layer.borderColor = UIColor.white.cgColor
-        case .processing:
+        case .processing, .opening:
             scanOverlayView.layer.borderColor = UIColor.systemYellow.cgColor
         case .evaluated:
             scanOverlayView.layer.borderColor = UIColor.systemGreen.cgColor

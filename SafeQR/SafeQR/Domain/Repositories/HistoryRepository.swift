@@ -170,6 +170,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
     private func updateExistingScanRecord(_ entity: ScanRecordEntity, with scanRecord: ScanRecord) {
         entity.visitCount += 1 // 訪問回数をインクリメント
         entity.scannedAt = scanRecord.scannedAt // 最終訪問日時を更新
+        entity.safety = scanRecord.safety.rawValue
 
         // タイトルが新しく取得された場合は更新
         if let newTitle = scanRecord.title {
