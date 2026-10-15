@@ -42,9 +42,10 @@
       "status": "利用者回答: 未定"
     },
     "pricing": {
-      "status": "unconfirmed",
+      "status": "planned_free_phase",
       "proposedBasePrice": 0,
-      "availability": null
+      "availability": null,
+      "notes": "当面は収益化しない方針。価格・配布地域の申請設定は別途確定する。"
     },
     "ageRating": {
       "status": "unanswered",
@@ -69,8 +70,8 @@
       "notes": "Simulatorの実画面を保存する。モックカメラを実機撮影に見せかけない。アップロード・審査未実施。"
     },
     "externalServiceUse": {
-      "status": "unconfirmed",
-      "notes": "Safe Browsingは非商用条件。価格0だけで適合を断定せず、配布・収益用途を確認する。",
+      "status": "planned_non_commercial_phase",
+      "notes": "当面は広告・有料販売・課金等で収益化せず、販売・収益獲得目的の利用を避ける方針。実際の配布用途がSafe Browsing条件に合うことは公開前に確認する。収益化開始前にWeb Risk APIへの移行・検証と料金/通信/プライバシー案内の確認を完了する。移行は未実装。",
       "source": "https://developers.google.com/safe-browsing/reference/Appropriate.Usage"
     }
   }

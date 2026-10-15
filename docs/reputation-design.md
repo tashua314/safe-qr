@@ -22,3 +22,13 @@ URLProtocolテストでraw URLやmarkerがrequestにないこと、4byte prefix�
 protobuf JSONで空fullHashesが省略された形は有効、null/誤った型/脅威詳細欠落はfailureとする。不正応答やfailureはcacheへ保存しない。未知の値を含む有効な応答はその情報のままTTL付きcacheへ保持し、cache hitでも未知状態を失わない。
 
 Googleの[利用条件](https://developers.google.com/safe-browsing/terms)に合わせ、fullHashを含むprefixのキャッシュはサーバーTTLと30分の短い方まで。陰性prefixはサーバーTTLを維持する。利用開始前の設定とGoogle検出の警告には、出典リンクと精度・信頼性の限界、誤判定・見逃しの可能性を表示する。ローカル警告にGoogleの危険判定の出典を付けない。
+
+## 配布方針と将来の収益化
+
+2026-10-15の利用者の提案に基づき、当面は収益化せず、Safe Browsingを任意の外部チェックに使う方針とする。非商用条件は現在の売上が0というだけで判定せず、販売・広告・課金等の収益獲得を目的とする使い方を避け、実際の用途を公開前に確認する。
+
+収益化は、Web Risk APIへの移行・検証を完了してから開始する。移行時は認証、料金・クォータ、応答/キャッシュ、警告の出典、通信内容とプライバシー案内を確認する。移行完了までは収益化を始めない。
+
+Web RiskのLookup APIはURL全文を送るため、現在の「GoogleへURL全文を送らない」という契約を維持する候補はUpdate APIである。ローカルの脅威リストの更新・照合が必要で、APIキーだけの変更では完了しない。方式・費用を評価してから別途実装する。現時点ではWeb Risk移行は未実装。
+
+一次資料：[Safe Browsingの用途条件](https://developers.google.com/safe-browsing/reference/Appropriate.Usage)、[Web Riskの方式比較](https://docs.cloud.google.com/web-risk/docs/overview)、[料金](https://cloud.google.com/web-risk/pricing)。
