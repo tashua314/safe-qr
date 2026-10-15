@@ -1,3 +1,4 @@
+import Combine
 import SafariServices
 import UIKit
 
@@ -34,6 +35,13 @@ class HistoryViewController: UIViewController {
 
     /// 履歴リポジトリ
     private let historyRepository = HistoryRepository()
+    private let accessModel = ScannerViewModel(
+        qrProcessor: resolve(QRCodeProcessorProtocol.self),
+        urlEvaluator: resolve(URLEvaluationServiceProtocol.self),
+        historyRepository: resolve(HistoryRepositoryProtocol.self),
+        titleFetcher: resolve(HtmlTitleFetcherProtocol.self)
+    )
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Constants
 
@@ -49,12 +57,63 @@ class HistoryViewController: UIViewController {
         setupTableView()
         setupEmptyStateView()
         loadHistoryData()
+        bindURLAccess()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // 画面表示時に履歴データを再読み込み（他画面で履歴が追加された可能性）
         loadHistoryData()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if accessModel.scanStatus == .opening { accessModel.resetScan() }
+    }
+
+    private func bindURLAccess() {
+        accessModel.$scanStatus
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                let ready = status == .ready
+                self.tableView.isUserInteractionEnabled = ready
+                self.navigationItem.rightBarButtonItem?.isEnabled = ready && !self.scanRecords.isEmpty
+                self.navigationItem.prompt = status == .processing ? "安全性を確認中..." : nil
+            }.store(in: &cancellables)
+        accessModel.$evaluationResult.compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in self?.handleAccessResult(result) }
+            .store(in: &cancellables)
+        accessModel.$urlToOpen.compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                guard let url = URL(string: value) else { return }
+                guard let self = self else { return }
+                let browser = SFSafariViewController(url: url)
+                browser.delegate = self
+                self.present(browser, animated: true)
+                browser.presentationController?.delegate = self
+            }.store(in: &cancellables)
+        accessModel.$errorMessage.compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in self?.showErrorAlert(message) }
+            .store(in: &cancellables)
+    }
+
+    private func handleAccessResult(_ result: URLEvaluationResult) {
+        guard accessModel.isCurrent(result) else { return }
+        guard result.requiresConfirmation else { accessModel.approve(result)
+            return
+        }
+        let confirmation = OpenConfirmViewController(
+            url: result.url, safetyLevel: result.safetyLevel, detectedIssues: result.detectedIssues,
+            isExternalCheckUnverified: result.evaluationMethod == .fallback
+        )
+        confirmation.onUserDecision = { [weak self] approved in
+            if approved { self?.accessModel.approve(result) } else { self?.accessModel.cancel(result) }
+        }
+        present(confirmation, animated: true)
     }
 
     // MARK: - UI Setup
@@ -227,6 +286,7 @@ class HistoryViewController: UIViewController {
      * 閉じるボタンタップ処理
      */
     @objc private func closeButtonTapped() {
+        accessModel.resetScan()
         dismiss(animated: true)
     }
 
@@ -334,27 +394,7 @@ class HistoryViewController: UIViewController {
      * @param scanRecord: タップされた履歴レコード
      */
     private func openURL(from scanRecord: ScanRecord) {
-        guard let url = URL(string: scanRecord.url) else {
-            showErrorAlert("無効なURLです")
-            return
-        }
-
-        // SFSafariViewControllerで開く
-        let safariVC = SFSafariViewController(url: url)
-        safariVC.modalPresentationStyle = .pageSheet
-        present(safariVC, animated: true)
-
-        // 履歴の訪問回数を更新（バックグラウンド処理）
-        DispatchQueue.global().async { [weak self] in
-            var updatedRecord = scanRecord
-            updatedRecord.visitCount += 1
-            self?.historyRepository.upsertScanRecord(updatedRecord)
-
-            // UI更新
-            DispatchQueue.main.async {
-                self?.loadHistoryData()
-            }
-        }
+        accessModel.processHistoryURL(scanRecord.url)
     }
 
     /**
@@ -363,7 +403,7 @@ class HistoryViewController: UIViewController {
      */
     private func showErrorAlert(_ message: String) {
         let alert = UIAlertController(title: "エラー", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in self?.accessModel.resetScan() })
         present(alert, animated: true)
     }
 }
@@ -425,3 +465,17 @@ extension HistoryViewController: UITableViewDelegate {
  * 履歴表示用カスタムテーブルビューセル
  * タイトル、URL（ドメイン）、安全性バッジ、訪問回数を表示
  */
+
+extension HistoryViewController: SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        controller.dismiss(animated: true) { [weak self] in
+            self?.accessModel.resetScan()
+            self?.loadHistoryData()
+        }
+    }
+
+    func presentationControllerDidDismiss(_: UIPresentationController) {
+        accessModel.resetScan()
+        loadHistoryData()
+    }
+}

@@ -61,13 +61,16 @@ class ScannerViewController: UIViewController {
         setupUI()
         setupBindings()
         setupQRScanner()
-        setupNotifications()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         startScanning()
-        viewModel.resetScan()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if viewModel.scanStatus == .opening { viewModel.resetScan() }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -130,6 +133,12 @@ class ScannerViewController: UIViewController {
             }
             .store(in: &cancellables)
 
+        viewModel.$urlToOpen
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] url in self?.openURL(url) }
+            .store(in: &cancellables)
+
         // エラーメッセージの監視
         viewModel.$errorMessage
             .compactMap { $0 }
@@ -146,29 +155,6 @@ class ScannerViewController: UIViewController {
                 if let uiManager = self?.uiManager as? ScannerUIManager {
                     uiManager.updateLightButtonState(isEnabled)
                 }
-            }
-            .store(in: &cancellables)
-    }
-
-    /**
-     * 通知の設定
-     */
-    private func setupNotifications() {
-        // URL開く要求の監視
-        NotificationCenter.default
-            .publisher(for: .openURLRequested)
-            .compactMap { $0.object as? String }
-            .sink { [weak self] url in
-                self?.openURL(url)
-            }
-            .store(in: &cancellables)
-
-        // 警告ダイアログ表示の監視
-        NotificationCenter.default
-            .publisher(for: .showWarningDialog)
-            .compactMap { $0.object as? [String: Any] }
-            .sink { [weak self] dialogInfo in
-                self?.showWarningDialog(dialogInfo)
             }
             .store(in: &cancellables)
     }
@@ -193,7 +179,8 @@ class ScannerViewController: UIViewController {
         // QRコード検出結果の監視
         qrScannerService.scanResult
             .sink { [weak self] qrCode in
-                self?.viewModel.processDetectedQRCode(qrCode)
+                guard let self = self, self.presentedViewController == nil else { return }
+                self.viewModel.processDetectedQRCode(qrCode)
             }
             .store(in: &cancellables)
     }
@@ -252,14 +239,11 @@ class ScannerViewController: UIViewController {
      * 評価結果の処理
      */
     private func handleEvaluationResult(_ result: URLEvaluationResult) {
-        switch result.safetyLevel {
-        case .safe:
-            // 安全なURLはそのまま開く
-            viewModel.proceedWithURL(result.url, safetyLevel: result.safetyLevel)
-
-        case .caution, .danger:
-            // 警告・危険なURLは確認ダイアログを表示
+        guard viewModel.isCurrent(result) else { return }
+        if result.requiresConfirmation {
             showConfirmationDialog(for: result)
+        } else {
+            viewModel.approve(result)
         }
     }
 
@@ -287,56 +271,19 @@ class ScannerViewController: UIViewController {
         let confirmVC = OpenConfirmViewController(
             url: result.url,
             safetyLevel: result.safetyLevel,
-            detectedIssues: result.detectedIssues
+            detectedIssues: result.detectedIssues,
+            isExternalCheckUnverified: result.evaluationMethod == .fallback
         )
 
         confirmVC.onUserDecision = { [weak self] shouldOpen in
             if shouldOpen {
-                self?.viewModel.proceedWithURL(result.url, safetyLevel: result.safetyLevel)
+                self?.viewModel.approve(result)
             } else {
-                self?.viewModel.resetScan()
+                self?.viewModel.cancel(result)
             }
         }
 
         present(confirmVC, animated: true)
-    }
-
-    /**
-     * 警告ダイアログの表示（通知経由）
-     */
-    private func showWarningDialog(_ dialogInfo: [String: Any]) {
-        guard let url = dialogInfo["url"] as? String,
-              let safetyLevelRaw = dialogInfo["safetyLevel"] as? Int16,
-              let safetyLevel = SafetyLevel(rawValue: safetyLevelRaw),
-              let detectedIssues = dialogInfo["detectedIssues"] as? [String] else {
-            return
-        }
-
-        let result = URLEvaluationResult(
-            url: url,
-            safetyLevel: safetyLevel,
-            evaluationMethod: .local,
-            responseTime: 0,
-            detectedIssues: detectedIssues
-        )
-
-        showConfirmationDialog(for: result)
-    }
-
-    /**
-     * 確認メッセージの作成
-     */
-    private func createConfirmationMessage(for result: URLEvaluationResult) -> String {
-        var message = "このサイトにアクセスしますか？\n\n"
-        message += "URL: \(result.url)\n"
-        message += "安全性: \(result.safetyLevel.displayName)\n"
-
-        if !result.detectedIssues.isEmpty {
-            message += "検出された問題: \(result.detectedIssues.joined(separator: ", "))\n"
-        }
-
-        message += "\n注意して進んでください。"
-        return message
     }
 
     // MARK: - Button Actions
@@ -376,7 +323,9 @@ class ScannerViewController: UIViewController {
         }
 
         let safariVC = SFSafariViewController(url: urlObject)
+        safariVC.delegate = self
         present(safariVC, animated: true)
+        safariVC.presentationController?.delegate = self
     }
 
     // MARK: - Error Handling
@@ -400,5 +349,15 @@ class ScannerViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
 
         present(alert, animated: true)
+    }
+}
+
+extension ScannerViewController: SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        controller.dismiss(animated: true) { [weak self] in self?.viewModel.resetScan() }
+    }
+
+    func presentationControllerDidDismiss(_: UIPresentationController) {
+        viewModel.resetScan()
     }
 }

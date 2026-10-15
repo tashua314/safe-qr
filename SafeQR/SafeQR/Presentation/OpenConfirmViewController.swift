@@ -47,10 +47,13 @@ class OpenConfirmViewController: UIViewController {
     private let detailLabel = UILabel()
 
     private var isDetailExpanded = false
+    private let isExternalCheckUnverified: Bool
+    private var hasDecided = false
 
     // MARK: - Initializer
 
-    init(url: String, safetyLevel: SafetyLevel, detectedIssues: [String] = []) {
+    init(url: String, safetyLevel: SafetyLevel, detectedIssues: [String] = [], isExternalCheckUnverified: Bool = false) {
+        self.isExternalCheckUnverified = isExternalCheckUnverified
         self.url = url
         self.safetyLevel = safetyLevel
         self.detectedIssues = detectedIssues
@@ -313,6 +316,10 @@ class OpenConfirmViewController: UIViewController {
     }
 
     private func configureForSafetyLevel() {
+        if safetyLevel == .safe, isExternalCheckUnverified {
+            configureUnverifiedLevel()
+            return
+        }
         switch safetyLevel {
         case .danger:
             configureDangerLevel()
@@ -331,7 +338,7 @@ class OpenConfirmViewController: UIViewController {
         titleLabel.text = "危険な可能性があります"
         titleLabel.textColor = .systemRed
 
-        descriptionLabel.text = "このリンクは危険な可能性が高いと判定されました。\\n詐欺サイトやマルウェアの感染リスクがあります。"
+        descriptionLabel.text = "このリンクは危険な可能性が高いと判定されました。\n詐欺サイトやマルウェアの感染リスクがあります。"
 
         adviceLabel.text = safetyLevel.recommendedAction
 
@@ -350,7 +357,7 @@ class OpenConfirmViewController: UIViewController {
         titleLabel.text = "不審な可能性があります"
         titleLabel.textColor = .systemOrange
 
-        descriptionLabel.text = "このリンクには注意が必要です。\\n不審なサイトやフィッシングサイトの可能性があります。"
+        descriptionLabel.text = "このリンクには注意が必要です。\n不審なサイトやフィッシングサイトの可能性があります。"
 
         adviceLabel.text = safetyLevel.recommendedAction
 
@@ -363,21 +370,19 @@ class OpenConfirmViewController: UIViewController {
     }
 
     private func configureSafeLevel() {
-        warningIconLabel.text = "✅"
-        warningIconLabel.textColor = .systemGreen
+        configureUnverifiedLevel()
+    }
 
-        titleLabel.text = "このリンクは安全です"
-        titleLabel.textColor = .systemGreen
-
-        descriptionLabel.text = "このリンクは安全と判定されました。"
-        adviceLabel.text = ""
-
-        recommendedButton.setTitle("開く", for: .normal)
-        recommendedButton.backgroundColor = .systemGreen
-
-        alternativeButton.setTitle("キャンセル", for: .normal)
-        alternativeButton.setTitleColor(.systemGray, for: .normal)
-        alternativeButton.layer.borderColor = UIColor.systemGray.cgColor
+    private func configureUnverifiedLevel() {
+        warningIconLabel.text = "⚠️"
+        titleLabel.text = "外部チェックは未確認です"
+        titleLabel.textColor = .systemOrange
+        descriptionLabel.text = "外部チェックを完了できませんでした。ローカル評価だけでは安全性を保証できません。"
+        adviceLabel.text = "開くと、このサイトへの通信が始まります。"
+        recommendedButton.setTitle("やめる（推奨）", for: .normal)
+        recommendedButton.backgroundColor = .systemOrange
+        alternativeButton.setTitle("未確認のまま開く", for: .normal)
+        alternativeButton.setTitleColor(.systemOrange, for: .normal)
     }
 
     private func setupAccessibility() {
@@ -470,6 +475,10 @@ class OpenConfirmViewController: UIViewController {
     }
 
     private func dismissWithDecision(shouldOpen: Bool) {
+        guard !hasDecided else { return }
+        hasDecided = true
+        recommendedButton.isEnabled = false
+        alternativeButton.isEnabled = false
         animateOut { [weak self] in
             self?.dismiss(animated: false) {
                 self?.onUserDecision?(shouldOpen)

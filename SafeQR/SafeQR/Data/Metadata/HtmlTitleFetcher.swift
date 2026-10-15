@@ -52,6 +52,12 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
     /// 大きなページでメモリを消費しすぎないよう制限
     private let maxContentLength: Int = 50000 // 50KB
 
+    private let sessionConfiguration: URLSessionConfiguration
+
+    init(sessionConfiguration: URLSessionConfiguration = .ephemeral) {
+        self.sessionConfiguration = sessionConfiguration
+    }
+
     // MARK: - 公開メソッド
 
     /**
@@ -80,7 +86,10 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
         let startTime = Date()
 
         // URLSession設定
-        let config = URLSessionConfiguration.default
+        let config = (sessionConfiguration.copy() as? URLSessionConfiguration) ?? .ephemeral
+        config.urlCache = nil
+        config.httpCookieStorage = nil
+        config.httpShouldSetCookies = false
         config.timeoutIntervalForRequest = timeoutInterval
         config.timeoutIntervalForResource = timeoutInterval
 
@@ -92,7 +101,7 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
             "Accept-Encoding": "gzip, deflate"
         ]
 
-        let session = URLSession(configuration: config)
+        let session = URLSession(configuration: config, delegate: HtmlTitleSessionDelegate(), delegateQueue: nil)
 
         // リクエスト作成
         var request = URLRequest(url: urlObject)
@@ -101,6 +110,7 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
 
         // データタスク実行
         session.dataTask(with: request) { [weak self] data, response, error in
+            session.finishTasksAndInvalidate()
             let fetchTime = Date().timeIntervalSince(startTime) * 1000 // ミリ秒
 
             // メインスレッドでコールバック実行
@@ -370,5 +380,15 @@ class HtmlTitleFetcher: HtmlTitleFetcherProtocol {
         }
 
         return cleaned
+    }
+}
+
+/// 開封許可は元URLに限る。未評価のリダイレクト先へタイトル取得を転送しない。
+final class HtmlTitleSessionDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _: URLSession, task _: URLSessionTask, willPerformHTTPRedirection _: HTTPURLResponse,
+        newRequest _: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
     }
 }
