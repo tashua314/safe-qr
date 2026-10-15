@@ -5,6 +5,10 @@
 
 先行するPR #16の対象HEADは `9fdbdaed74a4928fd3c72742c31e98cc9361c2d9`。CI改善PR #18の最終HEADは `2e16b0cd2547e04c22d9aa538c448b0d1c6bb28e`。その後のAPI互換修正でアプリとテストを変更しているため、先行テストを最終ソースの全端末確認へ読み替えない。
 
+レイアウト循環の修正は[PR #28](https://github.com/tashua314/safe-qr/pull/28)、対象HEAD `d13c1ff348253bf4708c6825fcc5b308eaa0ec98`。独立レビュー承認と[CI全3ジョブ成功](https://github.com/tashua314/safe-qr/actions/runs/38748795685)後にmain `9e3a62d4347cf05a7c9d8bd654840ae0151683d9`へマージし、レビュー/CI済みtreeとの一致を確認した。実機にインストールした版は修正前であり、修正後の実機CPU改善は未確認。
+
+2026-10-15、利用者の「負荷テストはスキップでOK」により、30分連続使用・多数回スキャン・繰り返し遷移などの負荷シナリオは未実施のまま省略した。合格とは扱わず、実施待ちを公開準備の条件から外す。既存の自動回帰テスト・レビュー・CIは維持する。
+
 ## 環境と確認できた範囲
 
 Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低対応OSの設定は18.5。SwiftLint0.63.2 / SwiftFormat0.61.1を固定する。
@@ -15,20 +19,25 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | Debug / Release | iOS26.5 Simulatorの署名なしビルド成功 | ローカルbuild.log |
 | 先行iPhone全テスト | XCTest99件・Swift Testing1件・UI9件成功。通常スイートの権限拒否1件は個別実行へ分離 | PR #16の専用iPhone16Pro Simulator / iOS26.5 |
 | 最新API修正の全体CI | XCTest113件・Swift Testing1件・UI9件成功。分離したカメラ拒否も個別1件成功・skip0。全3ジョブ成功、成果物のログと両xcresultを読み戻した | [PR #24のCI](https://github.com/tashua314/safe-qr/actions/runs/38735335577)。iOSジョブ14分47秒、check.shは854秒 |
+| レイアウト循環の修正 | 修正前の待機100msに追加レイアウト1,163回を再現。修正後は新規2件を含むXCTest115件・Swift Testing1件・UI9件、カメラ拒否個別1件（skip0）がローカルで成功。lint/format・Debug/Releaseも成功。CIでも全件成功し、保存ログと通常/拒否個別の両xcresultを読み戻した | iPhone16Pro / iOS26.5 Simulator、PR #28の対象HEAD。CIのcheck.shは926秒、iOSジョブ16分15秒。実機CPU改善の証明ではない |
 | 小画面と旧OS | 先行全テスト96件・追加1件・UI9件成功。Google案内/TTL修正後も関連単体15件・設定/詳細UI2件が成功 | 専用iPhone SE (3rd generation) / iOS18.6 |
 | iPad操作 | 設定保存、警告、履歴再訪、詳細・横画面、全削除の取消/確定・空状態の3テスト成功。Google説明追加後にも同じ3件で成功 | iPad Pro 13-inch (M4) / iPadOS26.5 |
 | カメラ拒否 | 専用SimulatorのOS権限をrevokeし、拒否案内→設定→履歴の1テスト成功（skip 0）。終了時にgrantへ戻した | `CameraPermissionUITests`個別実行 |
 | 履歴 | in-memory単体テストで同一URLの更新・50件上限等を確認。操作テストで全削除の取消、削除、再表示後の空状態を確認 | `HistoryRepositoryTestsNew` / UIテスト |
 | 同意と通信 | 承認前・拒否・履歴再訪・古い完了・遅い危険判定・HTTP302の通信契約をテスト。外部OFF・401/403等・未知/不正応答もモックで検証 | `ScanConsentTests` / `HtmlTitleRedirectTests` / SafeBrowsing系テスト |
 | メモリ | resident_size取得失敗をテスト失敗とし、別途新規ViewModel/QR scanner service/評価器/title fetcherが解放されることを弱参照で確認 | `MemoryLeakTestsSimple`6件。DI解決の反復は短いsmokeテスト |
-| Instruments | 旧main `78f4fed` の実機ReleaseでActivity Monitor記録成功。GUI run 00:01:01、Memory表示27.64MiB。最小/最大/平均や長時間推移の確認ではない。実機Leaksは接続断exit2、CLI exportはexit139・空XML。Simulator Leaksも開始待ちを中断 | GUIで短時間traceを読んだ。長時間・リーク0・CPU/発熱/電池の判定は未完了 |
+| 先行Instruments | 旧main `78f4fed` の実機ReleaseでActivity Monitor記録成功。GUI run 00:01:01、Memory表示27.64MiB。最小/最大/平均や長時間推移の確認ではない。実機Leaksは接続断exit2、CLI exportはexit139・空XML。Simulator Leaksも開始待ちを中断 | GUIで短時間traceを読んだ。長時間・リーク0・CPU/発熱/電池の判定は未完了 |
+| 実機10分待機 | カメラ表示・ライトOFF、Activity Monitorが時間上限で正常終了。全586行・連続601.3955秒・区間欠落なしを検査。physical footprintは開始14.236MiB、終了17.127MiB、増分2.891MiB、最小12.408MiB、最大27.846MiB。CPU585サンプルは標本平均100.103%、最小95.576%、最大101.766% | iPhone12Pro / iOS27.0.1、署名Release、アプリコードはPR #24最終HEADと同一。CPUはInstrumentsのプロセス表示。詳細と未確認範囲は[#27](https://github.com/tashua314/safe-qr/issues/27) |
 | 実機向けRelease | Apple Account再ログイン後に自動開発署名でDebug/Releaseをビルド。Release archive、開発用IPA export、codesignと対象実機登録、実機インストール・通常起動を確認。最終APIソースでも本番キー入りReleaseで成功 | iPhone12Pro / iOS27.0.1。開発用export（method=debugging）でありApp Store配布・提出の確認ではない |
 | 本番API設定 | 専用Cloudプロジェクト、開発/本番キーを作成。Safe Browsing APIとBundle IDへ制限し、Git管理外xcconfig（600）で接続。生成plistのconfiguredと本番キー一致を値なしで検査。課金関連付けなし・既定クォータを読み戻した | [#21 / PR #22](https://github.com/tashua314/safe-qr/pull/22)、[#23 / PR #24](https://github.com/tashua314/safe-qr/pull/24)。両PRは独立レビュー・CI後にマージ |
 | 実APIの7ケース | 本番/開発キー200、公開フィッシングの完全ハッシュ一致、通常URL一致なし、Bundle ID未送信/不一致403、不正キー400が成功。アプリと同じSwift正規化/hash生成とProtobufデコーダーを使用 | ホストからのHTTPS照会。実機のパケット監査や実APIを枯渇させる429試験ではない |
-| 実機の基本操作 | Debugでカメラ、注意/危険QR・拒否後履歴、ライト、強設定の再起動後保持、ブラウザ復帰/再読、オフライン、カメラ設定OFF時の履歴/設定を利用者が確認。旧Releaseのカメラ・注意QR・キャンセル・履歴保持も確認 | iPhone12Pro / iOS27.0.1、旧main `78f4fed`。初回インストール時の拒否は未確認 |
+| 実機の基本操作 | Debugでカメラ、注意/危険QR・拒否後履歴、ライト、強設定の再起動後保持、ブラウザ復帰/再読、オフライン、カメラ設定OFF時の履歴/設定を利用者が確認。旧Releaseのカメラ・注意QR・キャンセル・履歴保持も確認 | iPhone12Pro / iOS27.0.1、旧main `78f4fed`。初回拒否は次項の別Bundle IDで確認 |
+| 実機の初回カメラ拒否 | 同じReleaseソース `f508bebfc45a2d7f338a97fd1aecf8fe02c1c6b4` を別Bundle ID・表示名「SafeQR 権限確認」・APIキーなしで生成。新規インストール状態で利用者が「許可しない」→設定案内→キャンセル後の履歴/設定を確認。終了後はQA版だけアンインストール | iPhone12Pro / iOS27.0.1。通常版の履歴・権限は保持し、通常版Bundle IDの権限リセット試験とは区別する |
 | 実機の本番API | 最終APIソースの署名Releaseで、利用者が外部チェックONのGoogle危険警告・出典・ブロックを確認。アプリ終了→通信OFF→再起動後は未確認表示・キャンセル、確認後の通信復元も確認 | iPhone12Pro / iOS27.0.1。利用者操作の確認。Debugの全チェックリストのRelease再実施ではない |
 | アイコン | App Store用1024×1024 PNG、alphaなし、asset catalog登録あり | `Resources/Assets.xcassets/AppIcon.appiconset/icon.png` |
 | 画面 | GitへPNG原本・状態・端末・サイズ・SHA-256を保存。PRの完全コミットSHA参照をGitHubから読み戻す | [画面記録](pr-captures/issue-8/README.md) |
+
+10分記録の開始値は起動・測定準備後で、cold launch全体ではない。利用者は映像停止や気になる発熱について「特に気にならなかった」と回答したが、温度・UI遅延の計測値ではない。USB給電下なので電池消費は判定していない。先行の10分試行は切断でrun 00:04:04 / Process HistoryはNo Dataだったため失敗扱いとし、今回の成功記録と混同しない。Leaksは有効な結果がなく、0件とは判定しない。集計値と端末モデル/OSは利用者の公開許可後にIssueへ記録した。生trace・端末ID・APIキーは公開しない。
 
 ## 今回直した問題
 
@@ -43,8 +52,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | 条件 | 現在の状態・次の確認 |
 |---|---|
 | 接続実機 | 実機のpaired/wired/connectedと起動を確認済み。再測定の直前にも現在の接続・ロック状態を確認する |
-| 初回カメラ拒否 | 既存インストールの設定OFF経路は確認済み。初回インストール状態の権限拒否は未確認。既存履歴を消すアンインストールは行っていない |
-| 長時間・性能 | 実機で長時間スキャン/遷移とInstruments、メモリ推移・発熱/バッテリー・処理時間を記録する。短い単体テストや起動性能の平均で代用しない |
+| 性能の確認範囲 | 30分連続や多数回スキャン等の負荷テストは利用者判断で省略。実機10分待機の記録とレイアウト循環修正の回帰テストは確認済み。修正後の実機CPU、Leaks、温度・電池・UI遅延は未確認のまま残す |
 | 通信の確認範囲 | 本番認証と実機オンライン/オフラインは確認済み。OFF/同意/拒否・prefix限定・リダイレクト拒否・429等の失敗は自動テスト。実機の全通信を取得するパケット監査やクォータ枯渇試験は未実施 |
 | 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
 | 申請情報 | 運営者名、連絡先、サポートURL、プライバシー公開URLは利用者回答で未定 |
@@ -55,7 +63,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 
 ## 再実行
 
-実機の長時間測定は[メモリ・長時間動作の検証ガイド](memory-testing-guide.md)を使う。短い記録や失敗を長時間合格へ変換しない。
+実機測定を再開する場合は[メモリ・長時間動作の検証ガイド](memory-testing-guide.md)を使う。今回省略した負荷テストの実施を要求するものではない。短い記録や失敗を長時間合格へ変換しない。
 
 通常は`make tools && make check`。別の検証専用Simulatorは`SAFEQR_SIMULATOR_ID=<UUID> make check`を使う。同じSimulatorに同時に複数のxcodebuild testを実行しない。
 

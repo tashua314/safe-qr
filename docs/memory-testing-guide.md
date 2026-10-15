@@ -2,6 +2,8 @@
 
 更新日：2026-10-15。実施結果は[検証記録](release-validation.md)、最新の進行状況は[Issue #8](https://github.com/tashua314/safe-qr/issues/8)へ記録する。手順があることを測定成功の根拠にしない。
 
+2026-10-15のリリース準備では、利用者指示により30分連続・多数回スキャン・繰り返し遷移などの負荷テストを省略した。以下は将来測定を再開する場合の手順と内部目標として残し、今回の実施待ち条件や合格結果へ読み替えない。10分待機記録とCPU調査は[Issue #27](https://github.com/tashua314/safe-qr/issues/27)を参照する。
+
 ## 単体テストで分かる範囲
 
 現存するテストは `SafeQR/SafeQRTests/MemoryLeakTestsSimple.swift` の6件。
