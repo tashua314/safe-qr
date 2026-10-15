@@ -6,6 +6,11 @@ final class SafeBrowsingHashCache {
         let fullHash: Data
         let fullHashDetails: [Detail]
 
+        init(fullHash: Data, fullHashDetails: [Detail]) {
+            self.fullHash = fullHash
+            self.fullHashDetails = fullHashDetails
+        }
+
         private enum CodingKeys: String, CodingKey { case fullHash, fullHashDetails }
 
         init(from decoder: Decoder) throws {
@@ -18,6 +23,11 @@ final class SafeBrowsingHashCache {
     struct Detail: Decodable {
         let threatType: String
         let attributes: [String]
+
+        init(threatType: String, attributes: [String]) {
+            self.threatType = threatType
+            self.attributes = attributes
+        }
 
         private enum CodingKeys: String, CodingKey { case threatType, attributes }
 

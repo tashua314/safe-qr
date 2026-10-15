@@ -32,3 +32,11 @@ Googleの[利用条件](https://developers.google.com/safe-browsing/terms)に合
 Web RiskのLookup APIはURL全文を送るため、現在の「GoogleへURL全文を送らない」という契約を維持する候補はUpdate APIである。ローカルの脅威リストの更新・照合が必要で、APIキーだけの変更では完了しない。方式・費用を評価してから別途実装する。現時点ではWeb Risk移行は未実装。
 
 一次資料：[Safe Browsingの用途条件](https://developers.google.com/safe-browsing/reference/Appropriate.Usage)、[Web Riskの方式比較](https://docs.cloud.google.com/web-risk/docs/overview)、[料金](https://cloud.google.com/web-risk/pricing)。
+
+## v5の応答形式
+
+`hashes.search` の実応答は `application/x-protobuf`。JSON形式を要求する `alt=json` は受け付けられないため、バイナリ応答を専用デコーダーで読み、完全ハッシュ・脅威enum・Durationを既存の照合/キャッシュへ渡す。JSON形式とContent-Type未指定は既存の互換経路として読み取る。
+
+デコーダーは8 MiBの入力長と100,000個のフィールド/packed値を上限とし、varint overflow、切り詰め、wire type不一致、負/範囲外Durationを拒否する。未知enumを削除せず未確認へ渡し、不正応答はキャッシュしない。
+
+一次資料：[Google v5概要](https://developers.google.com/safe-browsing/reference)、[Chromiumのv5 wire定義](https://github.com/chromium/chromium/blob/main/components/safe_browsing/core/common/proto/safebrowsingv5.proto)。
