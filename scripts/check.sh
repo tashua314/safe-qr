@@ -71,7 +71,7 @@ run_phase Release-build "$SAFEQR_ARTIFACTS/Release-build.log" xcodebuild "${COMM
 
 # 必須理由APIの宣言がソースだけに残らず、両構成のアプリへ同梱されることを確認する。
 for SAFEQR_CONFIGURATION in Debug Release; do
-    plutil -lint "$SAFEQR_DERIVED_DATA/Build/Products/$SAFEQR_CONFIGURATION-iphonesimulator/SafeQR.app/PrivacyInfo.xcprivacy"
+    python3 scripts/verify_privacy_manifest.py "$SAFEQR_DERIVED_DATA/Build/Products/$SAFEQR_CONFIGURATION-iphonesimulator/SafeQR.app/PrivacyInfo.xcprivacy"
 done
 
 # 初回起動とコンパイルを競合させない。起動時間全体を独立して記録する。
