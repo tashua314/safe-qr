@@ -33,6 +33,14 @@ Web RiskのLookup APIはURL全文を送るため、現在の「GoogleへURL全�
 
 一次資料：[Safe Browsingの用途条件](https://developers.google.com/safe-browsing/reference/Appropriate.Usage)、[Web Riskの方式比較](https://docs.cloud.google.com/web-risk/docs/overview)、[料金](https://cloud.google.com/web-risk/pricing)。
 
+## APIキーの制限
+
+Google CloudのキーはSafe Browsing API（`safebrowsing.googleapis.com`）だけに制限し、iOSアプリ制限には `jp.techguide.SafeQR` を設定する。リクエストの `X-Ios-Bundle-Identifier` は実行アプリのBundle IDを使う。この識別ヘッダーはURLや利用者の識別情報を含まない。Bundle ID制限は偽装できるため、キーの秘匿や改ざん防止の保証とは扱わず、API制限と使用量の確認を併用する。
+
+開発用・本番用の値はGit管理外の `Local-Keys.xcconfig` / `Production-Keys.xcconfig` に分け、ビルドログや検証結果には値を出さない。Google Cloud設定と実APIの検証はコードの単体テスト結果と区別して記録する。
+
+[Google APIキー管理仕様](https://docs.cloud.google.com/docs/authentication/api-keys)
+
 ## v5の応答形式
 
 `hashes.search` の実応答は `application/x-protobuf`。JSON形式を要求する `alt=json` は受け付けられないため、バイナリ応答を専用デコーダーで読み、完全ハッシュ・脅威enum・Durationを既存の照合/キャッシュへ渡す。JSON形式とContent-Type未指定は既存の互換経路として読み取る。
