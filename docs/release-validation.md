@@ -59,7 +59,7 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
 | 申請情報 | 運営者はTechGuide合同会社、公開窓口は[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)と利用者確認済み。[サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)はcorporate PR #63を独立レビュー/CI後にマージし、Amplify job69成功と2026-10-16のHTTP200を確認済み。審査用連絡先は利用者確認済み・非公開資料へ分離（値は公開Gitへ記載しない）。窓口のフォーム統一はcorporate PR #65を独立レビュー/CI後にマージ。Amplify job70成功、本番両ページHTTP200・メール非表示・フォーム遷移/件名の事前入力を確認済み |
 | 配布条件 | 2026-10-16利用者確認：申請下書きは無料・日本のみ・Apple標準EULA。App Store Connectへの保存・契約の承諾・提出は未実施。実際の用途とSafe Browsing非商用条件の適合、年齢/App Privacyは未確定。収益化開始前にWeb Riskへ移行・検証する方針で、無料だけで非商用と断定しない |
-| ストア画像 | [撮影原本4枚](app-store-assets-draft.md)・[前案](store-artwork/README.md)を保存し、利用者の追加要望に応じた[安心を伝える新案6枚](store-artwork-v2/README.md)を優先候補とする。開く前のお知らせ→不安なら戻れる→履歴で見返せる、を説明。設定や専門用語の訴求を外し、明るい生成背景と大きな実画面を使用。拡大・説明用データと判定限界を注記。6枚の寸法・alphaなし・SHAを検証。最終採否は未承認・未アップロード・未提出 |
+| ストア画像 | 原本・前案を保存し、[QRにカメラを向ける導入画像を加えた案](store-artwork-v3/README.md)を優先候補とする。1枚目は生成の使用イメージと実際の注意画面を区別して併記、2/3枚目はv2の拒否操作/履歴を再利用。新規導入2枚と構成一覧の寸法/alpha/SHA・表示を検証。使用イメージは実機撮影や実際のカメラ画面ではない。注意が出た場合の確認と判定限界を注記。採否は未承認・未アップロード・未提出 |
 
 年齢・App Privacyの[回答案](app-store-questionnaire-draft.md)は実装とApple公式資料から準備した下書き。年齢やデータ収集/トラッキングの最終回答、App Store Connectでの保存・提出を確定したものではない。
 
