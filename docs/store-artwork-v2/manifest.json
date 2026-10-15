@@ -1,0 +1,90 @@
+{
+  "status": "draft_not_approved_not_uploaded",
+  "createdAt": "2026-10-16",
+  "userFeedback": "ITの知識が少ない人にも、使う場面と得られる安心を伝える。前案は未採用。",
+  "sourceInventory": "../store-artwork/README.md",
+  "composition": "generated decorative background + HTML text + cropped/enlarged actual app screenshots; each image labels enlargement and example data",
+  "images": [
+    {
+      "file": "generated-background-v2.png",
+      "pixels": [
+        851,
+        1848
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "f38e436f08561fe5e8640a8e2af812e330eb7b4bf85e2174a29db84efc43fb6c"
+    },
+    {
+      "file": "ipad-01-before-open.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "5b41fa05008c4ad85cb788c88799d3e7cf86fcaed5bd2ef580456a82dee4ddd4"
+    },
+    {
+      "file": "ipad-02-stop-without-opening.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "98fc9f629bc5aad5c1661e157d3024ef5a12536d18611f56896178037a344cde"
+    },
+    {
+      "file": "ipad-03-find-again.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "3d938bc4ce84d9c9588cdd9d01909f693dff3c05c32a7aca1773c12a05941893"
+    },
+    {
+      "file": "iphone-01-before-open.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "a61dccdf4221b02229b6954a1d8d7f36e812eacdc561fb596399590cf639ace1"
+    },
+    {
+      "file": "iphone-02-stop-without-opening.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "7e5e93425da577127667886d1c81f58c51d97430838a582297444446d4113450"
+    },
+    {
+      "file": "iphone-03-find-again.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "10fbd45b369215d125c4de9b342f2e4ef679c4dddb8b5150d5bdedd4e1de81e9"
+    },
+    {
+      "file": "overview.png",
+      "pixels": [
+        1200,
+        1600
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "121513f7986ff7fb2a129ca7434600a834c7fe7f9a806b1c5c9abdb772075dbb"
+    }
+  ],
+  "confirmationCopy": "注意画面が出た場合に確認できるという条件を明示。安全URLで毎回選択画面が出るとは案内しない。"
+}

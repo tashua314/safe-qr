@@ -40,7 +40,7 @@
       "supportURL": "https://techguide.jp/safeqr/",
       "privacyPolicyURL": "https://techguide.jp/safeqr/privacy/",
       "contact": "https://techguide.jp/contact/?category=other&subject=SafeQR",
-      "status": "利用者指定により公開窓口を既存問い合わせフォームへ統一。審査専用連絡先は非公開資料へ分離。サポート/プライバシーページも同じ方針へ変更する。"
+      "status": "2026-10-16：corporate PR #65を独立レビュー/CI後にマージし、Amplify job70成功。本番サポート/PrivacyはHTTP200、メール表示なし、フォームへの遷移とSafeQR件名の事前入力を確認。審査用連絡先は非公開資料へ分離。"
     },
     "pricing": {
       "status": "draft_user_confirmed",
@@ -74,8 +74,8 @@
           2752
         ]
       },
-      "notes": "利用者は原本4枚を最終採用せず、魅力を伝える構成を希望。生成背景と実画面の合成案をiPhone/iPad各3枚用意。iPadは実画面の一部を拡大し、その旨を明記。判定結果やUI文字は生成しない。採否・アップロード・審査提出は未実施。",
-      "candidateInventory": "store-artwork/README.md"
+      "notes": "利用者は原本4枚と前案の訴求を未採用とし、専門知識が少ない人にも得られる安心を伝える構成を希望。開く前のお知らせ→不安なら戻れる→履歴で見返す、の新案をiPhone/iPad各3枚用意。生成は明るい装飾背景だけ、UIは原本の一部を拡大し注記。寸法・alphaなし・SHAを確認。最終採否・アップロード・審査提出は未実施。 注意画面が出た場合の確認であり、すべてのURLで毎回選択できるとは案内しない。",
+      "candidateInventory": "store-artwork-v2/README.md"
     },
     "externalServiceUse": {
       "status": "planned_non_commercial_phase",
