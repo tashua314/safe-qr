@@ -6,20 +6,19 @@ import Foundation
  * 高精度とプライバシー保護を両立
  */
 class EnhancedUrlRiskEvaluator {
-    
     // MARK: - プロパティ
-    
+
     /// ローカル評価エンジン
     private let localEvaluator = UrlRiskEvaluator()
-    
+
     /// Safe Browsing API クライアント
     private let safeBrowsingClient = SafeBrowsingAPIClient()
-    
+
     /// 設定ストア
     private let settingsStore = SettingsStore.shared
-    
+
     // MARK: - 型定義
-    
+
     /// 評価結果の詳細情報
     struct EvaluationResult {
         let finalSafetyLevel: SafetyLevel
@@ -27,17 +26,17 @@ class EnhancedUrlRiskEvaluator {
         let apiResult: SafeBrowsingAPIClient.SafeBrowsingResult?
         let evaluationMethod: EvaluationMethod
         let responseTime: Double
-        
+
         enum EvaluationMethod {
-            case localOnly           // ローカル評価のみ
-            case hybridImmediate     // ローカル即座 + API後続
-            case hybridCached        // キャッシュヒット
-            case localFallback       // API失敗時ローカルフォールバック
+            case localOnly // ローカル評価のみ
+            case hybridImmediate // ローカル即座 + API後続
+            case hybridCached // キャッシュヒット
+            case localFallback // API失敗時ローカルフォールバック
         }
     }
-    
+
     // MARK: - 公開メソッド
-    
+
     /**
      * URL危険度評価（即座レスポンス版）
      * ローカル評価結果を即座に返し、API評価は非同期で実行
@@ -47,11 +46,11 @@ class EnhancedUrlRiskEvaluator {
      */
     func evaluateImmediate(url: String, completion: ((EvaluationResult) -> Void)? = nil) -> SafetyLevel {
         let startTime = Date()
-        
+
         // 1. ローカル詳細評価（即座実行）
         let localDetailedResult = localEvaluator.evaluateWithDetails(url: url)
         let localResult = localDetailedResult.finalSafetyLevel
-        
+
         // 2. ローカル評価で危険と判定された場合は即座にブロック
         if localResult == .danger {
             let result = EvaluationResult(
@@ -64,18 +63,18 @@ class EnhancedUrlRiskEvaluator {
             completion?(result)
             return .danger
         }
-        
+
         // 3. API評価を非同期で実行（バックグラウンド）
         if settingsStore.isExternalReputationEnabled {
             safeBrowsingClient.checkURL(url) { [weak self] apiResultWrapper in
                 self?.handleAPIResult(apiResultWrapper, localResult: localResult, startTime: startTime, completion: completion)
             }
         }
-        
+
         // 4. まずローカル結果を返す（UX重視）
         return localResult
     }
-    
+
     /**
      * URL危険度評価（完全同期版）
      * ローカル + API の両方完了まで待機
@@ -84,11 +83,11 @@ class EnhancedUrlRiskEvaluator {
      */
     func evaluateComplete(url: String, completion: @escaping (EvaluationResult) -> Void) {
         let startTime = Date()
-        
+
         // ローカル詳細評価
         let localDetailedResult = localEvaluator.evaluateWithDetails(url: url)
         let localResult = localDetailedResult.finalSafetyLevel
-        
+
         // ローカル評価で危険な場合は即座に返す
         if localResult == .danger {
             let result = EvaluationResult(
@@ -101,7 +100,7 @@ class EnhancedUrlRiskEvaluator {
             completion(result)
             return
         }
-        
+
         // API評価実行
         if settingsStore.isExternalReputationEnabled {
             safeBrowsingClient.checkURL(url) { [weak self] apiResultWrapper in
@@ -119,7 +118,7 @@ class EnhancedUrlRiskEvaluator {
             completion(result)
         }
     }
-    
+
     /**
      * 複数URL一括評価
      * @param urls: 評価対象URL配列
@@ -129,7 +128,7 @@ class EnhancedUrlRiskEvaluator {
         let dispatchGroup = DispatchGroup()
         var results: [String: EvaluationResult] = [:]
         let resultsQueue = DispatchQueue(label: "evaluation.results", attributes: .concurrent)
-        
+
         for url in urls {
             dispatchGroup.enter()
             evaluateComplete(url: url) { result in
@@ -139,14 +138,14 @@ class EnhancedUrlRiskEvaluator {
                 }
             }
         }
-        
+
         dispatchGroup.notify(queue: .main) {
             completion(results)
         }
     }
-    
+
     // MARK: - プライベートメソッド
-    
+
     /**
      * API結果の処理とファイナル判定
      */
@@ -157,14 +156,14 @@ class EnhancedUrlRiskEvaluator {
         completion: ((EvaluationResult) -> Void)?
     ) {
         let totalResponseTime = Date().timeIntervalSince(startTime) * 1000
-        
+
         switch apiResultWrapper {
-        case .success(let apiResult):
+        case let .success(apiResult):
             // 最終的な安全性レベルを決定（より厳格な方を採用）
             let finalSafetyLevel = selectStricterSafetyLevel(local: localResult, api: apiResult.safetyLevel)
-            
+
             let evaluationMethod: EvaluationResult.EvaluationMethod = apiResult.cacheHit ? .hybridCached : .hybridImmediate
-            
+
             let result = EvaluationResult(
                 finalSafetyLevel: finalSafetyLevel,
                 localResult: localResult,
@@ -172,13 +171,13 @@ class EnhancedUrlRiskEvaluator {
                 evaluationMethod: evaluationMethod,
                 responseTime: totalResponseTime
             )
-            
+
             completion?(result)
-            
-        case .failure(let error):
+
+        case let .failure(error):
             // API失敗時はローカル評価にフォールバック
             print("Safe Browsing API Error: \(error.localizedDescription)")
-            
+
             let result = EvaluationResult(
                 finalSafetyLevel: localResult,
                 localResult: localResult,
@@ -186,11 +185,11 @@ class EnhancedUrlRiskEvaluator {
                 evaluationMethod: .localFallback,
                 responseTime: totalResponseTime
             )
-            
+
             completion?(result)
         }
     }
-    
+
     /**
      * より厳格な安全性レベルを選択
      * API結果とローカル結果を比較し、より危険度の高い方を採用

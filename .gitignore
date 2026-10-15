@@ -168,3 +168,5 @@ APIKeys.plist
 # Backup config files
 *.xcconfig.backup
 Config/*.backup
+# Local quality-check results
+/.artifacts/

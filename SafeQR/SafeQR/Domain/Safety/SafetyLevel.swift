@@ -4,7 +4,7 @@ enum SafetyLevel: Int16, CaseIterable, Comparable {
     case safe = 0
     case caution = 1
     case danger = 2
-    
+
     var displayName: String {
         switch self {
         case .safe:
@@ -15,7 +15,7 @@ enum SafetyLevel: Int16, CaseIterable, Comparable {
             return "危険"
         }
     }
-    
+
     var description: String {
         switch self {
         case .safe:
@@ -26,7 +26,7 @@ enum SafetyLevel: Int16, CaseIterable, Comparable {
             return "危険な可能性があります"
         }
     }
-    
+
     var recommendedAction: String {
         switch self {
         case .safe:
@@ -37,9 +37,9 @@ enum SafetyLevel: Int16, CaseIterable, Comparable {
             return "開かないことをおすすめします"
         }
     }
-    
+
     // MARK: - Comparable
-    
+
     static func < (lhs: SafetyLevel, rhs: SafetyLevel) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
