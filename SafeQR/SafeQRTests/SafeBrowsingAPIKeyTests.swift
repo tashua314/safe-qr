@@ -74,7 +74,7 @@ final class SafeBrowsingAPIKeyTests: XCTestCase {
     }
 }
 
-private final class KeyConfigurationURLProtocol: URLProtocol {
+private class KeyConfigurationURLProtocol: URLProtocol {
     static var status = 200
     static var requestCount = 0
     override class func canInit(with _: URLRequest) -> Bool {
