@@ -108,7 +108,8 @@ class HistoryViewController: UIViewController {
         }
         let confirmation = OpenConfirmViewController(
             url: result.url, safetyLevel: result.safetyLevel, detectedIssues: result.detectedIssues,
-            isExternalCheckUnverified: result.evaluationMethod == .fallback
+            isExternalCheckUnverified: result.evaluationMethod == .fallback,
+            googleThreats: result.googleThreats
         )
         confirmation.onUserDecision = { [weak self] approved in
             if approved { self?.accessModel.approve(result) } else { self?.accessModel.cancel(result) }
@@ -330,7 +331,7 @@ class HistoryViewController: UIViewController {
         // 確認アラート表示
         let alert = UIAlertController(
             title: "すべて削除",
-            message: "すべての履歴を削除しますか？\\nこの操作は取り消せません。",
+            message: "すべての履歴を削除しますか？\nこの操作は取り消せません。",
             preferredStyle: .alert
         )
 

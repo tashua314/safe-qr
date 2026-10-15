@@ -137,6 +137,40 @@ final class SafeBrowsingPrivacyTests: XCTestCase {
         XCTAssertEqual(requests.count, 2)
     }
 
+    func testPositiveCacheRefreshesAtThirtyMinutesWhileNegativePrefixesRemainCached() throws {
+        var now = Date(timeIntervalSince1970: 1000)
+        let hash = try XCTUnwrap(SafeBrowsingURLHasher(suffixList: list).fullHashes(for: input).first)
+        respond(["cacheDuration": "3600s", "fullHashes": [[
+            "fullHash": hash.base64EncodedString(), "fullHashDetails": [["threatType": "MALWARE"]]
+        ]]])
+        let client = makeClient(now: { now })
+        XCTAssertEqual(try check(client, url: input).safetyLevel, .danger)
+        now = now.addingTimeInterval(1799)
+        XCTAssertTrue(try check(client, url: input).cacheHit)
+        XCTAssertEqual(requests.count, 1)
+        now = now.addingTimeInterval(1)
+        respond(["cacheDuration": "3600s"])
+        XCTAssertTrue(try check(client, url: input).isURLSafe, "古い危険情報で警告し続けない")
+        XCTAssertEqual(requests.count, 2)
+        let request = try XCTUnwrap(requests.last?.url)
+        let sent = try XCTUnwrap(URLComponents(url: request, resolvingAgainstBaseURL: false)?.queryItems)
+            .filter { $0.name == "hashPrefixes" }.compactMap(\.value)
+        XCTAssertEqual(sent, [Data(hash.prefix(4)).base64EncodedString()], "陰性prefixは3600秒のTTLを保つ")
+    }
+
+    func testPositiveCacheDoesNotExtendShorterServerTTL() throws {
+        var now = Date(timeIntervalSince1970: 1000)
+        let hash = try XCTUnwrap(SafeBrowsingURLHasher(suffixList: list).fullHashes(for: input).first)
+        respond(["cacheDuration": "10s", "fullHashes": [[
+            "fullHash": hash.base64EncodedString(), "fullHashDetails": [["threatType": "MALWARE"]]
+        ]]])
+        let client = makeClient(now: { now })
+        _ = try check(client, url: input)
+        now = now.addingTimeInterval(10)
+        XCTAssertFalse(try check(client, url: input).cacheHit)
+        XCTAssertEqual(requests.count, 2)
+    }
+
     func testCachedPrefixesAreNotRequestedAgainForAnotherPath() throws {
         respond(["cacheDuration": "60s"])
         let client = makeClient()

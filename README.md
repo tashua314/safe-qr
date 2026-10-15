@@ -1,104 +1,48 @@
-# SafeQR — iOS 18.5+ QRコードリーダー
+# SafeQR
 
-「ITリテラシー低めの方でも迷わず安全に使える」ことを最優先にした、シンプルなQRコードリーダー。
+QRコードのURLを開く前に危険度を確認するiPhone/iPadアプリ。最低対応OSは **iOS/iPadOS 18.5**。安全性の保証ではなく、端末内のルールと任意のGoogle Safe Browsing照会で注意を促す。危険なサイトの見逃しや、害のないサイトへの誤警告が起こる可能性がある。
 
-- 最低対応OS: **iOS 18.5**（UIKitベース、SceneDelegate対応）
-- スキャン: **AVFoundation / AVCaptureMetadataOutput**
-- ブラウズ: **SFSafariViewController**
-- 履歴: **Core Data**（最大50件、端末内のみ）
-- 危険判定: 端末内ヒューリスティック + **外部レピュテーション照会（任意ON）**
-- テレメトリ: 匿名クラッシュ収集（Apple標準）有効
-- 法務表記: **不要**
+## 実装
 
-## プロジェクト概要
+- UIKit、Swift5言語モード、SceneDelegate。画面はコードで構築し、起動画面だけStoryboardを使う。
+- AVFoundationでQRを読み取り、`ScannerViewModel`が完全評価・確認・開封の状態を管理する。Combineで各画面に通知する。
+- Core Dataの履歴は最大50件。同じURLの再スキャンは回数と日時・危険度を更新する。拒否したスキャンもタイトルなしで残す。
+- 注意・危険・外部チェック未確認では開封を選ぶまで対象サイトへ通信しない。履歴からの再訪も再評価する。
+- 開封を許可した後にだけタイトルを取得する。タイトル取得はHTTPリダイレクトを追わない。ページ表示はSFSafariViewController。
+- 外部チェックは既定OFF。ON時はURL候補のSHA-256先頭4バイト（base64）をv5 `hashes.search`へ送信し、完全ハッシュを端末内で比較する。URL全文はGoogleへ送らないが、IP等の通信情報は届き、prefixから候補が推測される可能性もある。
+- タイトル取得・ブラウザー表示は対象サイトへURLで通信する。ログは定義済みイベント・数値コード・処理時間だけ。独自の解析送信は実装していない。OSの診断は利用者のOS設定による。
 
-- 名称：SafeQR
-- 目的：ITリテラシーが高くない方でも、迷わず・安全にQRコードからリンクを開ける
-- 最低対応OS：**iOS 18.5**
-- 主要機能
-  - QRスキャン（起動＝即スキャン）
-  - **危険判定**（端末内ヒューリスティック＋外部レピュテーション）
-  - **履歴（最大50件）**：タイトル付き、端末内保存のみ
-  - アプリ内安全ブラウズ（SFSafariViewController）
-  - 設定（安全確認の厳しさ・外部照会ON/OFF）
-- 非機能
-  - アクセシビリティ（Dynamic Type/コントラスト/VoiceOver説明文）
-  - パフォーマンス（軽量・即応答）
-  - プライバシー（Google安全性照会はSHA-256の先頭4バイトのみ。タイトル取得・ブラウザ表示は対象サイトへ通信）
+## 開発と検証
 
-## ディレクトリ構成（実装版）
-
-```
-SafeQR/SafeQR/
-├─ AppDelegate.swift              # アプリライフサイクル管理
-├─ SceneDelegate.swift            # 画面・ウィンドウ管理（iOS 13+）
-├─ Info.plist                     # アプリ設定（カメラ権限等）
-│
-├─ Presentation/                  # UI層（UIKit）
-│   ├─ ScannerViewController.swift      # QRスキャナー画面（メイン画面）
-│   ├─ HistoryViewController.swift      # 履歴一覧・管理画面  
-│   ├─ SettingsViewController.swift     # 設定画面（安全性レベル調整）
-│   └─ OpenConfirmViewController.swift  # URL開封確認ダイアログ
-│
-├─ Domain/                        # ビジネスロジック・ドメインモデル
-│   ├─ Entities/
-│   │   └─ ScanRecord.swift             # スキャン履歴エンティティ
-│   ├─ Safety/
-│   │   ├─ SafetyLevel.swift            # 安全性レベル定義（safe/caution/danger）
-│   │   └─ UrlRiskEvaluator.swift       # URL危険度判定エンジン
-│   └─ Repositories/
-│       └─ HistoryRepository.swift      # 履歴データ操作（Core Data抽象化）
-│
-├─ Data/                          # データアクセス・外部連携層
-│   ├─ CoreData/
-│   │   ├─ CoreDataStack.swift          # Core Data管理・初期化
-│   │   └─ SafeQR.xcdatamodeld/         # データモデル定義
-│   ├─ Metadata/
-│   │   └─ HtmlTitleFetcher.swift       # Webページタイトル後追い取得
-│   └─ Reputation/
-│       └─ ReputationClient.swift       # 外部レピュテーション照会（オプション）
-│
-├─ Services/                      # 各種サービス・ユーティリティ
-│   ├─ QR/
-│   │   └─ QRScannerService.swift       # AVFoundation QRスキャン機能
-│   └─ Settings/
-│       └─ SettingsStore.swift          # アプリ設定管理（UserDefaults）
-│
-├─ Resources/                     # リソースファイル
-│   ├─ Assets.xcassets/                 # アプリアイコン・画像アセット
-│   └─ LaunchScreen.storyboard          # 起動画面
-│
-└─ SafeQRTests/                   # ユニットテスト
-    ├─ UrlRiskEvaluatorTests.swift      # 危険度判定ロジックのテスト
-    ├─ HistoryRepositoryTests.swift     # 履歴管理機能のテスト
-    └─ SafeQRTests.swift                # 基本テスト
+```sh
+open SafeQR/SafeQR.xcodeproj
+make tools
+make check
 ```
 
-### アーキテクチャ
+`make tools`でSwiftLint0.63.2 / SwiftFormat0.61.1をチェックサム検証して`.artifacts/tools`へ配置する。`make check`は静的チェック、Debug/Releaseの署名なしSimulatorビルド、専用iPhone Simulatorの単体・UIテストを実行する。成果物とログはGit管理外の`.artifacts`へ保存する。
 
-**Clean Architecture** ベースの3層構成：
-- **Presentation層**: UIKit ベースのビューコントローラー群
-- **Domain層**: ビジネスロジック（URL危険度判定・履歴管理等）
-- **Data層**: Core Data、外部API、メタデータ取得
+外部照会のキーは[設定手順](SafeQR/Config/README.md)に従い、Git管理外の`Local-Keys.xcconfig` / `Production-Keys.xcconfig`へ設定する。未設定でもビルドでき、設定未完了を未確認として扱う。実キーをコマンド引数・ログ・Issueへ記載しない。
 
-## 現在の実装状況
-- ✅ **基本機能完了**: QRスキャナー、危険度評価、履歴管理、設定画面
-- ✅ **SceneDelegate対応**: iOS 13+ の新しいアプリライフサイクル
-- ✅ **シミュレータ対応**: カメラが使えない環境でのテスト機能
-- ✅ **UIタッチ最適化**: 各ビューのタッチイベント処理を調整済み
-- ✅ **文字列補間修正**: 履歴画面の訪問回数表示を修正済み
+Simulatorにはカメラの代わりに`.invalid`テストURL用ボタンを表示する。実カメラ・ライト・長時間動作・バッテリー・本番API認証の確認を代用しない。
 
-## ビルド・実行方法
-1. Xcode でプロジェクトを開く
-2. シミュレータまたは実機を選択
-3. ビルド・実行（`Cmd+R`）
-4. シミュレータでは「テスト QR スキャン」ボタンでテスト可能
+## 構成
 
-## ドキュメント
-`/docs` 以下に詳細な仕様や設計ドキュメントがあります。
+| 場所 | 責務 |
+|---|---|
+| `SafeQR/SafeQR/Presentation` | UIKit画面、ViewModel、UI状態 |
+| `SafeQR/SafeQR/Domain` | ローカル危険度と履歴モデル・操作 |
+| `SafeQR/SafeQR/Data` | Core Data、HTMLタイトル、Safe Browsing v5 |
+| `SafeQR/SafeQR/Services` | QR検出とUserDefaults設定 |
+| `SafeQR/SafeQR/Common` | DI、プロトコル、定数、最小診断ログ |
+| `SafeQR/SafeQRTests` / `SafeQR/SafeQRUITests` | 単体・通信契約・画面操作の検証 |
 
-## 外部安全性チェックと通信
+実際の外部判定は`EnhancedUrlRiskEvaluator`→`SafeBrowsingAPIClient`を使う。`ReputationClient`は旧モックで、現在のスキャン経路には接続していない。
 
-既定ではOFFです。ON時はGoogle Safe Browsing v5の `hashes.search` を使用し、端末で正規化したURLから最大30候補を生成して、SHA-256の先頭4バイト（base64）だけを送ります。返された完全ハッシュを端末内で照合し、Googleが指定した有効期限を使ってメモリ内に保存します。URL全文や完全ハッシュは照会リクエストに含めません。
+## 公開前の状態
 
-ハッシュの一部から候補が推測される可能性があり、GoogleにはIP等の通信情報も届きます。タイトル取得・ページを開く操作は対象サイトへ通信します。安全判定は無害性の保証ではありません。詳しくは [照会設計](docs/reputation-design.md) と [プライバシーポリシー下書き](docs/privacy-policy-draft.md) を参照してください。
+[検証結果と残条件](docs/release-validation.md)、[タスク](docs/tasks.md)を参照。実機・署名配布・本番認証・申請情報が揃うまで公開可能とは扱わない。ストア説明、プライバシー、利用規約は下書きで、運営者・窓口・公開URLは未定。
+
+- [ビルドと権限](docs/build-and-permissions.md)
+- [安全判定](docs/safety-design.md) / [外部照会](docs/reputation-design.md)
+- [通信と開封確認](docs/scan-consent-design.md) / [ログ](docs/logging-policy.md)

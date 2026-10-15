@@ -173,6 +173,23 @@ final class ScanConsentTests: XCTestCase {
         XCTAssertTrue(titles.requests.isEmpty)
     }
 
+    func testOnlyKnownGoogleThreatsReachWarningAttribution() throws {
+        let model = model()
+        model.processDetectedQRCode(url)
+        evaluator.respond(level: .danger, apiResult: .init(
+            verificationStatus: .threats, detectedThreats: [.malware], responseTime: 1, cacheHit: false
+        ))
+        flushMain()
+        XCTAssertEqual(try XCTUnwrap(model.evaluationResult).googleThreats, [.malware])
+        model.resetScan()
+        model.processDetectedQRCode(url)
+        evaluator.respond(index: 1, level: .safe, method: .localFallback, apiResult: .init(
+            verificationStatus: .unrecognizedThreats, detectedThreats: [], responseTime: 1, cacheHit: false
+        ))
+        flushMain()
+        XCTAssertTrue(try XCTUnwrap(model.evaluationResult).googleThreats.isEmpty)
+    }
+
     func testTitleRedirectDelegateRejectsDestination() throws {
         let session = URLSession(configuration: .ephemeral)
         defer { session.invalidateAndCancel() }
@@ -221,9 +238,16 @@ private final class ConsentEvaluator: URLEvaluationServiceProtocol {
     func respond(
         index: Int = 0,
         level: SafetyLevel,
-        method: EnhancedUrlRiskEvaluator.EvaluationResult.EvaluationMethod = .hybridImmediate
+        method: EnhancedUrlRiskEvaluator.EvaluationResult.EvaluationMethod = .hybridImmediate,
+        apiResult: SafeBrowsingAPIClient.SafeBrowsingResult? = nil
     ) {
-        completions[index](.init(finalSafetyLevel: level, localResult: .safe, apiResult: nil, evaluationMethod: method, responseTime: 1))
+        completions[index](.init(
+            finalSafetyLevel: level,
+            localResult: .safe,
+            apiResult: apiResult,
+            evaluationMethod: method,
+            responseTime: 1
+        ))
     }
 
     func evaluateImmediate(url _: String, completion _: ((EnhancedUrlRiskEvaluator.EvaluationResult) -> Void)?) -> SafetyLevel {

@@ -4,7 +4,7 @@ Google Safe Browsing v5 hashes.searchへ移行する。端末でURL正規化、P
 
 URL正規化はGoogle仕様に従い、改行/tab削除、元fragment削除、繰返しpercent decode、IDN/Punycode、IPv4のhex/octal/短縮表記、IPv6圧縮/IPv4 mapped/NAT64、hostドット、pathドットと連続slash、byte escapingを扱う。queryはpath正規化しない。Public Suffix Listは公式配布のsnapshotをアプリ同梱し、wildcard/exception/private rulesを使用する。リソース読み込み失敗は照会失敗にする。
 
-HTTP自動キャッシュとCookieを無効にし、応答のcacheDurationに従うメモリ内キャッシュだけを使う。V4時代のUserDefaultsキャッシュを参照しない。外部チェックOFFはネットワーク要求を発生させない。レスポンス厳密検証・一括照会の失敗保持はIssue #6で追って対応するが、v5移行に必須な完全ハッシュ長やTTLは本変更から確認する。
+HTTP自動キャッシュとCookieを無効にし、応答のcacheDurationに従うメモリ内キャッシュだけを使う。V4時代のUserDefaultsキャッシュを参照しない。外部チェックOFFはネットワーク要求を発生させない。レスポンス厳密検証と一括照会の失敗保持はIssue #6で実装済み。完全ハッシュ長、TTLのprotobuf上限・オーバーフローも検証し、不正応答を保存しない。
 
 画面とREADME、プライバシー、Store申請資料の送信説明を合わせる。ハッシュprefixから候補が推測される可能性、GoogleへのIP等のネットワーク情報送信、タイトル取得/ブラウザ表示は対象サイトへの通信となる点を説明する。
 
@@ -20,3 +20,5 @@ URLProtocolテストでraw URLやmarkerがrequestにないこと、4byte prefix�
 単独・一括ともURLごとのResultを保持する。OFFはdisabled、キー未設定・HTTP/ネットワーク・不正応答はfailure。noMatchは有効な200応答に限る。未知type/attributeのdetailは適用せずunrecognizedThreatsとし、既知の脅威は保持する。未知情報しかない場合safetyLevelはnilで、無害性の確認ではない。Enhanced評価はlocalFallbackとして区別する。
 
 protobuf JSONで空fullHashesが省略された形は有効、null/誤った型/脅威詳細欠落はfailureとする。不正応答やfailureはcacheへ保存しない。未知の値を含む有効な応答はその情報のままTTL付きcacheへ保持し、cache hitでも未知状態を失わない。
+
+Googleの[利用条件](https://developers.google.com/safe-browsing/terms)に合わせ、fullHashを含むprefixのキャッシュはサーバーTTLと30分の短い方まで。陰性prefixはサーバーTTLを維持する。利用開始前の設定とGoogle検出の警告には、出典リンクと精度・信頼性の限界、誤判定・見逃しの可能性を表示する。ローカル警告にGoogleの危険判定の出典を付けない。

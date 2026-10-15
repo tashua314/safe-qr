@@ -52,10 +52,10 @@ final class SafeBrowsingHashCache {
         lock.lock()
         defer { lock.unlock() }
         for prefix in prefixes {
-            entries[prefix] = Entry(
-                hashes: hashes.filter { Data($0.fullHash.prefix(4)) == prefix },
-                expires: now.addingTimeInterval(duration)
-            )
+            let prefixHashes = hashes.filter { Data($0.fullHash.prefix(4)) == prefix }
+            // Googleの利用条件: 危険情報は30分以内に再確認する。陰性prefixのserver TTLは保つ。
+            let lifetime = prefixHashes.isEmpty ? duration : min(duration, 30 * 60)
+            entries[prefix] = Entry(hashes: prefixHashes, expires: now.addingTimeInterval(lifetime))
         }
         // 全URLの長期保管を避ける。再照会可能なメモリキャッシュに限る。
         if entries.count > 3000 { entries = entries.filter { prefixes.contains($0.key) } }

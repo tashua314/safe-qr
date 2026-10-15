@@ -1,0 +1,326 @@
+[
+  {
+    "file": "ipad-caution-warning.png",
+    "state": "注意警告",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "d4eda78cdc86a27a233d2e98817c2465ecb7b3b072483cca91dde0cd3b18d762"
+  },
+  {
+    "file": "ipad-danger-warning.png",
+    "state": "危険警告",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "99c75a029426a74967c69c32f48f5e91d5da41feda6ca5d1f986c0740e6ea791"
+  },
+  {
+    "file": "ipad-history-after-mock-scans.png",
+    "state": "スキャン履歴",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "9cb17b41375c0d0c1e6f7121b8b57993b08b126b0edc5bdd88c70d9bc71474a8"
+  },
+  {
+    "file": "ipad-history-delete-confirmation.png",
+    "state": "履歴全削除の確認",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "ab5ba129a22027ef2a02f0e48e94b15b71eed462c9d38237dabc0d97c3b8c321"
+  },
+  {
+    "file": "ipad-history-empty-after-deletion.png",
+    "state": "削除後の空履歴",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "0a0a214a60a4b20022dd7244f2c3d16f9b0b03f1e44ad748dc7d48b6ea43bbb7"
+  },
+  {
+    "file": "ipad-history-revisit-warning.png",
+    "state": "履歴再訪の警告",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "d83319f014b225875a639c29c29837d3f35e9c405a233dbc551fd43be3b4af1b"
+  },
+  {
+    "file": "ipad-landscape-details.png",
+    "state": "横画面の警告詳細",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 8,
+    "sha256": "f0ffae98e070e0b0531fe3a45e6a608a0890b111d42722f8821d1cd3863ca324"
+  },
+  {
+    "file": "ipad-portrait-details.png",
+    "state": "縦画面の警告詳細",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "e25f02755e06b5019e69d704c62db337483ec78c49ce24f460eff20bfd70c5c3"
+  },
+  {
+    "file": "ipad-scanner.png",
+    "state": "Debugの模擬スキャン画面",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "dbe4ecfe305d2fdb312af9521e4ee8dd226721a822020fa81aa7709268f580db"
+  },
+  {
+    "file": "ipad-settings.png",
+    "state": "設定・厳しさ標準・外部OFF",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "b6c88e928954350cb6d0f92b1564a459a9ab73fb0f069c628c67743cd9a81e5e"
+  },
+  {
+    "file": "ipad-unverified-external-warning.png",
+    "state": "外部未確認の警告",
+    "device": "iPad Pro 13-inch (M4) Simulator",
+    "os": "iPadOS26.5 (23F77)",
+    "pixels": [
+      2064,
+      2752
+    ],
+    "exifOrientation": 1,
+    "sha256": "a068276620e2537b472a8b296de524429d09944e3665016399c4086b28fae8bd"
+  },
+  {
+    "file": "iphone-camera-denied.png",
+    "state": "カメラ拒否後の案内",
+    "device": "iPhone 16 Pro Simulator",
+    "os": "iOS 26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "00d94982569795b83a869cdc40114631e7d32bee1087ee194766ed3876c4c6e9"
+  },
+  {
+    "file": "iphone-caution-warning.png",
+    "state": "注意警告",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "ab0c1a9e4e226f19e1f205c345b7f0cd50f3f91406d070cc8d9a4b7f149675a2"
+  },
+  {
+    "file": "iphone-danger-warning.png",
+    "state": "危険警告",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "645d0ec10de160caff8cde037fed812be9cdddc78d8382b850eea87b2400e459"
+  },
+  {
+    "file": "iphone-history-after-mock-scans.png",
+    "state": "スキャン履歴",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "e6a78f9a9c5e7002849f1d1832925e1e7309ad9466fdf60dfc1b5cacd1341865"
+  },
+  {
+    "file": "iphone-history-delete-confirmation.png",
+    "state": "履歴全削除の確認",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "c2c0311198154e1897bb5b2d2269ea9f4dac5c5d780f2f91c06234b50aa7e3f6"
+  },
+  {
+    "file": "iphone-history-empty-after-deletion.png",
+    "state": "削除後の空履歴",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "c29d10ba9dac19931bc4136e62303f95cd8b09b491eb48321032a145bee921b6"
+  },
+  {
+    "file": "iphone-history-revisit-warning.png",
+    "state": "履歴再訪の警告",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "0330d829716e51dd2db8908ea298eede4144d0fc367759949a190db6c55794b6"
+  },
+  {
+    "file": "iphone-scanner.png",
+    "state": "Debugの模擬スキャン画面",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "9ba3bfc67886b138ce89dbe342fb47a2590c924031237b8cd19199a689fdea54"
+  },
+  {
+    "file": "iphone-settings.png",
+    "state": "設定・厳しさ標準・外部OFF",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "ec575e86ae79373cd488e6d5062b952a7d0e2d5e13913b19399ad0f0ad358781"
+  },
+  {
+    "file": "iphone-unverified-external-warning.png",
+    "state": "外部未確認の警告",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "ea9e117646b85799969cb06fd8cfc0e31545156c0dcd3091ce49b98e76d8d1cd"
+  },
+  {
+    "file": "iphone-warning-before.png",
+    "state": "修正前・危険警告・詳細未展開",
+    "device": "iPhone 16 Pro Simulator",
+    "os": "iOS 26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "247f34f2832e1975beefe5d4f044d2b870529dd0fffabf14f7d093ced2c731d8"
+  },
+  {
+    "file": "iphone-warning-details.png",
+    "state": "縦画面の警告詳細",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 1,
+    "sha256": "050b705c1b8316ac229df9726b1963621fd1f4aca8a9e20c61c53e90728d7bbb"
+  },
+  {
+    "file": "iphone-warning-landscape.png",
+    "state": "横画面の警告詳細",
+    "device": "iPhone16Pro Simulator",
+    "os": "iOS26.5 (23F77)",
+    "pixels": [
+      1206,
+      2622
+    ],
+    "exifOrientation": 8,
+    "sha256": "bb06e4e21cb0d87e33e8201d4b34a51333f4596f9f8a886abed9248ac5846f55"
+  },
+  {
+    "file": "small-iphone-landscape-details.png",
+    "state": "横画面の警告詳細",
+    "device": "iPhone SE (3rd generation) Simulator",
+    "os": "iOS18.6 (22G86)",
+    "pixels": [
+      750,
+      1334
+    ],
+    "exifOrientation": 8,
+    "sha256": "66c3546f52b6aa3c1db44062e5b05cc11beb138ee1fcd8932aafcc5560e0dc3a"
+  },
+  {
+    "file": "small-iphone-portrait-details.png",
+    "state": "縦画面の警告詳細",
+    "device": "iPhone SE (3rd generation) Simulator",
+    "os": "iOS18.6 (22G86)",
+    "pixels": [
+      750,
+      1334
+    ],
+    "exifOrientation": 1,
+    "sha256": "613acf2a32846531551381ac162d65c8c5356942ca3cf97b6b05f4d3ddf96cf1"
+  },
+  {
+    "file": "small-iphone-settings.png",
+    "state": "設定・厳しさ標準・外部OFF",
+    "device": "iPhone SE (3rd generation) Simulator",
+    "os": "iOS18.6 (22G86)",
+    "pixels": [
+      750,
+      1334
+    ],
+    "exifOrientation": 1,
+    "sha256": "647c8fba5e93d9fa97821cbf2b5cfc423893cb994aff9550a2848e3d52d2a568"
+  }
+]

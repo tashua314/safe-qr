@@ -41,7 +41,7 @@ make check
 ツールがない場合は失敗する。ビルド・テストのログと `.xcresult` は `.artifacts/` に保存し、Gitに含めない。
 GitHub ActionsではPRとmainへのpushで同じスクリプトを実行し、結果をArtifactに保存する。
 
-チェック時は専用Simulatorへアプリをインストールし、そのSimulator内でSafeQRのカメラ許可を付与する。実機の権限は変更しない。別の検証専用デバイスを使う場合はUUIDを指定する。
+チェック時は専用Simulatorへアプリをインストールし、そのSimulator内でSafeQRのカメラ許可を付与する。通常スイート後にcameraをrevokeして拒否状態のUIテストを個別実行し、成功/失敗時ともtrapでgrantへ戻す。通常スイート内ではこの1件を意図的にskipし、個別実行で検証する。実機の権限は変更しない。別の検証専用デバイスを使う場合はUUIDを指定する。
 
 ```sh
 SAFEQR_SIMULATOR_ID=<検証専用デバイスのUUID> make check
