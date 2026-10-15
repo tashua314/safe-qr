@@ -55,9 +55,11 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 | 性能の確認範囲 | 30分連続や多数回スキャン等の負荷テストは利用者判断で省略。実機10分待機の記録とレイアウト循環修正の回帰テストは確認済み。修正後の実機CPU、Leaks、温度・電池・UI遅延は未確認のまま残す |
 | 通信の確認範囲 | 本番認証と実機オンライン/オフラインは確認済み。OFF/同意/拒否・prefix限定・リダイレクト拒否・429等の失敗は自動テスト。実機の全通信を取得するパケット監査やクォータ枯渇試験は未実施 |
 | 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
-| 申請情報 | 運営者名、連絡先、サポートURL、プライバシー公開URLは利用者回答で未定 |
+| 申請情報 | 運営者はTechGuide合同会社、問い合わせ先はy.takahashi@techguide.jpと利用者確認済み。[サポート](https://techguide.jp/safeqr/)・[プライバシー](https://techguide.jp/safeqr/privacy/)はcorporate PR #63を独立レビュー/CI後にマージし、Amplify job69成功と2026-10-16のHTTP200を確認済み。審査用氏名/電話等は未確定 |
 | 配布条件 | 当面は収益化せず、収益化開始前にWeb Riskへ移行・検証を完了する方針。実際の用途と非商用条件の適合、地域・年齢・規約/EULAは公開前に確定する。売上0だけで非商用と断定しない |
 | ストア画像 | QAのPNGは下書き。実機カメラのモックを実機撮影として提出しない。最新のApple仕様を確認し、状態・説明を整えてから申請する |
+
+年齢・App Privacyの[回答案](app-store-questionnaire-draft.md)は実装とApple公式資料から準備した下書き。年齢やデータ収集/トラッキングの最終回答、App Store Connectでの保存・提出を確定したものではない。
 
 [申請文](app-store-description.md)、[機械可読メタデータ](app-store-metadata.json)、[プライバシー](privacy-policy-draft.md)、[規約](terms-draft.md)は下書き。App Store Connectへの入力、署名アップロード、審査提出は行っていない。
 
