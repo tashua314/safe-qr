@@ -161,6 +161,19 @@ final class SafeBrowsingFailureTests: XCTestCase {
         XCTAssertEqual(requestCount, 2)
     }
 
+    func testOutOfRangeTTLDoesNotHideSubsequentDanger() throws {
+        let service = client()
+        for value in ["315576000001s", "99999999999999999999s", "18446744073709551616s"] {
+            respond(["cacheDuration": value, "fullHashes": []])
+            guard case .failure(.parsingError) = try check(service) else { return XCTFail("範囲外TTLを保存しない") }
+        }
+        try respond(matchedBody(details: [["threatType": "MALWARE"]]))
+        let result = try check(service).get()
+        XCTAssertFalse(result.cacheHit)
+        XCTAssertEqual(result.safetyLevel, .danger)
+        XCTAssertEqual(requestCount, 4)
+    }
+
     func testTimeoutIsNotCachedOrSafe() throws {
         FailureURLProtocol.handler = { _ in throw URLError(.timedOut) }
         let service = client()

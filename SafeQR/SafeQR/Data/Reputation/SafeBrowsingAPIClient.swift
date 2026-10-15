@@ -187,8 +187,7 @@ class SafeBrowsingAPIClient {
             return .failure(.apiError(response.statusCode, HTTPURLResponse.localizedString(forStatusCode: response.statusCode)))
         }
         guard let data = data, let parsed = try? JSONDecoder().decode(HashResponse.self, from: data),
-              parsed.cacheDuration.range(of: "^[0-9]+(?:\\.[0-9]{1,9})?s$", options: .regularExpression) != nil,
-              let duration = Double(parsed.cacheDuration.dropLast()), duration.isFinite else { return .failure(.parsingError) }
+              let duration = parseCacheDuration(parsed.cacheDuration) else { return .failure(.parsingError) }
         let hashes = parsed.fullHashes
         guard hashes.allSatisfy({ hash in
             hash.fullHash.count == 32 && prefixes.contains(Data(hash.fullHash.prefix(4)))
@@ -198,6 +197,14 @@ class SafeBrowsingAPIClient {
         }
         cache.store(hashes, prefixes: prefixes, duration: duration, now: configuration.now())
         return .success(hashes)
+    }
+
+    private func parseCacheDuration(_ text: String) -> TimeInterval? {
+        guard text.range(of: "^[0-9]+(?:\\.[0-9]{1,9})?s$", options: .regularExpression) != nil else { return nil }
+        let components = text.dropLast().split(separator: ".")
+        // protobuf Durationの秒数上限とUInt64 overflowを確認し、不正TTLをcacheしない。
+        guard let integer = components.first, let seconds = UInt64(integer), seconds <= 315_576_000_000 else { return nil }
+        return Double(text.dropLast())
     }
 
     private func evaluate(
