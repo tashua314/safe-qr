@@ -44,19 +44,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
         configureInitialState()
     }
 
-    func updateLayout() {
-        guard let viewController = viewController,
-              viewController.isViewLoaded, isUIConfigured else {
-            return
-        }
-
-        // メインスレッドでUI更新を確実に実行
-        DispatchQueue.main.async {
-            viewController.view.setNeedsLayout()
-            viewController.view.layoutIfNeeded()
-        }
-    }
-
     func updateUI(for status: ScanStatus) {
         DispatchQueue.main.async { [weak self] in
             self?.updateStatusLabel(for: status)

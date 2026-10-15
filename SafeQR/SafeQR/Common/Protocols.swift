@@ -112,9 +112,6 @@ protocol ScannerUIManagerProtocol {
     /// UI要素のセットアップ
     func setupUI(in viewController: UIViewController)
 
-    /// レイアウトの更新
-    func updateLayout()
-
     /// 状態に応じたUI更新
     func updateUI(for status: ScanStatus)
 
