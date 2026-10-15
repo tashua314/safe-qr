@@ -83,6 +83,23 @@ class ChangesTests(unittest.TestCase):
             with self.subTest(base=base):
                 self.assertNotEqual(self.select(base=base, check=False).returncode, 0)
 
+    def test_shallow_checkout_fetches_missing_event_base(self):
+        for index in range(3):
+            self.write("docs/guide.md", f"revision {index}")
+            self.commit()
+        checkout = self.root / "shallow-checkout"
+        subprocess.check_call(["git", "clone", "--quiet", "--no-local", "--depth=2",
+                               self.root.as_uri(), str(checkout)])
+        missing = subprocess.run(["git", "cat-file", "-e", f"{self.base}^{{commit}}"], cwd=checkout,
+                                 capture_output=True)
+        self.assertNotEqual(missing.returncode, 0)
+        env = {**os.environ, "SAFEQR_BASE_SHA": self.base, "SAFEQR_FORCE_IOS": "false"}
+        env.pop("GITHUB_OUTPUT", None)
+        result = subprocess.run([sys.executable, str(SCRIPTS / "ci-changes.py")], cwd=checkout,
+                                env=env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["ios_required"], "false")
+
     def test_invalid_force_is_failure(self):
         self.assertNotEqual(self.select(force="yes", check=False).returncode, 0)
 

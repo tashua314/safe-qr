@@ -15,6 +15,12 @@ def ios_required(paths):
 def changed_paths(base):
     if not re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", base):
         raise ValueError("変更判定には有効なbaseコミットSHAが必要です。")
+    # A PR event can refer to an older base than the freshly checked-out merge ref.
+    # Keep shallow checkout fast, but obtain that exact base instead of treating a missing object as docs-only.
+    present = subprocess.run(["git", "cat-file", "-e", f"{base}^{{commit}}"],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if present.returncode:
+        subprocess.check_call(["git", "fetch", "--no-tags", "--depth=1", "origin", base])
     # Without --no-renames, moving a Swift file into docs/ could hide its deletion.
     data = subprocess.check_output(["git", "diff", "--no-renames", "--name-only", "-z", base, "HEAD", "--"])
     return [path.decode("utf-8", errors="surrogateescape") for path in data.split(b"\0") if path]

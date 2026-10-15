@@ -6,6 +6,7 @@
 - docs/配下、README.md、CLAUDE.mdだけの変更ではmacOSを省く。docs/はアプリのビルド入力に使わない。
 - Swift、Xcode、CI、scripts、未知のパスはmacOSを必要とする。renameは旧/新パスを両方評価し、判定エラーでは失敗する。
 - workflow全体をpaths-ignoreで省かず、最終Quality gateを常に実行する。Linuxの失敗、必要なmacOSの失敗/取消/予期しない省略を成功にしない。
+- 浅いcheckoutにイベントの基準コミットがない場合、そのSHAだけを取得する。取得失敗は失敗扱いにし、mainが進んだ場合も比較対象を省略しない。
 - 手動実行は変更種別に関係なく全検証する。自動実行はPRへ集約する。mainへ直接pushせず、最新mainを含むPRの検証成功後にマージする。
 - 固定版SwiftLint/SwiftFormatとSHA-256を維持する。導入は改善前の実測で2〜4秒のため、大型キャッシュやLinux用ツール配布物の追加は行わない。
 - mac-clipyのmake checkを入口とした一括検証、strict lint、警告をエラーにする方針を引き続き利用する。
