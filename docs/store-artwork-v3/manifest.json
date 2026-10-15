@@ -1,5 +1,5 @@
 {
-  "status": "draft_not_approved_not_uploaded",
+  "status": "user_approved_not_uploaded_not_submitted",
   "createdAt": "2026-10-16",
   "composition": "generated usage photograph clearly labeled + actual warning screen; generated photo is not an actual camera screenshot",
   "sourceInventory": "../store-artwork/README.md",
@@ -88,5 +88,27 @@
       "sha256": "3d938bc4ce84d9c9588cdd9d01909f693dff3c05c32a7aca1773c12a05941893",
       "reused": true
     }
-  ]
+  ],
+  "userConfirmation": {
+    "date": "2026-10-16",
+    "scope": "下記の掲載画像6枚。生成素材とoverviewの単独掲載を含まない",
+    "sequence": [
+      "QRにかざす",
+      "注意が出たら戻る",
+      "履歴を見返す"
+    ],
+    "record": "https://github.com/tashua314/safe-qr/issues/8",
+    "listingImages": {
+      "iphone": [
+        "iphone-01-camera-story.png",
+        "../store-artwork-v2/iphone-02-stop-without-opening.png",
+        "../store-artwork-v2/iphone-03-find-again.png"
+      ],
+      "ipad": [
+        "ipad-01-camera-story.png",
+        "../store-artwork-v2/ipad-02-stop-without-opening.png",
+        "../store-artwork-v2/ipad-03-find-again.png"
+      ]
+    }
+  }
 }

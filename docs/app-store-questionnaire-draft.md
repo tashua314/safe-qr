@@ -32,8 +32,8 @@ Appleの収集の定義は、端末外で要求処理に必要な期間を超え
 
 [Google照会コード](https://github.com/tashua314/safe-qr/blob/aa99934084b55770ab4b92e16ab3a9b90b2f03f4/SafeQR/SafeQR/Data/Reputation/SafeBrowsingAPIClient.swift)、[タイトル取得コード](https://github.com/tashua314/safe-qr/blob/aa99934084b55770ab4b92e16ab3a9b90b2f03f4/SafeQR/SafeQR/Data/Metadata/HtmlTitleFetcher.swift)、[プライバシー下書き](privacy-policy-draft.md)を根拠に、必要なデータ種別・用途・利用者との紐付け・トラッキングを決める。Google APIキーはアプリの認証情報、Bundle IDはアプリ共通値であり、それだけで利用者IDや端末IDと同一視しない。実キーや端末IDを申請文へ貼らない。
 
-UserDefaultsの必須理由API宣言はIssue #31 / PR #32で対応する。理由宣言はApp Privacy回答の確定を代替しない。
+UserDefaultsの必須理由API宣言はIssue #31 / PR #32で対応済み。理由宣言はApp Privacy回答の確定を代替しない。
 
 ## 最終確定に必要な入力
 
-運営者TechGuide合同会社・公開窓口[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)は利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。無料・日本のみ・Apple標準EULAの申請方針は2026-10-16利用者確認済み。実際の用途とSafe Browsing条件の適合、年齢の最終回答、外部事業者の処理の確認を残す。申請画像・説明も確定前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。
+運営者TechGuide合同会社・公開窓口[問い合わせフォーム](https://techguide.jp/contact/?category=other&subject=SafeQR)は利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。無料・日本のみ・Apple標準EULAの申請方針は2026-10-16利用者確認済み。当面は無料アプリ単独で提供し、会社の集客・有償サービスへの誘導・顧客向けサービスには使う予定がないと利用者が追加確認した。既存の広告・課金等による収益化をしない方針と合わせ、販売・収益目的でないという[Google公式条件](https://developers.google.com/safe-browsing/reference/Appropriate.Usage)に沿うと判断する（2026-10-16照合）。これは確認済みの用途に基づく判断でGoogleの個別承認ではない。会社名義や無料という一点だけで判断せず、用途変更前には再確認し、収益化開始前にWeb Riskへ移行する。年齢の最終回答と外部事業者の保持・紐付けの確認は引き続き残す。掲載画像6枚・画像内コピー・順序は利用者確認済み。申請文全体は最終確認前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。
