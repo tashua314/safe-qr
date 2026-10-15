@@ -325,6 +325,9 @@ class ScannerViewModel: ObservableObject {
 
         // API結果から脅威情報を抽出
         if let apiResult = result.apiResult {
+            if apiResult.verificationStatus == .unrecognizedThreats {
+                issues.append("外部チェックに未対応の脅威情報が含まれています（安全性は未確認）")
+            }
             for threat in apiResult.detectedThreats {
                 issues.append("API検出: \(threat.rawValue)")
             }

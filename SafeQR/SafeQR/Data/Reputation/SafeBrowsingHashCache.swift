@@ -4,12 +4,28 @@ import Foundation
 final class SafeBrowsingHashCache {
     struct FullHash: Decodable {
         let fullHash: Data
-        let fullHashDetails: [Detail]?
+        let fullHashDetails: [Detail]
+
+        private enum CodingKeys: String, CodingKey { case fullHash, fullHashDetails }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            fullHash = try container.decode(Data.self, forKey: .fullHash)
+            fullHashDetails = try container.decode([Detail].self, forKey: .fullHashDetails)
+        }
     }
 
     struct Detail: Decodable {
         let threatType: String
-        let attributes: [String]?
+        let attributes: [String]
+
+        private enum CodingKeys: String, CodingKey { case threatType, attributes }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            threatType = try container.decode(String.self, forKey: .threatType)
+            attributes = container.contains(.attributes) ? try container.decode([String].self, forKey: .attributes) : []
+        }
     }
 
     private struct Entry {

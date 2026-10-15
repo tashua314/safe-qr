@@ -96,7 +96,9 @@ final class SafeBrowsingPrivacyTests: XCTestCase {
 
     func testExternalOffMakesNoRequest() throws {
         respond(["cacheDuration": "60s"])
-        _ = try check(makeClient(enabled: false), url: input)
+        XCTAssertThrowsError(try check(makeClient(enabled: false), url: input)) { error in
+            guard case SafeBrowsingAPIClient.SafeBrowsingError.disabled = error else { return XCTFail("無効を成功へ変換しない") }
+        }
         XCTAssertTrue(requests.isEmpty)
     }
 
