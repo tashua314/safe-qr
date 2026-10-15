@@ -1,0 +1,92 @@
+{
+  "status": "draft_not_approved_not_uploaded",
+  "createdAt": "2026-10-16",
+  "composition": "generated usage photograph clearly labeled + actual warning screen; generated photo is not an actual camera screenshot",
+  "sourceInventory": "../store-artwork/README.md",
+  "images": [
+    {
+      "file": "ipad-01-camera-story.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "b91ec92357d7541c0097f069f157e7c10898bf4264da6838ba13cee57679bb21"
+    },
+    {
+      "file": "iphone-01-camera-story.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "9271718706862fc4c552575dbe05a5ccdaa3c425cda9f3a3c74dcefcc4f7142e"
+    },
+    {
+      "file": "overview.png",
+      "pixels": [
+        1200,
+        1600
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "d91dcf48ba52efcd92ef78f80b6b24959e2c1a8c9e99105ed8eb78203d6a8c0e"
+    },
+    {
+      "file": "qr-scanning-usage-generated.png",
+      "pixels": [
+        1122,
+        1402
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "141f758a36bdec554dd77c050c0f15a83c5422d277730097f4e048a30321b630"
+    },
+    {
+      "file": "../store-artwork-v2/iphone-02-stop-without-opening.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "7e5e93425da577127667886d1c81f58c51d97430838a582297444446d4113450",
+      "reused": true
+    },
+    {
+      "file": "../store-artwork-v2/iphone-03-find-again.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "10fbd45b369215d125c4de9b342f2e4ef679c4dddb8b5150d5bdedd4e1de81e9",
+      "reused": true
+    },
+    {
+      "file": "../store-artwork-v2/ipad-02-stop-without-opening.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "98fc9f629bc5aad5c1661e157d3024ef5a12536d18611f56896178037a344cde",
+      "reused": true
+    },
+    {
+      "file": "../store-artwork-v2/ipad-03-find-again.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "colorType": 2,
+      "hasAlpha": false,
+      "sha256": "3d938bc4ce84d9c9588cdd9d01909f693dff3c05c32a7aca1773c12a05941893",
+      "reused": true
+    }
+  ]
+}

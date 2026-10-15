@@ -1,0 +1,7 @@
+# 使用イメージの生成プロンプト
+
+内蔵image_genで新規生成、背景透過なし。実画面はモデルへ送信せず、写真内にはSafeQRのUI・判定結果を生成しない。生成後のポスターでは実際の注意画面と明確に区別して配置する。
+
+```text
+Use case: ads-marketing. Asset type: photographic usage illustration for a Japanese QR-reader app called SafeQR. Make a warm, accessible, realistic editorial photograph, portrait 4:5. Close three-quarter view over an anonymous adult's shoulder: one natural adult hand holds a modern black rounded smartphone vertically, aiming its camera at a small white tabletop card with a simple black QR-like square pattern on a pale oak cafe table. The action of pointing a phone at the QR should be immediately clear to someone unfamiliar with technology. The phone screen is clearly visible and shows only a live camera view of that same white QR card aligned naturally in the scene, with no app controls, no interface labels, no fake warning/safety verdict, no green check, no padlock, no notification, no logo, no OS branding, no text. The physical QR card and its depiction on the screen must refer to the same location and pattern. Use a decorative non-functional QR-like motif, no encoded personal data or real website. Natural hand anatomy, believable lens perspective and reflection, calm soft daylight, warm ivory and pale sage environment, premium but everyday approachable photography. No faces, no other people, no extra fingers, no second phone. Frame the phone and card large and keep the background simple. This is an illustrative scene, not an actual app screenshot.
+```
