@@ -89,7 +89,11 @@ class HistoryViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 guard let url = URL(string: value) else { return }
-                self?.present(SFSafariViewController(url: url), animated: true)
+                guard let self = self else { return }
+                let browser = SFSafariViewController(url: url)
+                browser.delegate = self
+                self.present(browser, animated: true)
+                browser.presentationController?.delegate = self
             }.store(in: &cancellables)
         accessModel.$errorMessage.compactMap { $0 }
             .receive(on: DispatchQueue.main)
@@ -461,3 +465,17 @@ extension HistoryViewController: UITableViewDelegate {
  * 履歴表示用カスタムテーブルビューセル
  * タイトル、URL（ドメイン）、安全性バッジ、訪問回数を表示
  */
+
+extension HistoryViewController: SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
+    func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+        controller.dismiss(animated: true) { [weak self] in
+            self?.accessModel.resetScan()
+            self?.loadHistoryData()
+        }
+    }
+
+    func presentationControllerDidDismiss(_: UIPresentationController) {
+        accessModel.resetScan()
+        loadHistoryData()
+    }
+}
