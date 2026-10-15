@@ -69,6 +69,11 @@ run_phase Debug-build-for-testing "$SAFEQR_ARTIFACTS/Debug-build.log" xcodebuild
 run_phase Release-build "$SAFEQR_ARTIFACTS/Release-build.log" xcodebuild "${COMMON[@]}" \
     -configuration Release -destination 'generic/platform=iOS Simulator' build
 
+# 必須理由APIの宣言がソースだけに残らず、両構成のアプリへ同梱されることを確認する。
+for SAFEQR_CONFIGURATION in Debug Release; do
+    plutil -lint "$SAFEQR_DERIVED_DATA/Build/Products/$SAFEQR_CONFIGURATION-iphonesimulator/SafeQR.app/PrivacyInfo.xcprivacy"
+done
+
 # 初回起動とコンパイルを競合させない。起動時間全体を独立して記録する。
 run_phase Simulator-boot "$SAFEQR_ARTIFACTS/simulator-boot.log" xcrun simctl bootstatus "$SAFEQR_SIMULATOR_ID" -b
 xcrun simctl install "$SAFEQR_SIMULATOR_ID" "$SAFEQR_DERIVED_DATA/Build/Products/Debug-iphonesimulator/SafeQR.app"
