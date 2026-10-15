@@ -32,7 +32,7 @@
         "email": "y.takahashi@techguide.jp"
       },
       "demoAccountRequired": false,
-      "notes": "申請前の下書き。カメラ画像・動画は保存せず、QRのURLを評価する。外部チェックは既定OFF。ON時はGoogle Safe Browsing v5 hashes.searchへ4byte SHA-256 prefixだけを送り、完全ハッシュは端末内照合。注意・危険・外部未確認では開封確認が必要で、許可前にタイトル取得とブラウザー表示をしない。履歴再訪も同様。タイトル取得は元URLだけでリダイレクトを追わない。判定には見逃し・誤警告があり得る。実機の基本動作、本番API認証、開発用署名/exportは確認済み。別Bundle IDの新規Releaseで初回カメラ拒否の案内・履歴/設定も確認し、通常版データは保持した。カメラ待機10分の記録は完了。CPU高値に対するレイアウト循環修正はPR #28、修正後実機CPUは未確認。利用者判断で30分連続・多数回スキャン等の負荷テストを省略した。Leaks、温度/電池、UI遅延は未確認。運営者はTechGuide合同会社、問い合わせ先はy.takahashi@techguide.jpと利用者確認済み。サポートURL https://techguide.jp/safeqr/ とプライバシーURL https://techguide.jp/safeqr/privacy/ の公開を確認済み。配布条件・年齢質問、審査用氏名/電話等の確定は未完了。App Store向け配布・アップロード・審査提出は未実施。詳細はrelease-validation.mdを参照する。"
+      "notes": "申請前の下書き。カメラ画像・動画は保存せず、QRのURLを評価する。外部チェックは既定OFF。ON時はGoogle Safe Browsing v5 hashes.searchへ4byte SHA-256 prefixだけを送り、完全ハッシュは端末内照合。注意・危険・外部未確認では開封確認が必要で、許可前にタイトル取得とブラウザー表示をしない。履歴再訪も同様。タイトル取得は元URLだけでリダイレクトを追わない。判定には見逃し・誤警告があり得る。実機の基本動作、本番API認証、開発用署名/exportは確認済み。別Bundle IDの新規Releaseで初回カメラ拒否の案内・履歴/設定も確認し、通常版データは保持した。カメラ待機10分の記録は完了。CPU高値に対するレイアウト循環修正はPR #28、修正後実機CPUは未確認。利用者判断で30分連続・多数回スキャン等の負荷テストを省略した。Leaks、温度/電池、UI遅延は未確認。運営者はTechGuide合同会社、問い合わせ先はy.takahashi@techguide.jpと利用者確認済み。サポートURL https://techguide.jp/safeqr/ とプライバシーURL https://techguide.jp/safeqr/privacy/ の公開を確認済み。無料・日本のみ・Apple標準EULAの申請方針は利用者確認済み。実際の用途と外部API条件の適合、年齢/App Privacy、審査用氏名/電話等の確定は未完了。App Store向け配布・アップロード・審査提出は未実施。詳細はrelease-validation.mdを参照する。"
     },
     "support": {
       "operator": "TechGuide合同会社",
@@ -42,10 +42,15 @@
       "status": "運営者・問い合わせ先は利用者確認済み。両公開URLのHTTP200、本文、相互リンクを2026-10-16に確認済み"
     },
     "pricing": {
-      "status": "planned_free_phase",
+      "status": "draft_user_confirmed",
       "proposedBasePrice": 0,
-      "availability": null,
-      "notes": "当面は収益化しない方針。価格・配布地域の申請設定は別途確定する。"
+      "availability": {
+        "countryCodes": [
+          "JP"
+        ],
+        "scope": "Japan only"
+      },
+      "notes": "2026-10-16利用者確認：申請下書きは無料・日本のみ。App Store Connectへの設定保存・提出は未実施。"
     },
     "ageRating": {
       "status": "unanswered",
@@ -81,6 +86,13 @@
       "dataCollected": null,
       "tracking": null,
       "notes": "端末内処理、Google照会、タイトル取得、一般Web閲覧を区別して確認する。第三者の保持・用途等を未確認のままデータ収集なしと確定しない。"
+    },
+    "licenseAgreement": {
+      "status": "draft_user_confirmed",
+      "type": "apple_standard",
+      "customEULA": false,
+      "source": "https://developer.apple.com/help/app-store-connect/manage-app-information/provide-a-custom-license-agreement/",
+      "notes": "2026-10-16利用者確認。Apple標準EULAを使う方針。独自EULAは追加しない。App Store Connectの設定・契約の承諾・法的確認完了を示さない。"
     }
   }
 }

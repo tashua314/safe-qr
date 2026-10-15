@@ -13,7 +13,7 @@ Appleはアプリ内の自由なWeb閲覧をUnrestricted Web Accessとし、OS26
 | User-Generated Content / Social Media | 自前の配信機能はなし。履歴は端末内のみで、公開投稿・フィード・利用者間共有の機能はない。一般Web閲覧の能力は別項で申告する |
 | Messaging and Chat / Advertising | 自前のチャット・広告配信はなし。外部Webページの機能とアプリ自身の機能を区別して実際の質問に回答する |
 | 粗野な言葉・恐怖、医療/健康、暴力/武器、性的表現、飲酒/喫煙/薬物、賭博、コンテスト、loot box | 自前の収録コンテンツ・ゲーム機能はなし。任意リンク先の内容を一律に安全・全年齢向けと保証する回答にはしない |
-| Kids、年齢上書き、EULAの最低年齢 | 運営判断が未確定。計算結果と各項目の条件を確認してから決める。現時点で4+やKids向けを設定しない |
+| Kids、年齢上書き、EULAの最低年齢 | Apple標準EULAを使う申請方針は利用者確認済み。Kids・年齢上書きや最低年齢は、計算結果と各項目の条件を確認してから決める。現時点で4+やKids向けを設定しない |
 
 根拠：[URL開封処理](https://github.com/tashua314/safe-qr/blob/aa99934084b55770ab4b92e16ab3a9b90b2f03f4/SafeQR/SafeQR/Presentation/ScannerViewController.swift)、[利用者設定](https://github.com/tashua314/safe-qr/blob/aa99934084b55770ab4b92e16ab3a9b90b2f03f4/SafeQR/SafeQR/Services/Settings/SettingsStore.swift)。上表は実装に基づく回答案であり、Appleによる審査・算定結果ではない。
 
@@ -36,4 +36,4 @@ UserDefaultsの必須理由API宣言はIssue #31 / PR #32で対応する。理�
 
 ## 最終確定に必要な入力
 
-運営者TechGuide合同会社・問い合わせ先y.takahashi@techguide.jpは利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。配布地域と実際の用途、EULA/年齢の運営判断、外部事業者の処理の確認を残す。申請画像・説明も確定前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。
+運営者TechGuide合同会社・問い合わせ先y.takahashi@techguide.jpは利用者確認済み。[サポート](https://techguide.jp/safeqr/)と[プライバシーポリシー](https://techguide.jp/safeqr/privacy/)の公開・HTTP200は2026-10-16確認済み。無料・日本のみ・Apple標準EULAの申請方針は2026-10-16利用者確認済み。実際の用途とSafe Browsing条件の適合、年齢の最終回答、外部事業者の処理の確認を残す。申請画像・説明も確定前。App Store Connectでの回答保存・公開・アップロード・審査提出は実施していない。
