@@ -35,7 +35,8 @@ class CoreDataStack {
                  本来はより適切なエラーハンドリングが必要
                  開発段階では一旦fatalErrorで落とす
                  */
-                fatalError("Core Data読み込みエラー: \(error), \(error.userInfo)")
+                AppLog.error(.coreDataLoadFailed, code: error.code)
+                fatalError("Core Data読み込みに失敗しました")
             }
         }
 
@@ -79,11 +80,11 @@ class CoreDataStack {
             } catch {
                 // 保存エラーが発生した場合
                 let nsError = error as NSError
-                print("Core Data保存エラー: \(nsError), \(nsError.userInfo)")
+                AppLog.error(.coreDataSaveFailed, code: nsError.code)
 
                 // 本来はより適切なエラーハンドリングが必要
                 // 例：ユーザーに通知、データの復旧処理など
-                fatalError("Core Data保存エラー: \(nsError), \(nsError.userInfo)")
+                fatalError("Core Data保存に失敗しました")
             }
         }
     }
@@ -99,7 +100,7 @@ class CoreDataStack {
                     try context.save()
                 } catch {
                     let nsError = error as NSError
-                    print("バックグラウンドCore Data保存エラー: \(nsError), \(nsError.userInfo)")
+                    AppLog.error(.coreDataSaveFailed, code: nsError.code)
                 }
             }
         }
@@ -122,7 +123,7 @@ class CoreDataStack {
             try context.execute(deleteRequest)
             saveContext()
         } catch {
-            print("データ削除エラー: \(error)")
+            AppLog.error(.coreDataDeleteFailed, code: (error as NSError).code)
         }
     }
 }

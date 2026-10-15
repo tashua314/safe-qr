@@ -74,6 +74,20 @@ class SafeBrowsingAPIClient {
         case cacheExpired
         case disabled
 
+        var diagnosticCode: Int {
+            switch self {
+            case let .networkError(error): return (error as NSError).code
+            case let .apiError(code, _): return code
+            case .invalidURL: return 1
+            case .apiKeyMissing: return 2
+            case .parsingError: return 3
+            case .timeout: return NSURLErrorTimedOut
+            case .suffixListUnavailable: return 4
+            case .cacheExpired: return 5
+            case .disabled: return 6
+            }
+        }
+
         var localizedDescription: String {
             switch self {
             case .invalidURL: return "無効なURLです"

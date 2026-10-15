@@ -285,7 +285,7 @@ class ReputationClient {
             )
 
         } catch {
-            print("APIレスポンス解析エラー: \(error)")
+            AppLog.error(.reputationParseFailed, code: (error as NSError).code)
             return nil
         }
     }

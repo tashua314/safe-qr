@@ -68,7 +68,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
             let entities = try context.fetch(request)
             return entities.compactMap { convertToScanRecord($0) }
         } catch {
-            print("履歴取得エラー: \(error)")
+            AppLog.error(.historyReadFailed, code: (error as NSError).code)
             return []
         }
     }
@@ -88,7 +88,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
             let entities = try context.fetch(request)
             return entities.first.flatMap { convertToScanRecord($0) }
         } catch {
-            print("履歴取得エラー: \(error)")
+            AppLog.error(.historyReadFailed, code: (error as NSError).code)
             return nil
         }
     }
@@ -120,7 +120,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
             }
             coreDataStack.saveContext()
         } catch {
-            print("全履歴削除エラー: \(error)")
+            AppLog.error(.historyDeleteFailed, code: (error as NSError).code)
         }
     }
 
@@ -135,7 +135,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
         do {
             return try context.count(for: request)
         } catch {
-            print("履歴件数取得エラー: \(error)")
+            AppLog.error(.historyCountFailed, code: (error as NSError).code)
             return 0
         }
     }
@@ -156,7 +156,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
         do {
             return try context.fetch(request).first
         } catch {
-            print("既存レコード検索エラー: \(error)")
+            AppLog.error(.historyLookupFailed, code: (error as NSError).code)
             return nil
         }
     }
@@ -233,7 +233,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
             }
 
         } catch {
-            print("履歴制限適用エラー: \(error)")
+            AppLog.error(.historyLimitFailed, code: (error as NSError).code)
         }
     }
 
@@ -249,7 +249,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
               let scannedAt = entity.scannedAt,
               let domainHash = entity.domainHash,
               let safetyLevel = SafetyLevel(rawValue: entity.safety) else {
-            print("ScanRecord変換エラー: 必須プロパティが不足")
+            AppLog.error(.historyRecordInvalid, code: 0)
             return nil
         }
 
@@ -279,7 +279,7 @@ class HistoryRepository: HistoryRepositoryProtocol {
         do {
             return try context.fetch(request).first
         } catch {
-            print("ScanRecordEntity検索エラー: \(error)")
+            AppLog.error(.historyLookupFailed, code: (error as NSError).code)
             return nil
         }
     }
@@ -301,12 +301,11 @@ class HistoryRepository: HistoryRepositoryProtocol {
             if let entity = try context.fetch(request).first {
                 entity.title = title
                 coreDataStack.saveContext()
-                print("✅ タイトル更新成功: \(url) -> \(title)")
             } else {
-                print("⚠️ タイトル更新: レコードが見つからない: \(url)")
+                AppLog.error(.titleRecordMissing, code: 0)
             }
         } catch {
-            print("❌ タイトル更新エラー: \(error.localizedDescription)")
+            AppLog.error(.titleUpdateFailed, code: (error as NSError).code)
             throw error
         }
     }

@@ -14,6 +14,7 @@ swiftlint version
 swiftformat --version
 swiftlint lint --strict --no-cache
 swiftformat SafeQR/SafeQR SafeQR/SafeQRTests SafeQR/SafeQRUITests --lint --cache ignore
+python3 scripts/check-log-policy.py
 plutil -lint SafeQR/SafeQR.xcodeproj/project.pbxproj SafeQR/SafeQR/Info.plist
 
 SAFEQR_SIMULATOR_ID="${SAFEQR_SIMULATOR_ID:-$(python3 scripts/simulator_destination.py)}"

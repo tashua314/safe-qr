@@ -47,7 +47,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
     func updateLayout() {
         guard let viewController = viewController,
               viewController.isViewLoaded, isUIConfigured else {
-            print("⚠️ UIManager: レイアウト更新をスキップ（初期化未完了）")
             return
         }
 
@@ -312,7 +311,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
 
     private func updateStatusLabel(for status: ScanStatus) {
         guard isUIConfigured else {
-            print("⚠️ UIManager: statusLabel未初期化")
             return
         }
 
@@ -334,7 +332,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
 
     private func updateOverlayAppearance(for status: ScanStatus) {
         guard isUIConfigured else {
-            print("⚠️ UIManager: scanOverlayView未初期化")
             return
         }
 
@@ -352,7 +349,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
 
     private func updateButtonStates(for status: ScanStatus) {
         guard isUIConfigured else {
-            print("⚠️ UIManager: ボタン未初期化")
             return
         }
 
@@ -369,7 +365,6 @@ class ScannerUIManager: ScannerUIManagerProtocol {
 
     func updateLightButtonState(_ isEnabled: Bool) {
         guard isUIConfigured else {
-            print("⚠️ UIManager: lightButton未初期化")
             return
         }
 

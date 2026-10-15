@@ -23,6 +23,6 @@ safeはこのヒューリスティックのしきい値を超えなかった結�
 
 ## プライバシー
 - Google安全性照会ではURL生値を**送信しない**。タイトル取得・ブラウザ表示は対象サイトへのURLを使う通信。hash prefixから候補が推測される可能性があり、GoogleにはIP等の通信情報も届く。
-- ログにURLを残さない（匿名クラッシュのみ）
+- ログにURL・タイトル・エラー説明を残さない（定義済みイベント、数値エラーコード、処理時間のみ。詳細はlogging-policy.md）
 
 詳細とPSL snapshot、TTL、検証は [reputation-design.md](reputation-design.md) を参照。
