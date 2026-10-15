@@ -40,3 +40,11 @@ Google CloudのキーはSafe Browsing API（`safebrowsing.googleapis.com`）だ�
 開発用・本番用の値はGit管理外の `Local-Keys.xcconfig` / `Production-Keys.xcconfig` に分け、ビルドログや検証結果には値を出さない。Google Cloud設定と実APIの検証はコードの単体テスト結果と区別して記録する。
 
 [Google APIキー管理仕様](https://docs.cloud.google.com/docs/authentication/api-keys)
+
+## v5の応答形式
+
+`hashes.search` の実応答は `application/x-protobuf`。JSON形式を要求する `alt=json` は受け付けられないため、バイナリ応答を専用デコーダーで読み、完全ハッシュ・脅威enum・Durationを既存の照合/キャッシュへ渡す。JSON形式とContent-Type未指定は既存の互換経路として読み取る。
+
+デコーダーは8 MiBの入力長と100,000個のフィールド/packed値を上限とし、varint overflow、切り詰め、wire type不一致、負/範囲外Durationを拒否する。未知enumを削除せず未確認へ渡し、不正応答はキャッシュしない。
+
+一次資料：[Google v5概要](https://developers.google.com/safe-browsing/reference)、[Chromiumのv5 wire定義](https://github.com/chromium/chromium/blob/main/components/safe_browsing/core/common/proto/safebrowsingv5.proto)。

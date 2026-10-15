@@ -177,6 +177,11 @@ class SafeBrowsingAPIClient {
         let fullHashes: [SafeBrowsingHashCache.FullHash]
         let cacheDuration: String
 
+        init(fullHashes: [SafeBrowsingHashCache.FullHash], cacheDuration: String) {
+            self.fullHashes = fullHashes
+            self.cacheDuration = cacheDuration
+        }
+
         private enum CodingKeys: String, CodingKey { case fullHashes, cacheDuration }
 
         init(from decoder: Decoder) throws {
@@ -198,7 +203,8 @@ class SafeBrowsingAPIClient {
         guard response.statusCode == 200 else {
             return .failure(.apiError(response.statusCode, HTTPURLResponse.localizedString(forStatusCode: response.statusCode)))
         }
-        guard let data = data, let parsed = try? JSONDecoder().decode(HashResponse.self, from: data),
+        let mimeType = response.value(forHTTPHeaderField: "Content-Type") == nil ? nil : response.mimeType
+        guard let data = data, let parsed = try? decodeResponse(data, mimeType: mimeType),
               let duration = parseCacheDuration(parsed.cacheDuration) else { return .failure(.parsingError) }
         let hashes = parsed.fullHashes
         guard hashes.allSatisfy({ hash in
@@ -209,6 +215,17 @@ class SafeBrowsingAPIClient {
         }
         cache.store(hashes, prefixes: prefixes, duration: duration, now: configuration.now())
         return .success(hashes)
+    }
+
+    private func decodeResponse(_ data: Data, mimeType: String?) throws -> HashResponse {
+        switch mimeType?.lowercased() {
+        case "application/x-protobuf", "application/protobuf":
+            let parsed = try SafeBrowsingProtobufDecoder.decode(data)
+            return HashResponse(fullHashes: parsed.fullHashes, cacheDuration: parsed.cacheDuration)
+        case "application/json", nil:
+            return try JSONDecoder().decode(HashResponse.self, from: data)
+        default: throw SafeBrowsingProtobufDecoder.DecodingError.invalidResponse
+        }
     }
 
     private func parseCacheDuration(_ text: String) -> TimeInterval? {
