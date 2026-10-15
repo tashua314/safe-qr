@@ -12,3 +12,7 @@ format:
 .PHONY: tools
 tools:
 	./scripts/install-check-tools.sh
+
+.PHONY: check-portable
+check-portable:
+	@scripts/check-portable.sh
