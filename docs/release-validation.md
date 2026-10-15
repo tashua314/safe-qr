@@ -1,7 +1,9 @@
 # リリース前の検証記録
 
 更新日：2026-10-15。公開判定は保留。CI成功や文書更新だけでIssue #8を閉じない。
-アプリとUIテストの検証対象はPR #16の最終HEAD `9fdbdaed74a4928fd3c72742c31e98cc9361c2d9`。その後、アプリとUIテストを変更せず、CI改善のPR #18（最終HEAD `2e16b0cd2547e04c22d9aa538c448b0d1c6bb28e`）をmain `200fe60654095f04d2f0519f2c5c6e09cbb1b9e4`へ反映した。CI結果と公開前の未確認事項を以下で区別する。
+最新のAPI検証ソースはPR #24の最終HEAD `6bd50d1666e848140bebc20b8e5bac4def6f156b`。独立レビューとCI成功後にmain `5e1a783071b1b875fb55960e48b30efc7579dd32`へマージし、tree一致を確認した。以下では過去のSimulator確認、今回の実機/API確認、未完了条件を区別する。最新の進行状況は[Issue #8](https://github.com/tashua314/safe-qr/issues/8)も参照する。
+
+先行するPR #16の対象HEADは `9fdbdaed74a4928fd3c72742c31e98cc9361c2d9`。CI改善PR #18の最終HEADは `2e16b0cd2547e04c22d9aa538c448b0d1c6bb28e`。その後のAPI互換修正でアプリとテストを変更しているため、先行テストを最終ソースの全端末確認へ読み替えない。
 
 ## 環境と確認できた範囲
 
@@ -11,16 +13,20 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 |---|---|---|
 | 品質チェック | strict lint、format、ログ方針、plist検査がローカルと公開後CIで成功。CI改善後も全検証が成功 | [PR #16のCI](https://github.com/tashua314/safe-qr/actions/runs/38687487667)、[PR #18の最終CI](https://github.com/tashua314/safe-qr/actions/runs/38706185299)。検証ログと通常/カメラ拒否個別の両xcresultを保存・読み戻し済み |
 | Debug / Release | iOS26.5 Simulatorの署名なしビルド成功 | ローカルbuild.log |
-| iPhone全テスト | XCTest99件・Swift Testing1件・UI9件成功。通常スイートの権限拒否1件は個別実行へ分離 | 専用iPhone16Pro Simulator / iOS26.5 |
+| 先行iPhone全テスト | XCTest99件・Swift Testing1件・UI9件成功。通常スイートの権限拒否1件は個別実行へ分離 | PR #16の専用iPhone16Pro Simulator / iOS26.5 |
+| 最新API修正の全体CI | XCTest113件・Swift Testing1件・UI9件成功。分離したカメラ拒否も個別1件成功・skip0。全3ジョブ成功、成果物のログと両xcresultを読み戻した | [PR #24のCI](https://github.com/tashua314/safe-qr/actions/runs/38735335577)。iOSジョブ14分47秒、check.shは854秒 |
 | 小画面と旧OS | 先行全テスト96件・追加1件・UI9件成功。Google案内/TTL修正後も関連単体15件・設定/詳細UI2件が成功 | 専用iPhone SE (3rd generation) / iOS18.6 |
 | iPad操作 | 設定保存、警告、履歴再訪、詳細・横画面、全削除の取消/確定・空状態の3テスト成功。Google説明追加後にも同じ3件で成功 | iPad Pro 13-inch (M4) / iPadOS26.5 |
 | カメラ拒否 | 専用SimulatorのOS権限をrevokeし、拒否案内→設定→履歴の1テスト成功（skip 0）。終了時にgrantへ戻した | `CameraPermissionUITests`個別実行 |
 | 履歴 | in-memory単体テストで同一URLの更新・50件上限等を確認。操作テストで全削除の取消、削除、再表示後の空状態を確認 | `HistoryRepositoryTestsNew` / UIテスト |
 | 同意と通信 | 承認前・拒否・履歴再訪・古い完了・遅い危険判定・HTTP302の通信契約をテスト。外部OFF・401/403等・未知/不正応答もモックで検証 | `ScanConsentTests` / `HtmlTitleRedirectTests` / SafeBrowsing系テスト |
 | メモリ | resident_size取得失敗をテスト失敗とし、別途新規ViewModel/QR scanner service/評価器/title fetcherが解放されることを弱参照で確認 | `MemoryLeakTestsSimple`6件。DI解決の反復は短いsmokeテスト |
-| Instruments | Release SimulatorへLeaksの60秒記録を試行したが、5分以上「Starting recording」のまま。中断し、有効な測定結果は得ていない | 実機Instruments・長時間測定は未完了 |
-| 実機向けarchive | `generic/platform=iOS`のRelease archive成功。Bundle ID `jp.techguide.SafeQR`、version1.0/build1、iPhone/iPad、minimum18.5、PSL resourceを確認 | CODE_SIGNING_ALLOWED=NO。配布署名や提出の確認ではない |
-| 本番API設定 | archiveの生成Info.plistはmissing。実キーの値を表示せず確認 | 認証・本番クォータは未確認 |
+| Instruments | 旧main `78f4fed` の実機ReleaseでActivity Monitor記録成功。GUI run 00:01:01、Memory表示27.64MiB。最小/最大/平均や長時間推移の確認ではない。実機Leaksは接続断exit2、CLI exportはexit139・空XML。Simulator Leaksも開始待ちを中断 | GUIで短時間traceを読んだ。長時間・リーク0・CPU/発熱/電池の判定は未完了 |
+| 実機向けRelease | Apple Account再ログイン後に自動開発署名でDebug/Releaseをビルド。Release archive、開発用IPA export、codesignと対象実機登録、実機インストール・通常起動を確認。最終APIソースでも本番キー入りReleaseで成功 | iPhone12Pro / iOS27.0.1。開発用export（method=debugging）でありApp Store配布・提出の確認ではない |
+| 本番API設定 | 専用Cloudプロジェクト、開発/本番キーを作成。Safe Browsing APIとBundle IDへ制限し、Git管理外xcconfig（600）で接続。生成plistのconfiguredと本番キー一致を値なしで検査。課金関連付けなし・既定クォータを読み戻した | [#21 / PR #22](https://github.com/tashua314/safe-qr/pull/22)、[#23 / PR #24](https://github.com/tashua314/safe-qr/pull/24)。両PRは独立レビュー・CI後にマージ |
+| 実APIの7ケース | 本番/開発キー200、公開フィッシングの完全ハッシュ一致、通常URL一致なし、Bundle ID未送信/不一致403、不正キー400が成功。アプリと同じSwift正規化/hash生成とProtobufデコーダーを使用 | ホストからのHTTPS照会。実機のパケット監査や実APIを枯渇させる429試験ではない |
+| 実機の基本操作 | Debugでカメラ、注意/危険QR・拒否後履歴、ライト、強設定の再起動後保持、ブラウザ復帰/再読、オフライン、カメラ設定OFF時の履歴/設定を利用者が確認。旧Releaseのカメラ・注意QR・キャンセル・履歴保持も確認 | iPhone12Pro / iOS27.0.1、旧main `78f4fed`。初回インストール時の拒否は未確認 |
+| 実機の本番API | 最終APIソースの署名Releaseで、利用者が外部チェックONのGoogle危険警告・出典・ブロックを確認。アプリ終了→通信OFF→再起動後は未確認表示・キャンセル、確認後の通信復元も確認 | iPhone12Pro / iOS27.0.1。利用者操作の確認。Debugの全チェックリストのRelease再実施ではない |
 | アイコン | App Store用1024×1024 PNG、alphaなし、asset catalog登録あり | `Resources/Assets.xcassets/AppIcon.appiconset/icon.png` |
 | 画面 | GitへPNG原本・状態・端末・サイズ・SHA-256を保存。PRの完全コミットSHA参照をGitHubから読み戻す | [画面記録](pr-captures/issue-8/README.md) |
 
@@ -36,11 +42,11 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 
 | 条件 | 現在の状態・次の確認 |
 |---|---|
-| 接続実機 | 利用者は接続・ロック解除の準備を回答。直近のdevicectlはiPhone12Proをunavailableと表示。利用可能になってから確認する |
-| 実機の基本操作 | カメラの初回許可/拒否、実QR、ライト、警告の承認/拒否、履歴、設定保存、オフラインを確認する。Simulatorの模擬URLで代用しない |
+| 接続実機 | 実機のpaired/wired/connectedと起動を確認済み。再測定の直前にも現在の接続・ロック状態を確認する |
+| 初回カメラ拒否 | 既存インストールの設定OFF経路は確認済み。初回インストール状態の権限拒否は未確認。既存履歴を消すアンインストールは行っていない |
 | 長時間・性能 | 実機で長時間スキャン/遷移とInstruments、メモリ推移・発熱/バッテリー・処理時間を記録する。短い単体テストや起動性能の平均で代用しない |
-| 本番通信 | Git管理外キーを設定し、Google認証・クォータ・実際の送信と承認/拒否時の通信を実機で確認する。キーをチャット・GitHub・ログに記載しない |
-| 配布 | iOS用の署名・provisioning・archive export/実機インストールを確認する。今回の署名なしarchiveを配布成功と扱わない |
+| 通信の確認範囲 | 本番認証と実機オンライン/オフラインは確認済み。OFF/同意/拒否・prefix限定・リダイレクト拒否・429等の失敗は自動テスト。実機の全通信を取得するパケット監査やクォータ枯渇試験は未実施 |
+| 配布 | 開発用署名・export・実機インストール/起動は確認済み。App Store向け配布・TestFlight・アップロード・審査提出は未実施 |
 | 申請情報 | 運営者名、連絡先、サポートURL、プライバシー公開URLは利用者回答で未定 |
 | 配布条件 | 当面は収益化せず、収益化開始前にWeb Riskへ移行・検証を完了する方針。実際の用途と非商用条件の適合、地域・年齢・規約/EULAは公開前に確定する。売上0だけで非商用と断定しない |
 | ストア画像 | QAのPNGは下書き。実機カメラのモックを実機撮影として提出しない。最新のApple仕様を確認し、状態・説明を整えてから申請する |
@@ -48,6 +54,8 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 [申請文](app-store-description.md)、[機械可読メタデータ](app-store-metadata.json)、[プライバシー](privacy-policy-draft.md)、[規約](terms-draft.md)は下書き。App Store Connectへの入力、署名アップロード、審査提出は行っていない。
 
 ## 再実行
+
+実機の長時間測定は[メモリ・長時間動作の検証ガイド](memory-testing-guide.md)を使う。短い記録や失敗を長時間合格へ変換しない。
 
 通常は`make tools && make check`。別の検証専用Simulatorは`SAFEQR_SIMULATOR_ID=<UUID> make check`を使う。同じSimulatorに同時に複数のxcodebuild testを実行しない。
 
