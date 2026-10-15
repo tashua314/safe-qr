@@ -22,6 +22,10 @@ make check
 
 `make tools`でSwiftLint0.63.2 / SwiftFormat0.61.1をチェックサム検証して`.artifacts/tools`へ配置する。`make check`は静的チェック、Debug/Releaseの署名なしSimulatorビルド、専用iPhone Simulatorの単体・UIテストを実行する。成果物とログはGit管理外の`.artifacts`へ保存する。
 
+CIはPRで実行する。Linuxで変更判定と`make check-portable`を行い、文書・キャプチャだけならmacOSを省略する。アプリ・設定・スクリプト変更と手動実行はmacOSの全検証を必要とする。最終の`Quality gate`は常に実行し、必要な検証の失敗や省略を成功扱いにしない。mainへは検証済みPRをマージし、同じ内容の自動再実行は行わない。[CIの設計・検証手順](docs/ci-design.md)を参照。
+
+`make check`はDebug/Releaseのビルド後にSimulatorを起動し、Debugのテスト用成果物を通常/権限拒否で再利用する。各工程の秒数は`.artifacts/phase-times.log`とCIサマリーで確認できる。
+
 外部照会のキーは[設定手順](SafeQR/Config/README.md)に従い、Git管理外の`Local-Keys.xcconfig` / `Production-Keys.xcconfig`へ設定する。未設定でもビルドでき、設定未完了を未確認として扱う。実キーをコマンド引数・ログ・Issueへ記載しない。
 
 Simulatorにはカメラの代わりに`.invalid`テストURL用ボタンを表示する。実カメラ・ライト・長時間動作・バッテリー・本番API認証の確認を代用しない。
