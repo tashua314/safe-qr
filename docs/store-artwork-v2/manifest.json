@@ -1,0 +1,89 @@
+{
+  "status": "draft_not_approved_not_uploaded",
+  "createdAt": "2026-10-16",
+  "userFeedback": "ITの知識が少ない人にも、使う場面と得られる安心を伝える。前案は未採用。",
+  "sourceInventory": "../store-artwork/README.md",
+  "composition": "generated decorative background + HTML text + cropped/enlarged actual app screenshots; each image labels enlargement and example data",
+  "images": [
+    {
+      "file": "generated-background-v2.png",
+      "pixels": [
+        851,
+        1848
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "f38e436f08561fe5e8640a8e2af812e330eb7b4bf85e2174a29db84efc43fb6c"
+    },
+    {
+      "file": "ipad-01-before-open.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "1d4cbe1191e8673fcf56950931f33bf95faebffbf169311eb94ede5603ab4880"
+    },
+    {
+      "file": "ipad-02-stop-without-opening.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "9adf7c75701a69fcdbaddc3dad78d05922250134c8843eeac924643da9541e1d"
+    },
+    {
+      "file": "ipad-03-find-again.png",
+      "pixels": [
+        2064,
+        2752
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "051061c3b6335349e0d71e039d997dee259fbec2426d9dffa890e4f8d867948f"
+    },
+    {
+      "file": "iphone-01-before-open.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "f8e8e2a910f3cb8db6471c226ff8f1fcc00f4784af18f8b771f1ee3b69535eef"
+    },
+    {
+      "file": "iphone-02-stop-without-opening.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "e09eeff53c3dc0689c54e9b0117add359047c19291026b127a5283c4a52cc803"
+    },
+    {
+      "file": "iphone-03-find-again.png",
+      "pixels": [
+        1206,
+        2622
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "121948cdaa8807d24333fd0dfc039fb4abf4aa3f3db1d1895242515b5af86fe5"
+    },
+    {
+      "file": "overview.png",
+      "pixels": [
+        1200,
+        1600
+      ],
+      "hasAlpha": false,
+      "colorType": 2,
+      "sha256": "d5c09cce6a698483f533a705436decc983e3f1d839cbe958c7df8d8c6fd1ec5d"
+    }
+  ]
+}
