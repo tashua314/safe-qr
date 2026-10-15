@@ -34,4 +34,6 @@ jobs:
             .artifacts/*.log
             .artifacts/*.xcresult
           if-no-files-found: ignore
+          # 保存対象は検証ログ/結果だけに限定し、隠しフォルダ内の成果物も含める。
+          include-hidden-files: true
           retention-days: 7

@@ -9,8 +9,8 @@ Xcode26.6 (17F113)、Swift6.3.3 / Swift5言語モード、macOS26.5.2。最低�
 
 | 項目 | 環境・結果 | 証跡 |
 |---|---|---|
-| 品質チェック | strict lint、format、ログ方針、plist検査が成功 | `scripts/check.sh` / CIのArtifact |
-| Debug / Release | iOS26.5 Simulatorの署名なしビルド成功 | CI / ローカルbuild.log |
+| 品質チェック | strict lint、format、ログ方針、plist検査がローカルで成功。最終PRのGitHub CIはランナー起動拒否で未実行 | `scripts/check.sh`のローカル結果。CI成果物の保存設定は修正済みだが、保存成功は次の実行で確認する |
+| Debug / Release | iOS26.5 Simulatorの署名なしビルド成功 | ローカルbuild.log |
 | iPhone全テスト | XCTest99件・Swift Testing1件・UI9件成功。通常スイートの権限拒否1件は個別実行へ分離 | 専用iPhone16Pro Simulator / iOS26.5 |
 | 小画面と旧OS | 先行全テスト96件・追加1件・UI9件成功。Google案内/TTL修正後も関連単体15件・設定/詳細UI2件が成功 | 専用iPhone SE (3rd generation) / iOS18.6 |
 | iPad操作 | 設定保存、警告、履歴再訪、詳細・横画面、全削除の取消/確定・空状態の3テスト成功。Google説明追加後にも同じ3件で成功 | iPad Pro 13-inch (M4) / iPadOS26.5 |
