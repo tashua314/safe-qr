@@ -8,13 +8,12 @@
 - workflow全体をpaths-ignoreで省かず、最終Quality gateを常に実行する。Linuxの失敗、必要なmacOSの失敗/取消/予期しない省略を成功にしない。
 - 浅いcheckoutにイベントの基準コミットがない場合、そのSHAだけを取得する。取得失敗は失敗扱いにし、mainが進んだ場合も比較対象を省略しない。
 - 手動実行は変更種別に関係なく全検証する。自動実行はPRへ集約する。mainへ直接pushせず、最新mainを含むPRの検証成功後にマージする。
-- iOS検証は標準macos-26-intel（4 CPU / 14GB）で行う。同じXcode26.6 / iOS26.5を使い、macos-26（3 CPU / 7GB）との実測比較をPRへ記録する。[ランナー仕様](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)。
 - 固定版SwiftLint/SwiftFormatとSHA-256を維持する。導入は改善前の実測で2〜4秒のため、大型キャッシュやLinux用ツール配布物の追加は行わない。
 - mac-clipyのmake checkを入口とした一括検証、strict lint、警告をエラーにする方針を引き続き利用する。
 
 ## macOSで維持する検証
 
-Debugはbuild-for-testingでアプリとテストを一度だけ生成し、Release buildも行う。その後に専用Simulatorを起動してアプリを導入し、通常とカメラ拒否をtest-without-buildingで実行する。初回起動とコンパイルを同時に行う試行ではmacOSジョブが12分13秒から16分35秒へ延びたため、両者を直列に戻した。直列の試行は14分57秒で、通常テスト456秒・起動121秒を要したため、メモリの多い標準Intelランナーでも同じ全検証を比較する。単発比較から原因や短縮率は断定しない。
+Debugはbuild-for-testingでアプリとテストを一度だけ生成し、Release buildも行う。その後に専用Simulatorを起動してアプリを導入し、通常とカメラ拒否をtest-without-buildingで実行する。初回起動とコンパイルを同時に行う試行ではmacOSジョブが12分13秒から16分35秒へ延びたため、両者を直列にして再計測する。同時起動だけが原因とは断定しない。
 
 全単体/UIテスト、Releaseの警告検査、権限拒否の個別実行とskip 0を維持する。失敗時も変更した専用Simulatorのカメラ権限を復元する。実機の権限は操作しない。
 
