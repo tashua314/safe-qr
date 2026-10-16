@@ -4,45 +4,51 @@
 
 ## 日本語
 
-SafeQRは、QRコードのリンクを開く前に危険度を確認するアプリです。
+「このQRコード、開いて大丈夫かな？」と思ったら。
+SafeQRは、リンクに気になる点が見つかると、開く前に注意をお知らせするQRコードリーダーです。
 
-主な機能
-・カメラでQRコードを読み取り
-・端末内のルールで注意・危険な可能性を表示
-・注意・危険・外部チェック未確認では、開くか選ぶ確認画面を表示
-・履歴を端末内に最大50件保存し、個別・一括削除に対応
-・同じURLの再スキャン回数と最終判定を記録
-・履歴からの再訪も安全性を再確認
-・安全確認の厳しさを弱・標準・強から選択
+1. QRコードにカメラをかざす
+アプリを開いて、読み取りたいQRコードにカメラを向けるだけ。リンクの注意点を端末内でチェックします。
+
+2. 注意が出たら、開かずに戻れる
+注意や危険の可能性が表示されたら、内容を確認して開くのをやめられます。迷ったときに、いったん立ち止まれます。
+
+3. 読み取ったリンクを、あとから見返す
+履歴は端末内に最大50件保存。読み取った回数や最新の判定を確認でき、不要な履歴は1件ずつでも、まとめてでも削除できます。履歴からリンクを開くときも、あらためてチェックします。
+
+チェックの厳しさは「弱・標準・強」から選べます。注意がないと判定されたリンクは、確認画面を挟まずに開きます。外部チェックをONにしていてチェックが完了しなかった場合は、開く前に確認画面が出ます。
+
+判定は安全性を保証しません。危険なサイトの見逃しや、安全なサイトへの誤警告が起こる可能性があります。リンク先や入力情報を確認してください。
 
 通信とプライバシー
 外部チェックは既定OFFです。ONにすると、Google Safe BrowsingへURL候補のSHA-256先頭4バイトを送り、端末内で完全ハッシュを比較します。URL全文はGoogleへ送りませんが、IP等の通信情報が届き、ハッシュの一部から候補が推測される可能性があります。
 
 タイトル取得とブラウザー表示は対象サイトへ通信します。注意・危険・外部未確認では開封を許可するまで開始しません。取得できたタイトルは端末内の履歴へ保存します。
 
-判定は安全性を保証しません。危険なサイトの見逃しや、安全なサイトへの誤警告が起こる可能性があります。リンク先や入力情報を確認してください。
-
 iOS/iPadOS18.5以降に対応。現在のアプリ画面は日本語です。
 
 ## English
 
-SafeQR checks the risk of a QR-code link before you open it.
+Unsure whether to open a QR-code link?
+SafeQR is a QR-code reader that alerts you before opening a link when it finds something to watch out for.
 
-Features
-- Scan QR codes with the camera
-- Assess possible risks using on-device rules
-- Confirm before opening caution, danger, or externally unverified results
-- Keep up to 50 history records on your device, with individual and bulk deletion
-- Track repeated scans and the latest risk result
-- Recheck links opened from history
-- Choose low, standard, or high strictness
+1. Point your camera at a QR code
+Open the app and point your camera at the code you want to scan. SafeQR checks the link for potential risks on your device.
+
+2. If a warning appears, you can go back without opening
+When a caution or possible danger is shown, you can read the warning and cancel. Take a moment to pause when you are unsure.
+
+3. Find scanned links again
+Keep up to 50 history records on your device. See scan counts and the latest risk result, and delete records individually or all at once. Links opened from history are checked again.
+
+Choose low, standard, or high strictness. Links assessed as having no concerns open without a confirmation screen. If external checks are enabled but cannot be completed, a confirmation screen appears before opening.
+
+Risk checks do not guarantee safety. Risky sites may be missed and harmless sites may be flagged. Check the destination and the information you enter.
 
 Network use
 External checks are off by default. When enabled, SafeQR sends 4-byte SHA-256 prefixes of URL candidates to Google Safe Browsing and compares full hashes on your device. The raw URL is not sent to Google, but network information such as your IP address is visible and prefixes may allow candidates to be inferred.
 
 Title retrieval and browsing contact the destination website. They start only after you allow opening when a warning or an unverified result is shown. Retrieved titles are stored with local history.
-
-Risk checks do not guarantee safety. Risky sites may be missed and harmless sites may be flagged. Check the destination and the information you enter.
 
 Requires iOS/iPadOS18.5 or later. The app interface is currently in Japanese.
 
